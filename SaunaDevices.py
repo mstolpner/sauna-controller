@@ -284,10 +284,12 @@ class SaunaDevices:
             return (response.registers[0] & fanId) == 0
 
     def isLeftFanOk(self) -> bool:
-        return not self._checkFanFaultStatus(self._leftFanId)
+        # Fan controller reports fan staus failed if the fan is off managed by a relay
+        return not self._ctx.getLeftFanOnStatus() or not self._checkFanFaultStatus(self._leftFanId)
 
     def isRightFanOk(self) -> bool:
-        return not self._checkFanFaultStatus(self._rightFanId)
+        # Fan controller reports fan staus failed if the fan is off managed by a relay
+        return not self._ctx.getRightFanOnStatus() or not self._checkFanFaultStatus(self._rightFanId)
 
     def _resetFanModuleGovernor(self) -> None:
         response = self._modbus_write_register(self._resetFanModuleGovernorAddress, 
