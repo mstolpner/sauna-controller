@@ -18,7 +18,7 @@ if __name__ == '__main__':
 #    lf = sd.isLeftFanOn()
 #    rf = sd.isRightFanOn()
 #    sr = sd.isRightFanOk()
-    sd.turnRightFanOff()
+#    sd.turnRightFanOff()
 #    rf = sd.isRightFanOn()
 #    sd.turnLeftFanOn()
 #    lf = sd.isLeftFanOn()
