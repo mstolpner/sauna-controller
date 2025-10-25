@@ -155,44 +155,46 @@ class MainScreen(Screen):
         
         layout.add_widget(sensor_layout)
 
-        # Preset Temperature Buttons - 3 buttons in one row
-        preset_layout = GridLayout(cols=3, rows=1, size_hint_y=0.5, spacing=20, padding=[20, 0])
+        # Preset Temperature Buttons - 3 columns: [High/Medium stacked], [Target Temp], [OFF]
+        preset_layout = BoxLayout(orientation='horizontal', size_hint_y=0.5, spacing=5, padding=[20, 0])
+
+        # Use FloatLayout as button base
+        from kivy.uix.floatlayout import FloatLayout
+        from kivy.uix.behaviors import ButtonBehavior
+
+        class ImageButton(ButtonBehavior, FloatLayout):
+            pass
+
+        # Column 1: Vertical stack with High on top, Medium on bottom
+        preset_stack_outer = BoxLayout(orientation='vertical', size_hint_x=0.15)
+        preset_stack_outer.add_widget(Label())  # Top spacer
+
+        preset_stack = BoxLayout(orientation='vertical', spacing=0, size_hint_y=None, height=160)
 
         presets = [
-            ('Medium', 160, 'icons/preset1.png', 'icons/preset1.png'),
             ('High', 180, 'icons/preset2.png', 'icons/preset2.png'),
-            ('OFF', 0, 'icons/off_passive.png', 'icons/off_active.png')
+            ('Medium', 160, 'icons/preset1.png', 'icons/preset1.png')
         ]
-        
+
         for idx, (name, temp, passive_img, active_img) in enumerate(presets):
-            # Create button container
             full_path = os.path.abspath(passive_img)
             print(f"Loading preset '{name}': {passive_img} -> {full_path}, exists: {os.path.exists(passive_img)}")
-            
-            # Use FloatLayout as button base
-            from kivy.uix.floatlayout import FloatLayout
-            from kivy.uix.behaviors import ButtonBehavior
-            
-            class ImageButton(ButtonBehavior, FloatLayout):
-                pass
-            
-            btn = ImageButton()
-            
+
+            btn = ImageButton(size_hint_y=None, height=80)
+
             if os.path.exists(passive_img):
-                # Add image that maintains aspect ratio
-                # Make preset1 and preset2 25% size, keep OFF button full size
-                img_size = (0.25, 0.25) if idx < 2 else (1, 1)
+                # Make preset images 60% size so they appear closer
                 btn.img = Image(
                     source=passive_img,
                     fit_mode="contain",
-                    size_hint=img_size,
+                    size_hint=(0.6, 0.6),
                     pos_hint={'center_x': 0.5, 'center_y': 0.5}
                 )
                 btn.add_widget(btn.img)
             else:
                 print(f"Warning: Image not found: {passive_img}")
                 btn.img = None
-            
+
             # Store button data
             btn.preset_name = name
             btn.preset_temp = temp
@@ -202,16 +204,64 @@ class MainScreen(Screen):
 
             btn.bind(on_press=lambda x, i=idx: self.toggle_preset(i))
             self.preset_buttons.append(btn)
-            preset_layout.add_widget(btn)
-        
+            preset_stack.add_widget(btn)
+
+        preset_stack_outer.add_widget(preset_stack)
+        preset_stack_outer.add_widget(Label())  # Bottom spacer
+
+        preset_layout.add_widget(preset_stack_outer)
+
+        # Column 2: Target temperature display
+        target_temp_wrapper = FloatLayout(size_hint_x=0.5)
+
+        target_temp_container = BoxLayout(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=150,
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+
+        # Temperature value
+        target_temp = self.ctx.getHotRoomTargetTempF() if self.ctx else 190
+
+        self.target_temp_label = Label(
+            text=f'{target_temp}°F',
+            font_size='135sp',
+            bold=True,
+            color=(0.85, 1, 0.4, 0.6)  # Lighter greenish-yellow
+        )
+        target_temp_container.add_widget(self.target_temp_label)
+
+        target_temp_wrapper.add_widget(target_temp_container)
+        preset_layout.add_widget(target_temp_wrapper)
+
+        # Column 3: Heater button
+        heater_btn = ImageButton(size_hint_x=0.35)
+        self.heater_passive_img_path = 'icons/passive.png'
+        self.heater_active_img_path = 'icons/active.png'
+
+        heater_btn.img = Image(
+            source=self.heater_passive_img_path,
+            fit_mode="contain",
+            size_hint=(1, 1),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        heater_btn.add_widget(heater_btn.img)
+
+        heater_btn.bind(on_press=self.toggle_heater)
+        self.heater_btn = heater_btn
+        preset_layout.add_widget(heater_btn)
+
         layout.add_widget(preset_layout)
-        
+
         self.add_widget(layout)
 
         # Update sensor readings every 2 seconds
         Clock.schedule_interval(self.update_sensors, 2)
         # Update clock every second
         Clock.schedule_interval(self.update_clock, 1)
+        # Initialize heater button state
+        self.update_heater_button()
     
     def toggle_temperature_unit(self, instance):
         """Toggle between Celsius and Fahrenheit"""
@@ -233,6 +283,8 @@ class MainScreen(Screen):
         if self.ctx:
             self.update_temperature_display()
             self.humidity_label.text = f'{int(self.ctx.getHotRoomHumidity())}%'
+            self.target_temp_label.text = f'{int(self.ctx.getHotRoomTargetTempF())}°F'
+            self.update_heater_button()
 
         # Update error icon visibility - show only when there are errors
         if self.errorMgr and self.errorMgr.hasAnyError():
@@ -248,7 +300,28 @@ class MainScreen(Screen):
         """Update clock display"""
         from datetime import datetime
         self.clock_label.text = datetime.now().strftime('%I:%M:%S').lstrip('0')
-    
+
+    def toggle_heater(self, instance):
+        """Toggle sauna heater on/off"""
+        if self.ctx:
+            if self.ctx.isSaunaOn():
+                self.ctx.turnSaunaOff()
+                print("Sauna turned OFF")
+            else:
+                self.ctx.turnSaunaOn()
+                print("Sauna turned ON")
+            self.update_heater_button()
+
+    def update_heater_button(self):
+        """Update heater button appearance based on sauna state"""
+        if self.ctx and hasattr(self, 'heater_btn'):
+            if self.ctx.isSaunaOn():
+                # Sauna is on - use active image
+                self.heater_btn.img.source = self.heater_active_img_path
+            else:
+                # Sauna is off - use passive image
+                self.heater_btn.img.source = self.heater_passive_img_path
+
     def toggle_preset(self, preset_index):
         """Toggle preset button - activate selected, deactivate others"""
         clicked_btn = self.preset_buttons[preset_index]
