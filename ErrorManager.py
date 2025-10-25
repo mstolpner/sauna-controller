@@ -46,3 +46,14 @@ class ErrorManager:
 
     def eraseHeaterError(self) -> None:
         self._heaterErrorMessage = None
+
+    def hasAnyError(self) -> bool:
+        """Check if there are any active errors"""
+        return any([
+            self._criticalErrorMessage,
+            self._relayModuleErrorMessage,
+            self._fanModuleErrorMessage,
+            self._sensorModuleErrorMessage,
+            self._modbusException,
+            self._heaterErrorMessage
+        ])

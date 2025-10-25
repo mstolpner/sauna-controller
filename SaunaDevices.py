@@ -5,6 +5,9 @@ from pymodbus.exceptions import ModbusException
 from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
 
+class DummyErrorResponse():
+    def isError(self):
+        return True
 
 class SaunaDevices:
 
@@ -52,15 +55,15 @@ class SaunaDevices:
     _lastTimeHeaterOn = time.time()
     _lastHeaterOnStatus = False
 
-    def __init__(self, ctx: SaunaContext):
+    def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
         self._ctx = ctx
+        self._errorMgr = errorMgr
         self._rs485Client = ModbusSerialClient(port=self._ctx.getRs485SerialPort(),
                                                baudrate=self._ctx.getRs485SerialBaudRate(),
                                                # Timeout is optimized for devices.
                                                timeout=self._ctx.getRs485SerialTimeout(),
                                                retries=self._ctx.getRs485SerialRetries())
         self._rs485Client.connect()
-        self._errorMgr = ErrorManager()
         # Initialize Relay Module
         self._setRelayStatus(self._notUsedCoilId, False)
         # Initialize Fans
@@ -303,31 +306,38 @@ class SaunaDevices:
 
 # ----------------------------------- RS485 Modbus Helpers -------------------------------------
 
-    def _modbus_read_holding_registers(self, address: int, slave: int, count: int=1) -> int:
+    def _modbus_read_holding_registers(self, address: int, slave: int, count: int=1):
         try:
             response = self._rs485Client.read_holding_registers(address, count=1, slave=slave)
             self._errorMgr.eraseModbusError()
+            return response
         except ModbusException as e:
             self._errorMgr.raiseModbusError(e)
-        return response
+            return DummyErrorResponse()
 
-    def _modbus_write_register(self, address: int, value: int, slave: int) -> int:
+    def _modbus_write_register(self, address: int, value: int, slave: int):
         try:
             response = self._rs485Client.write_register(address=address, value=value, slave=slave)
+            self._errorMgr.eraseModbusError()
+            return response
         except ModbusException as e:
             self._errorMgr.raiseModbusError(e)
-        return response
+            return DummyErrorResponse()
 
-    def _modbus_read_coils(self, address: int, slave: int, count: int=1) -> int:
+    def _modbus_read_coils(self, address: int, slave: int, count: int=1):
         try:
             response = self._rs485Client.read_coils(address=address, count=count, slave=slave)
+            self._errorMgr.eraseModbusError()
+            return response
         except ModbusException as e:
             self._errorMgr.raiseModbusError(e)
-        return response
+            return DummyErrorResponse()
 
-    def _modbus_write_coil(self, address: int, value: int, slave: int) -> int:
+    def _modbus_write_coil(self, address: int, value: bool, slave: int):
         try:
             response = self._rs485Client.write_coil(address=address, value=value, slave=slave)
+            self._errorMgr.eraseModbusError()
+            return response
         except ModbusException as e:
             self._errorMgr.raiseModbusError(e)
-        return response
+            return DummyErrorResponse()

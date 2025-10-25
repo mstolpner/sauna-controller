@@ -10,8 +10,8 @@ class SaunaContext:
     _fanControlModuleDeviceId = 3
     _hotRoomTargetTempF = 190
     _coolingGracePeriod = 60  # seconds
-    _lowerHotRoomTempThreashold = 5
-    _upperHotRoomTempThreashold = 0
+    _lowerHotRoomTempThreshold = 5
+    _upperHotRoomTempThreshold = 0
     _heaterHealthWarmUpTime = 300
     _heaterHealthCoolDownTime = 1200
     _maxHotRoomTempF = 240
@@ -23,9 +23,13 @@ class SaunaContext:
     _numberOfFans = 2
     _leftFanOnStatus = False
     _rightFanOnStatus = True
+    # Dependencies
     _configObj = None
-    _isSaunaOn = False
     _configFileName = 'sauna.ini'
+    # Runtime-only, not saved to config
+    _isSaunaOn = False
+    _hotRoomTempF = 20
+    _hotRoomHumidity = 50
 
     def __init__(self):
         iniFileExists = os.path.exists(self._configFileName)
@@ -47,8 +51,8 @@ class SaunaContext:
         self._configObj['hot_room_temp_control'] = {}
         self._configObj['hot_room_temp_control']['target_temp_f'] = self._hotRoomTargetTempF
         self._configObj['hot_room_temp_control']['cooling_grace_period'] = self._coolingGracePeriod
-        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threashold_f'] = self._lowerHotRoomTempThreashold
-        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threashold_f'] = self._upperHotRoomTempThreashold
+        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threshold_f'] = self._lowerHotRoomTempThreshold
+        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threshold_f'] = self._upperHotRoomTempThreshold
         self._configObj['hot_room_temp_control']['heater_health_warmup_time'] = self._heaterHealthWarmUpTime
         self._configObj['hot_room_temp_control']['heater_health_cooldown_time'] = self._heaterHealthCoolDownTime
         self._configObj['hot_room_temp_control']['max_temp_f'] = self._maxHotRoomTempF
@@ -136,17 +140,17 @@ class SaunaContext:
     def setCoolingGracePeriod(self, coolingGracePeriod: int) -> None:
         self._configObj['hot_room_temp_control']['cooling_grace_period'] = coolingGracePeriod
 
-    def getLowerHotRoomTempThreasholdF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('lower_hot_room_temp_threashold_f')
+    def getLowerHotRoomTempThresholdF(self) -> int:
+        return self._configObj['hot_room_temp_control'].as_int('lower_hot_room_temp_threshold_f')
 
-    def setLowerHotRoomTempThreasholdF(self, thresholdTempF: int) -> None:
-        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threashold_f'] = thresholdTempF
+    def setLowerHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
+        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threshold_f'] = thresholdTempF
 
-    def getUpperHotRoomTempThreasholdF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('upper_hot_room_temp_threashold_f')
+    def getUpperHotRoomTempThresholdF(self) -> int:
+        return self._configObj['hot_room_temp_control'].as_int('upper_hot_room_temp_threshold_f')
 
-    def setUpperHotRoomTempThreasholdF(self, thresholdTempF: int) -> None:
-        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threashold_f'] = thresholdTempF
+    def setUpperHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
+        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threshold_f'] = thresholdTempF
 
     def getHeaterHealthWarmUpTime(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('heater_health_warmup_time')
@@ -161,7 +165,7 @@ class SaunaContext:
         self._configObj['hot_room_temp_control']['heater_health_cooldown_time'] = cooldownTime
 
     def getHotRoomMaxTempF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_bool('max_temp_f')
+        return self._configObj['hot_room_temp_control'].as_int('max_temp_f')
 
     def setHotRoomMaxTempF(self, maxTempF: int) -> None:
         self._configObj['hot_room_temp_control']['max_temp_f'] = maxTempF
@@ -189,3 +193,19 @@ class SaunaContext:
 
     def setLeftFanOnStatus(self, status: bool) -> None:
         self._configObj['fan_control']['left_fan_on_status'] = status
+
+    def getHotRoomTempF(self) -> float:
+        """Get current hot room temperature in Fahrenheit (runtime-only, not persisted)"""
+        return self._hotRoomTempF
+
+    def setHotRoomTempF(self, tempF: float) -> None:
+        """Set current hot room temperature in Fahrenheit (runtime-only, not persisted)"""
+        self._hotRoomTempF = tempF
+
+    def getHotRoomHumidity(self) -> float:
+        """Get current hot room humidity percentage (runtime-only, not persisted)"""
+        return self._hotRoomHumidity
+
+    def setHotRoomHumidity(self, humidity: float) -> None:
+        """Set current hot room humidity percentage (runtime-only, not persisted)"""
+        self._hotRoomHumidity = humidity
