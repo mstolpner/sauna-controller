@@ -159,9 +159,9 @@ class MainScreen(Screen):
         preset_layout = GridLayout(cols=3, rows=1, size_hint_y=0.5, spacing=20, padding=[20, 0])
 
         presets = [
-            ('Medium', 160, 'presets/passive.png', 'presets/active.png'),
-            ('High', 180, 'presets/passive.png', 'presets/active.png'),
-            ('OFF', 0, 'presets/off_passive.png', 'presets/off_active.png')
+            ('Medium', 160, 'icons/preset1.png', 'icons/preset1.png'),
+            ('High', 180, 'icons/preset2.png', 'icons/preset2.png'),
+            ('OFF', 0, 'icons/off_passive.png', 'icons/off_active.png')
         ]
         
         for idx, (name, temp, passive_img, active_img) in enumerate(presets):
@@ -180,10 +180,12 @@ class MainScreen(Screen):
             
             if os.path.exists(passive_img):
                 # Add image that maintains aspect ratio
+                # Make preset1 and preset2 25% size, keep OFF button full size
+                img_size = (0.25, 0.25) if idx < 2 else (1, 1)
                 btn.img = Image(
                     source=passive_img,
                     fit_mode="contain",
-                    size_hint=(1, 1),
+                    size_hint=img_size,
                     pos_hint={'center_x': 0.5, 'center_y': 0.5}
                 )
                 btn.add_widget(btn.img)
@@ -197,19 +199,7 @@ class MainScreen(Screen):
             btn.passive_img = passive_img
             btn.active_img = active_img
             btn.is_active = False
-            
-            # Add temperature label overlay (only for temp presets, not OFF)
-            if temp > 0:
-                temp_label = Label(
-                    text=f'{temp}°C',
-                    font_size='32sp',
-                    bold=True,
-                    color=(1, 1, 1, 1),
-                    size_hint=(None, None),
-                    pos_hint={'center_x': 0.5, 'center_y': 0.5}
-                )
-                btn.add_widget(temp_label)
-            
+
             btn.bind(on_press=lambda x, i=idx: self.toggle_preset(i))
             self.preset_buttons.append(btn)
             preset_layout.add_widget(btn)

@@ -27,8 +27,10 @@ if __name__ == '__main__':
     errorMgr = ErrorManager()
 
     # Initialize classes
-    sd = SaunaDevices(ctx, errorMgr)
-    hc = HeaterController(ctx, sd, errorMgr)
+#    sd = SaunaDevices(ctx, errorMgr)
+#    hc = HeaterController(ctx, sd, errorMgr)
+    sd = None
+    hc = None
 
     # Start heater control loop in background thread
     saunaControllerThread = threading.Thread(target=saunaControllerLoop, args=(ctx,sd,hc,), daemon=True)
