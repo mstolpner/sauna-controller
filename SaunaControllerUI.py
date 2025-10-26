@@ -1,5 +1,4 @@
 import os
-os.environ['KIVY_KEYBOARD_MODE'] = 'systemanddock'
 
 from kivy.config import Config
 # Enable virtual keyboard - must be before other kivy imports
@@ -14,10 +13,22 @@ from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
+from kivy.uix.slider import Slider
 from kivy.clock import Clock
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, RoundedRectangle, Line
 from kivy.core.window import Window
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.scrollview import ScrollView
+
 import random
+from datetime import datetime
+from ErrorManager import ErrorManager
+from SaunaDevices import SaunaDevices
+from SaunaContext import SaunaContext
+from SettingsScreen import SettingsScreen
 
 # Set window size for Raspberry Pi touchscreen (portrait)
 Window.size = (800, 1280)
@@ -29,16 +40,16 @@ class StatusIcon(Button):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
         self.size = (50, 50)  # Smaller size
-
         self.background_normal = icon_image
         self.background_down = icon_image
         self.border = (0, 0, 0, 0)
 
 class MainScreen(Screen):
     """Main sauna control screen"""
-    def __init__(self, ctx=None, errorMgr=None, **kwargs):
+    def __init__(self, ctx=None, errorMgr: ErrorManager=None, sd: SaunaDevices=None, **kwargs):
         super().__init__(**kwargs)
         self.ctx = ctx
+        self.sd = sd
         self.errorMgr = errorMgr
         self.active_preset = None
         self.preset_buttons = []
@@ -62,6 +73,9 @@ class MainScreen(Screen):
 
         self.status_bar.add_widget(Label())  # Spacer
 
+        self.heater_icon = StatusIcon('icons/heater_off.png')
+        self.status_bar.add_widget(self.heater_icon)
+
         self.errors_icon = StatusIcon('icons/errors.png')
         self.errors_icon.bind(on_press=self.open_errors_screen)
         self.errors_icon.background_color = (1, 0, 0, 1)  # Red when errors present
@@ -70,11 +84,10 @@ class MainScreen(Screen):
         layout.add_widget(self.status_bar)
 
         # Spacer to push content down
-        layout.add_widget(Label(size_hint_y=0.03))
+        layout.add_widget(Label(size_hint_y=0.12))
 
         # Clock row
         clock_row = BoxLayout(size_hint_y=0.15, spacing=5)
-        from datetime import datetime
         current_time = datetime.now().strftime('%I:%M:%S').lstrip('0')
         self.clock_label = Label(
             text=current_time,
@@ -90,14 +103,13 @@ class MainScreen(Screen):
         layout.add_widget(clock_row)
 
         # Spacer between clock and temperature
-        layout.add_widget(Label(size_hint_y=0.08))
+        layout.add_widget(Label(size_hint_y=0.10))
 
         # Temperature and Humidity Display
         sensor_layout = BoxLayout(orientation='vertical', size_hint_y=0.35, spacing=20)
 
         # Large temperature display - takes full row - touchable to toggle C/F
         temp_display = '0°F' if not self.ctx else f'{int(self.ctx.getHotRoomTempF())}°F'
-        from kivy.uix.behaviors import ButtonBehavior
 
         class TouchableLabel(ButtonBehavior, Label):
             pass
@@ -156,12 +168,9 @@ class MainScreen(Screen):
         layout.add_widget(sensor_layout)
 
         # Preset Temperature Buttons - 3 columns: [High/Medium stacked], [Target Temp], [OFF]
-        preset_layout = BoxLayout(orientation='horizontal', size_hint_y=0.5, spacing=5, padding=[20, 0])
+        preset_layout = BoxLayout(orientation='horizontal', size_hint_y=0.3, spacing=5, padding=[0, 0])
 
         # Use FloatLayout as button base
-        from kivy.uix.floatlayout import FloatLayout
-        from kivy.uix.behaviors import ButtonBehavior
-
         class ImageButton(ButtonBehavior, FloatLayout):
             pass
 
@@ -169,11 +178,15 @@ class MainScreen(Screen):
         preset_stack_outer = BoxLayout(orientation='vertical', size_hint_x=0.15)
         preset_stack_outer.add_widget(Label())  # Top spacer
 
-        preset_stack = BoxLayout(orientation='vertical', spacing=0, size_hint_y=None, height=160)
+        preset_stack = BoxLayout(orientation='vertical', spacing=20, size_hint_y=None, height=180)
+
+        # Get preset temperatures from context
+        preset_high_temp = self.ctx.getTargetTempPresetHigh() if self.ctx else 200
+        preset_medium_temp = self.ctx.getTargetTempPresetMedium() if self.ctx else 180
 
         presets = [
-            ('High', 180, 'icons/preset2.png', 'icons/preset2.png'),
-            ('Medium', 160, 'icons/preset1.png', 'icons/preset1.png')
+            ('High', preset_high_temp, 'icons/preset_high.png', 'icons/preset_high.png'),
+            ('Medium', preset_medium_temp, 'icons/preset_medium.png', 'icons/preset_medium.png')
         ]
 
         for idx, (name, temp, passive_img, active_img) in enumerate(presets):
@@ -183,11 +196,11 @@ class MainScreen(Screen):
             btn = ImageButton(size_hint_y=None, height=80)
 
             if os.path.exists(passive_img):
-                # Make preset images 60% size so they appear closer
+                # Preset images at 75% size
                 btn.img = Image(
                     source=passive_img,
                     fit_mode="contain",
-                    size_hint=(0.6, 0.6),
+                    size_hint=(1, 1),
                     pos_hint={'center_x': 0.5, 'center_y': 0.5}
                 )
                 btn.add_widget(btn.img)
@@ -214,11 +227,12 @@ class MainScreen(Screen):
         # Column 2: Target temperature display
         target_temp_wrapper = FloatLayout(size_hint_x=0.5)
 
+        # Create a container with rounded rectangle background
         target_temp_container = BoxLayout(
             orientation='vertical',
-            size_hint=(1, None),
-            height=150,
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            size_hint=(None, None),
+            size=(400, 180),
+            pos_hint={'center_x': 0.55, 'center_y': 0.5}
         )
 
         # Temperature value
@@ -230,29 +244,60 @@ class MainScreen(Screen):
             bold=True,
             color=(0.85, 1, 0.4, 0.6)  # Lighter greenish-yellow
         )
+
+        # Add rounded rectangle outline to container
+        def update_background(instance, value):
+            instance.canvas.before.clear()
+            with instance.canvas.before:
+                Color(0.85, 1, 0.4, 0.8)  # Greenish-yellow outline to match text
+                Line(
+                    rounded_rectangle=(instance.x, instance.y, instance.width, instance.height, 20),
+                    width=2
+                )
+
+        target_temp_container.bind(pos=update_background, size=update_background)
+        update_background(target_temp_container, None)
+
         target_temp_container.add_widget(self.target_temp_label)
 
         target_temp_wrapper.add_widget(target_temp_container)
         preset_layout.add_widget(target_temp_wrapper)
 
         # Column 3: Heater button
-        heater_btn = ImageButton(size_hint_x=0.35)
-        self.heater_passive_img_path = 'icons/passive.png'
-        self.heater_active_img_path = 'icons/active.png'
+        sauna_btn = ImageButton(size_hint_x=0.35)
+        self.sauna_passive_img_path = 'icons/passive.png'
+        self.sauna_active_img_path = 'icons/active.png'
 
-        heater_btn.img = Image(
-            source=self.heater_passive_img_path,
+        sauna_btn.img = Image(
+            source=self.sauna_passive_img_path,
             fit_mode="contain",
             size_hint=(1, 1),
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
-        heater_btn.add_widget(heater_btn.img)
+        sauna_btn.add_widget(sauna_btn.img)
 
-        heater_btn.bind(on_press=self.toggle_heater)
-        self.heater_btn = heater_btn
-        preset_layout.add_widget(heater_btn)
+        sauna_btn.bind(on_press=self.toggle_sauna)
+        self.sauna_btn = sauna_btn
+        preset_layout.add_widget(sauna_btn)
 
         layout.add_widget(preset_layout)
+
+        # Temperature slider at the bottom
+        slider_container = BoxLayout(orientation='vertical', size_hint_y=0.1, padding=[40, 10], spacing=10)
+
+        # Temperature slider
+        initial_temp = self.ctx.getHotRoomTargetTempF() if self.ctx else 190
+        max_temp = self.ctx.getHotRoomMaxTempF() if self.ctx else 250
+        self.temp_slider = Slider(
+            min=100,
+            max=max_temp,
+            value=initial_temp,
+            step=1
+        )
+        self.temp_slider.bind(value=self.on_slider_change)
+        slider_container.add_widget(self.temp_slider)
+
+        layout.add_widget(slider_container)
 
         self.add_widget(layout)
 
@@ -261,7 +306,15 @@ class MainScreen(Screen):
         # Update clock every second
         Clock.schedule_interval(self.update_clock, 1)
         # Initialize heater button state
-        self.update_heater_button()
+        self.update_sauna_button()
+        # Initialize heater icon state
+        if self.ctx:
+            if self.ctx.isHeaterOn():
+                self.heater_icon.background_normal = 'icons/heater_on.png'
+                self.heater_icon.background_down = 'icons/heater_on.png'
+            else:
+                self.heater_icon.background_normal = 'icons/heater_off.png'
+                self.heater_icon.background_down = 'icons/heater_off.png'
     
     def toggle_temperature_unit(self, instance):
         """Toggle between Celsius and Fahrenheit"""
@@ -272,19 +325,41 @@ class MainScreen(Screen):
         """Update temperature display based on current unit"""
         if self.ctx:
             temp_f = self.ctx.getHotRoomTempF()
+            target_temp_f = self.ctx.getHotRoomTargetTempF()
+
             if self.temp_unit == 'F':
                 self.temp_label.text = f'{int(temp_f)}°F'
+                if hasattr(self, 'target_temp_label'):
+                    self.target_temp_label.text = f'{int(target_temp_f)}°F'
             else:
                 temp_c = (temp_f - 32) * 5 / 9
                 self.temp_label.text = f'{int(temp_c)}°C'
+                if hasattr(self, 'target_temp_label'):
+                    target_temp_c = (target_temp_f - 32) * 5 / 9
+                    self.target_temp_label.text = f'{int(target_temp_c)}°C'
 
     def update_sensors(self, dt):
         """Update sensor readings from SaunaContext"""
         if self.ctx:
             self.update_temperature_display()
             self.humidity_label.text = f'{int(self.ctx.getHotRoomHumidity())}%'
-            self.target_temp_label.text = f'{int(self.ctx.getHotRoomTargetTempF())}°F'
-            self.update_heater_button()
+            target_temp = int(self.ctx.getHotRoomTargetTempF())
+
+            # Update slider if value differs (to reflect external changes)
+            if hasattr(self, 'temp_slider') and self.temp_slider.value != target_temp:
+                self.temp_slider.value = target_temp
+
+            self.update_sauna_button()
+
+            # Update heater icon - switch between heater_on and heater_off
+            if self.ctx.isHeaterOn():
+                # Heater is on - show heater_on icon
+                self.heater_icon.background_normal = 'icons/heater_on.png'
+                self.heater_icon.background_down = 'icons/heater_on.png'
+            else:
+                # Heater is off - show heater_off icon
+                self.heater_icon.background_normal = 'icons/heater_off.png'
+                self.heater_icon.background_down = 'icons/heater_off.png'
 
         # Update error icon visibility - show only when there are errors
         if self.errorMgr and self.errorMgr.hasAnyError():
@@ -298,10 +373,9 @@ class MainScreen(Screen):
 
     def update_clock(self, dt):
         """Update clock display"""
-        from datetime import datetime
         self.clock_label.text = datetime.now().strftime('%I:%M:%S').lstrip('0')
 
-    def toggle_heater(self, instance):
+    def toggle_sauna(self, instance):
         """Toggle sauna heater on/off"""
         if self.ctx:
             if self.ctx.isSaunaOn():
@@ -310,17 +384,30 @@ class MainScreen(Screen):
             else:
                 self.ctx.turnSaunaOn()
                 print("Sauna turned ON")
-            self.update_heater_button()
+            self.update_sauna_button()
 
-    def update_heater_button(self):
+    def update_sauna_button(self):
         """Update heater button appearance based on sauna state"""
-        if self.ctx and hasattr(self, 'heater_btn'):
+        if self.ctx and hasattr(self, 'sauna_btn'):
             if self.ctx.isSaunaOn():
                 # Sauna is on - use active image
-                self.heater_btn.img.source = self.heater_active_img_path
+                self.sauna_btn.img.source = self.sauna_active_img_path
             else:
                 # Sauna is off - use passive image
-                self.heater_btn.img.source = self.heater_passive_img_path
+                self.sauna_btn.img.source = self.sauna_passive_img_path
+
+    def on_slider_change(self, instance, value):
+        """Handle temperature slider value change"""
+        if self.ctx:
+            self.ctx.setHotRoomTargetTempF(int(value))
+            # Update the target temperature display immediately
+            if hasattr(self, 'target_temp_label'):
+                if self.temp_unit == 'F':
+                    self.target_temp_label.text = f'{int(value)}°F'
+                else:
+                    temp_c = (value - 32) * 5 / 9
+                    self.target_temp_label.text = f'{int(temp_c)}°C'
+            print(f"Target temperature set to {int(value)}°F")
 
     def toggle_preset(self, preset_index):
         """Toggle preset button - activate selected, deactivate others"""
@@ -339,16 +426,23 @@ class MainScreen(Screen):
             if clicked_btn.img:
                 clicked_btn.img.source = clicked_btn.active_img
             self.active_preset = preset_index
-            print(f"Setting temperature to {clicked_btn.preset_temp}°C ({clicked_btn.preset_name})")
-    
+
+            # Set target temperature based on preset
+            self.ctx.setHotRoomTargetTempF(clicked_btn.preset_temp)
+            # Also update the slider to reflect the new temperature
+            if hasattr(self, 'temp_slider'):
+                self.temp_slider.value = clicked_btn.preset_temp
+
+    # TODO
     def deactivate_all_presets(self):
+        pass
         """Deactivate all preset buttons"""
         for btn in self.preset_buttons:
             btn.is_active = False
             if btn.img:
                 btn.img.source = btn.passive_img
         self.active_preset = None
-    
+
     def set_temperature(self, temp):
         """Set target temperature (kept for compatibility)"""
         if temp == 0:
@@ -371,9 +465,10 @@ class MainScreen(Screen):
 
 class FanScreen(Screen):
     """Fan control screen"""
-    def __init__(self, ctx=None, **kwargs):
+    def __init__(self, ctx: SaunaContext=None, sd: SaunaDevices=None, **kwargs):
         super().__init__(**kwargs)
         self.ctx = ctx
+        self.sd = sd
         
         layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
         
@@ -383,11 +478,11 @@ class FanScreen(Screen):
         layout.add_widget(header)
         
         # Fan controls - top third of screen
-        fan_layout = BoxLayout(orientation='vertical', spacing=40, size_hint_y=0.33, padding=[0, 20, 0, 0])
+        fan_layout = BoxLayout(orientation='vertical', spacing=60, size_hint_y=0.33, padding=[0, 40, 0, 0])
 
         # Left Fan
         left_fan_box = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=45)
-        left_fan_box.add_widget(Label(size_hint_x=0.25))  # Left spacer - 25% from left
+        left_fan_box.add_widget(Label(size_hint_x=0.15))  # Left spacer - 15% from left
         self.left_fan_btn = Button(
             size_hint=(None, None),
             size=(45, 45),
@@ -396,24 +491,27 @@ class FanScreen(Screen):
             border=(0, 0, 0, 0)
         )
         # Load initial state from context
-        if self.ctx:
-            self.left_fan_btn.active = self.ctx.getLeftFanOnStatus()
-            if self.left_fan_btn.active:
-                self.left_fan_btn.background_normal = 'icons/checkbox-checked.png'
-                self.left_fan_btn.background_down = 'icons/checkbox-checked.png'
-        else:
-            self.left_fan_btn.active = False
+        self.left_fan_btn.active = self.ctx.getLeftFanOnStatus()
+        if self.left_fan_btn.active:
+            self.left_fan_btn.background_normal = 'icons/checkbox-checked.png'
+            self.left_fan_btn.background_down = 'icons/checkbox-checked.png'
         self.left_fan_btn.bind(on_press=self.toggle_left_fan)
         left_fan_box.add_widget(self.left_fan_btn)
-        left_label = Label(text='Left Fan', font_size='30sp', bold=True, halign='left', size_hint_x=1)
+
+        # Make label clickable
+        class ClickableLabel(ButtonBehavior, Label):
+            pass
+
+        left_label = ClickableLabel(text='Left Fan', font_size='30sp', bold=True, halign='left', size_hint_x=1)
         left_label.text_size = (left_label.width, None)
         left_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
+        left_label.bind(on_press=self.toggle_left_fan)
         left_fan_box.add_widget(left_label)
         fan_layout.add_widget(left_fan_box)
 
         # Right Fan
         right_fan_box = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=45)
-        right_fan_box.add_widget(Label(size_hint_x=0.25))  # Left spacer - 25% from left
+        right_fan_box.add_widget(Label(size_hint_x=0.15))  # Left spacer - 15% from left
         self.right_fan_btn = Button(
             size_hint=(None, None),
             size=(45, 45),
@@ -431,16 +529,50 @@ class FanScreen(Screen):
             self.right_fan_btn.active = False
         self.right_fan_btn.bind(on_press=self.toggle_right_fan)
         right_fan_box.add_widget(self.right_fan_btn)
-        right_label = Label(text='Right Fan', font_size='30sp', bold=True, halign='left', size_hint_x=1)
+        right_label = ClickableLabel(text='Right Fan', font_size='30sp', bold=True, halign='left', size_hint_x=1)
         right_label.text_size = (right_label.width, None)
         right_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
+        right_label.bind(on_press=self.toggle_right_fan)
         right_fan_box.add_widget(right_label)
         fan_layout.add_widget(right_fan_box)
 
         layout.add_widget(fan_layout)
 
+        # Fan Speed Control
+        speed_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.20, padding=[60, 20, 60, 0])
+
+        speed_label = Label(
+            text='Fan Speed',
+            font_size='30sp',
+            bold=True,
+            size_hint_y=0.3
+        )
+        speed_layout.add_widget(speed_label)
+
+        # Fan speed slider
+        initial_speed = self.ctx.getFanSpeedPct() if self.ctx else 100
+        self.speed_slider = Slider(
+            min=0,
+            max=100,
+            value=initial_speed,
+            step=1,
+            size_hint_y=0.4
+        )
+        self.speed_slider.bind(value=self.on_speed_change)
+        speed_layout.add_widget(self.speed_slider)
+
+        # Speed value display
+        self.speed_value_label = Label(
+            text=f'{int(initial_speed)}%',
+            font_size='24sp',
+            size_hint_y=0.3
+        )
+        speed_layout.add_widget(self.speed_value_label)
+
+        layout.add_widget(speed_layout)
+
         # Spacer to push OK button up from bottom
-        layout.add_widget(Label(size_hint_y=0.45))
+        layout.add_widget(Label(size_hint_y=0.25))
 
         # OK button
         ok_btn = Button(
@@ -471,6 +603,7 @@ class FanScreen(Screen):
         # Save to context
         if self.ctx:
             self.ctx.setLeftFanOnStatus(self.left_fan_btn.active)
+            self.sd.turnLeftFanOnOff(self.left_fan_btn.active)
         print(f"Left Fan: {self.left_fan_btn.active}")
 
     def toggle_right_fan(self, instance):
@@ -485,7 +618,17 @@ class FanScreen(Screen):
         # Save to context
         if self.ctx:
             self.ctx.setRightFanOnStatus(self.right_fan_btn.active)
+            self.sd.turnRightFanOnOff(self.right_fan_btn.active)
         print(f"Right Fan: {self.right_fan_btn.active}")
+
+    def on_speed_change(self, instance, value):
+        """Handle fan speed slider change"""
+        speed_pct = int(value)
+        self.speed_value_label.text = f'{speed_pct}%'
+        if self.ctx and self.sd:
+            self.ctx.setFanSpeedPct(speed_pct)
+            self.sd.setFanSpeed(speed_pct)
+        print(f"Fan Speed: {speed_pct}%")
 
     def go_back(self, instance):
         # Save fan states here if needed
@@ -551,138 +694,6 @@ class WiFiScreen(Screen):
     def go_back(self, instance):
         self.manager.current = 'main'
 
-class SettingsScreen(Screen):
-    """Settings configuration screen"""
-    def __init__(self, ctx=None, **kwargs):
-        super().__init__(**kwargs)
-        self.ctx = ctx
-        
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
-        
-        # Header
-        header = BoxLayout(size_hint_y=0.1)
-        header.add_widget(Label(text='Settings', font_size='30sp', bold=True))
-        layout.add_widget(header)
-        
-        # Settings list with input fields
-        from kivy.uix.scrollview import ScrollView
-        scroll_view = ScrollView(size_hint=(1, 0.9))
-        settings_layout = GridLayout(cols=2, spacing=10, size_hint_y=None, padding=10)
-        settings_layout.bind(minimum_height=settings_layout.setter('height'))
-
-        # Load values from context or use defaults
-        if self.ctx:
-            settings = [
-                ('Target Temperature (°F)', str(self.ctx.getHotRoomTargetTempF())),
-                ('Max Temperature (°F)', str(self.ctx.getHotRoomMaxTempF())),
-                ('Lower Temperature Threshold (°F)', str(self.ctx.getLowerHotRoomTempThresholdF())),
-                ('Upper Temperature Threshold (°F)', str(self.ctx.getUpperHotRoomTempThresholdF())),
-                ('Cooling Grace Period (seconds)', str(self.ctx.getCoolingGracePeriod())),
-                ('Heater Warmup Time (seconds)', str(self.ctx.getHeaterHealthWarmUpTime())),
-                ('Heater Cooldown Time (seconds)', str(self.ctx.getHeaterHealthCooldownTime())),
-                ('Fan Speed (%)', str(self.ctx.getFanSpeedPct())),
-                ('Number of Fans', str(self.ctx.getNumberOfFans())),
-                ('RS485 Serial Port', self.ctx.getRs485SerialPort()),
-                ('RS485 Baud Rate', str(self.ctx.getRs485SerialBaudRate())),
-                ('RS485 Timeout (seconds)', str(self.ctx.getRs485SerialTimeout())),
-                ('RS485 Retries', str(self.ctx.getRs485SerialRetries()))
-            ]
-        else:
-            settings = [
-                ('Target Temperature (°F)', '190'),
-                ('Max Temperature (°F)', '240'),
-                ('Lower Temp Threshold (°F)', '5'),
-                ('Upper Temp Threshold (°F)', '0'),
-                ('Cooling Grace Period (seconds)', '60'),
-                ('Heater Warmup Time (seconds)', '300'),
-                ('Heater Cooldown Time (seconds)', '1200'),
-                ('Fan Speed (%)', '100'),
-                ('Number of Fans', '2'),
-                ('RS485 Serial Port', '/dev/ttyAMA0'),
-                ('RS485 Baud Rate', '9600'),
-                ('RS485 Timeout (seconds)', '0.3'),
-                ('RS485 Retries', '3')
-            ]
-
-        self.setting_inputs = {}
-
-        for setting_name, default_value in settings:
-            # Label
-            label = Label(
-                text=setting_name,
-                font_size='16sp',
-                size_hint_y=None,
-                height=50,
-                halign='left',
-                valign='middle'
-            )
-            label.bind(size=label.setter('text_size'))
-            settings_layout.add_widget(label)
-
-            # Input field
-            input_field = TextInput(
-                text=default_value,
-                multiline=False,
-                font_size='16sp',
-                size_hint_y=None,
-                height=50
-            )
-            self.setting_inputs[setting_name] = input_field
-            settings_layout.add_widget(input_field)
-
-        scroll_view.add_widget(settings_layout)
-        layout.add_widget(scroll_view)
-
-        # Save button
-        save_btn = Button(
-            text='Save',
-            size_hint=(None, None),
-            size=(200, 60),
-            pos_hint={'center_x': 0.5},
-            font_size='20sp',
-            background_color=(0.5, 0.8, 1.0, 1)
-        )
-        save_btn.bind(on_press=self.save_settings)
-        layout.add_widget(save_btn)
-
-        self.add_widget(layout)
-    
-    def save_settings(self, instance):
-        """Save all settings"""
-        print("Saving settings:")
-        if self.ctx:
-            try:
-                # Save temperature settings
-                self.ctx.setHotRoomTargetTempF(int(self.setting_inputs['Target Temperature (°F)'].text))
-                self.ctx.setHotRoomMaxTempF(int(self.setting_inputs['Max Temperature (°F)'].text))
-                self.ctx.setLowerHotRoomTempThresholdF(int(self.setting_inputs['Lower Temperature Threshold (°F)'].text))
-                self.ctx.setUpperHotRoomTempThresholdF(int(self.setting_inputs['Upper Temperature Threshold (°F)'].text))
-                self.ctx.setCoolingGracePeriod(int(self.setting_inputs['Cooling Grace Period (seconds)'].text))
-                self.ctx.setLHeaterHealthWarmupTime(int(self.setting_inputs['Heater Warmup Time (seconds)'].text))
-                self.ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Cooldown Time (seconds)'].text))
-
-                # Save fan settings
-                self.ctx.setFanSpeedPct(int(self.setting_inputs['Fan Speed (%)'].text))
-                self.ctx.setNumberOfFans(int(self.setting_inputs['Number of Fans'].text))
-
-                # Save RS485 settings
-                self.ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
-                self.ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
-                self.ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout (seconds)'].text))
-                self.ctx.setRs485SerialRetries(int(self.setting_inputs['RS485 Retries'].text))
-
-                print("Settings saved successfully!")
-            except ValueError as e:
-                print(f"Error saving settings: {e}")
-        else:
-            for setting_name, input_field in self.setting_inputs.items():
-                print(f"  {setting_name}: {input_field.text}")
-
-        self.manager.current = 'main'
-
-    def go_back(self, instance):
-        self.manager.current = 'main'
-
 class ErrorsScreen(Screen):
     """Errors display screen"""
     def __init__(self, errorMgr=None, **kwargs):
@@ -697,7 +708,6 @@ class ErrorsScreen(Screen):
         layout.add_widget(header)
 
         # Errors list
-        from kivy.uix.scrollview import ScrollView
         scroll_view = ScrollView(size_hint=(1, 0.8))
         self.errors_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, padding=10)
         self.errors_layout.bind(minimum_height=self.errors_layout.setter('height'))
@@ -853,16 +863,18 @@ class ErrorsScreen(Screen):
 
 class SaunaControlApp(App):
     """Main application class"""
-    def __init__(self, ctx=None, errorMgr=None, **kwargs):
+    def __init__(self, ctx=None, sc=None, sd=None, errorMgr=None, **kwargs):
         super().__init__(**kwargs)
         self.ctx = ctx
+        self.sc = sc
+        self.sd = sd
         self.errorMgr = errorMgr
 
     def build(self):
         sm = ScreenManager()
         sm.add_widget(MainScreen(name='main', ctx=self.ctx, errorMgr=self.errorMgr))
-        sm.add_widget(FanScreen(name='fan', ctx=self.ctx))
+        sm.add_widget(FanScreen(name='fan', ctx=self.ctx, sd=self.sd))
         sm.add_widget(WiFiScreen(name='wifi'))
-        sm.add_widget(SettingsScreen(name='settings', ctx=self.ctx))
+        sm.add_widget(SettingsScreen(name='settings', ctx=self.ctx, sc=self.sc))
         sm.add_widget(ErrorsScreen(name='errors', errorMgr=self.errorMgr))
         return sm

@@ -1,6 +1,7 @@
+import asyncio
 import time
 import atexit
-from pymodbus.client import ModbusSerialClient
+from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.exceptions import ModbusException
 from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
@@ -58,12 +59,12 @@ class SaunaDevices:
     def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
         self._ctx = ctx
         self._errorMgr = errorMgr
-        self._rs485Client = ModbusSerialClient(port=self._ctx.getRs485SerialPort(),
-                                               baudrate=self._ctx.getRs485SerialBaudRate(),
-                                               # Timeout is optimized for devices.
-                                               timeout=self._ctx.getRs485SerialTimeout(),
-                                               retries=self._ctx.getRs485SerialRetries())
-        self._rs485Client.connect()
+#        self._rs485Client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
+#                                               baudrate=self._ctx.getRs485SerialBaudRate(),
+#                                               # Timeout is optimized for devices.
+#                                               timeout=self._ctx.getRs485SerialTimeout(),
+#                                               retries=self._ctx.getRs485SerialRetries())
+#        self._rs485Client.connect()
         # Initialize Relay Module
         self._setRelayStatus(self._notUsedCoilId, False)
         # Initialize Fans
@@ -225,7 +226,6 @@ class SaunaDevices:
             self._errorMgr.raiseFanModuleError('Cannot Change Fan Speed.')
         else:
             self._errorMgr.eraseFanModuleError()
-            self._ctx.setFanSpeedPct(speedPct)      # Save as default
 
     def isRightFanOn(self) -> bool: 
         return self._getFanRelayStatus(self._rightFanCoilId) and \
@@ -243,21 +243,23 @@ class SaunaDevices:
     def isLeftFanOff(self) -> bool:
         return not self.isLeftFanOn()
 
+    def turnLeftFanOnOff(self, state: bool):
+        self._setFanRelayStatus(self._leftFanCoilId, state)
+
     def turnLeftFanOn(self) -> None:
-        self._setFanRelayStatus(self._leftFanCoilId, True)
-        self._ctx.setLeftFanOnStatus(True)                  # Save as default
+        self.turnLeftFanOnOff(True)
 
     def turnLeftFanOff(self) -> None:
-        self._setFanRelayStatus(self._leftFanCoilId, False)
-        self._ctx.setLeftFanOnStatus(False)                 # Save as default
+        self.turnLeftFanOnOff(False)
+
+    def turnRightFanOnOff(self, state: bool):
+        self._setFanRelayStatus(self._rightFanCoilId, state)
 
     def turnRightFanOn(self) -> None:
-        self._setFanRelayStatus(self._rightFanCoilId, True) 
-        self._ctx.setRightFanOnStatus(True)                 # Save as default
+        self.turnRightFanOnOff(True)
 
     def turnRightFanOff(self) -> None:
-        self._setFanRelayStatus(self._rightFanCoilId, False)
-        self._ctx.setRightFanOnStatus(False)                # Save as default
+        self.turnRightFanOnOff(False)
 
     def getNumberOfFans(self) -> int:
         response = self._modbus_read_holding_registers(self._numberOfFansAddress, self._fanControlModuleRs485SlaveId)
@@ -274,7 +276,6 @@ class SaunaDevices:
             self._errorMgr.raiseFanModuleError('Cannot Set Number of Fans.')
         else:
             self._errorMgr.eraseFanModuleError()
-            self._ctx.setNumberOfFans(nFans)        # Set as default
 
     def _checkFanFaultStatus(self, fanId: int) -> bool:
         response = self._modbus_read_holding_registers(self._fanFaultStatusAddress, self._fanControlModuleRs485SlaveId)
@@ -306,7 +307,77 @@ class SaunaDevices:
 
 # ----------------------------------- RS485 Modbus Helpers -------------------------------------
 
+
     def _modbus_read_holding_registers(self, address: int, slave: int, count: int=1):
+        async def _read():
+            try:
+                client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
+                                                baudrate=self._ctx.getRs485SerialBaudRate(),
+                                                # Timeout is optimized for devices.
+                                                timeout=self._ctx.getRs485SerialTimeout(),
+                                                retries=self._ctx.getRs485SerialRetries())
+                await client.connect()
+                response = await client.read_holding_registers(address, count=1, slave=slave)
+                client.close()
+                return response
+            except ModbusException as e:
+                self._errorMgr.raiseModbusError(e)
+                return DummyErrorResponse()
+        return asyncio.run(_read())
+
+    def _modbus_write_register(self, address: int, value: int, slave: int):
+        async def _read():
+            try:
+                client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
+                                                baudrate=self._ctx.getRs485SerialBaudRate(),
+                                                # Timeout is optimized for devices.
+                                                timeout=self._ctx.getRs485SerialTimeout(),
+                                                retries=self._ctx.getRs485SerialRetries())
+                await client.connect()
+                response = await client.write_register(address=address, value=value, slave=slave)
+                client.close()
+                return response
+            except ModbusException as e:
+                self._errorMgr.raiseModbusError(e)
+                return DummyErrorResponse()
+        return asyncio.run(_read())
+
+    def _modbus_read_coils(self, address: int, slave: int, count: int=1):
+        async def _read():
+            try:
+                client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
+                                                baudrate=self._ctx.getRs485SerialBaudRate(),
+                                                # Timeout is optimized for devices.
+                                                timeout=self._ctx.getRs485SerialTimeout(),
+                                                retries=self._ctx.getRs485SerialRetries())
+                await client.connect()
+                response = await client.read_coils(address=address, count=count, slave=slave)
+                client.close()
+                return response
+            except ModbusException as e:
+                self._errorMgr.raiseModbusError(e)
+                return DummyErrorResponse()
+        return asyncio.run(_read())
+
+    def _modbus_write_coil(self, address: int, value: bool, slave: int):
+        async def _read():
+            try:
+                client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
+                                                baudrate=self._ctx.getRs485SerialBaudRate(),
+                                                # Timeout is optimized for devices.
+                                                timeout=self._ctx.getRs485SerialTimeout(),
+                                                retries=self._ctx.getRs485SerialRetries())
+                await client.connect()
+                response = await client.write_coil(address=address, value=value, slave=slave)
+                client.close()
+                return response
+            except ModbusException as e:
+                self._errorMgr.raiseModbusError(e)
+                return DummyErrorResponse()
+        return asyncio.run(_read())
+
+
+    def _modbus_read_holding_registers_sync(self, address: int, slave: int, count: int=1):
         try:
             response = self._rs485Client.read_holding_registers(address, count=1, slave=slave)
             self._errorMgr.eraseModbusError()
@@ -315,7 +386,7 @@ class SaunaDevices:
             self._errorMgr.raiseModbusError(e)
             return DummyErrorResponse()
 
-    def _modbus_write_register(self, address: int, value: int, slave: int):
+    def _modbus_write_register_sync(self, address: int, value: int, slave: int):
         try:
             response = self._rs485Client.write_register(address=address, value=value, slave=slave)
             self._errorMgr.eraseModbusError()
@@ -324,7 +395,7 @@ class SaunaDevices:
             self._errorMgr.raiseModbusError(e)
             return DummyErrorResponse()
 
-    def _modbus_read_coils(self, address: int, slave: int, count: int=1):
+    def _modbus_read_coils_sync(self, address: int, slave: int, count: int=1):
         try:
             response = self._rs485Client.read_coils(address=address, count=count, slave=slave)
             self._errorMgr.eraseModbusError()
@@ -333,7 +404,7 @@ class SaunaDevices:
             self._errorMgr.raiseModbusError(e)
             return DummyErrorResponse()
 
-    def _modbus_write_coil(self, address: int, value: bool, slave: int):
+    def _modbus_write_coil_sync(self, address: int, value: bool, slave: int):
         try:
             response = self._rs485Client.write_coil(address=address, value=value, slave=slave)
             self._errorMgr.eraseModbusError()

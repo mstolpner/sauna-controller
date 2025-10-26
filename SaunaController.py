@@ -5,7 +5,7 @@ from ErrorManager import ErrorManager
 from Timer import Timer
 from datetime import datetime
 
-class HeaterController:
+class SaunaController:
 
     # Dependencies
     _errorMgr = None
@@ -35,7 +35,7 @@ class HeaterController:
         # Initialize member variables
         self._heaterHealthLastRefPointTemp = self._devices.getHotRoomTemperature('F')
 
-    def process(self) -> None:
+    def processHeater(self) -> None:
         priorHeaterOnStatus = self._isHeaterOn
         self._isHeaterOn = self._devices.isHeaterOn()
         self._ctx.setHotRoomTempF(self._devices.getHotRoomTemperature('F'))
@@ -94,3 +94,9 @@ class HeaterController:
                 # All good, restart the cycle
                 self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
             self._heaterHealthCoolDownTimer.start()
+
+    def turnRightFanOnOff(self, state: bool) -> None:
+        self._devices.turnRightFanOnOff(state)
+
+    def turnLeftFanOnOff(self, state: bool) -> None:
+        self._devices.turnLeftFanOnOff(state)

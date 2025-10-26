@@ -15,6 +15,8 @@ class SaunaContext:
     _heaterHealthWarmUpTime = 300
     _heaterHealthCoolDownTime = 1200
     _maxHotRoomTempF = 240
+    _targetTempPresetMedium = 180
+    _targetTempPresetHigh = 200
     _rs485SerialPort = '/dev/ttyAMA0'
     _rs485SerialBaudRate = 9600
     _rs485Timeout = 0.3
@@ -28,6 +30,7 @@ class SaunaContext:
     _configFileName = 'sauna.ini'
     # Runtime-only, not saved to config
     _isSaunaOn = False
+    _isHeaterOn = False
     _hotRoomTempF = 20
     _hotRoomHumidity = 50
 
@@ -56,6 +59,8 @@ class SaunaContext:
         self._configObj['hot_room_temp_control']['heater_health_warmup_time'] = self._heaterHealthWarmUpTime
         self._configObj['hot_room_temp_control']['heater_health_cooldown_time'] = self._heaterHealthCoolDownTime
         self._configObj['hot_room_temp_control']['max_temp_f'] = self._maxHotRoomTempF
+        self._configObj['hot_room_temp_control']['target_temp_preset_medium'] = self._targetTempPresetMedium
+        self._configObj['hot_room_temp_control']['target_temp_preset_high'] = self._targetTempPresetHigh
         self._configObj['fan_control'] = {}
         self._configObj['fan_control']['fan_speed_pct'] = self._fanSpeedPct
         self._configObj['fan_control']['number_of_fans'] = self._numberOfFans
@@ -77,6 +82,15 @@ class SaunaContext:
     
     def turnSaunaOff(self) -> None:
         self._isSaunaOn = False
+
+    def isHeaterOn(self) -> bool:
+        return self._isHeaterOn
+
+    def setHeaterOn(self) -> None:
+        self._isHeaterOn = True
+
+    def setHeaterOff(self) -> None:
+        self._isHeaterOn = False
 
     def getSaunaSensorsDeviceId(self) -> int:
         return self._configObj['rs485'].as_int('sensors_module_device_id')
@@ -209,3 +223,15 @@ class SaunaContext:
     def setHotRoomHumidity(self, humidity: float) -> None:
         """Set current hot room humidity percentage (runtime-only, not persisted)"""
         self._hotRoomHumidity = humidity
+
+    def getTargetTempPresetMedium(self) -> int:
+        return self._configObj['hot_room_temp_control'].as_int('target_temp_preset_medium')
+
+    def setTargetTempPresetMedium(self, tempF: int) -> None:
+        self._configObj['hot_room_temp_control']['target_temp_preset_medium'] = tempF
+
+    def getTargetTempPresetHigh(self) -> int:
+        return self._configObj['hot_room_temp_control'].as_int('target_temp_preset_high')
+
+    def setTargetTempPresetHigh(self, tempF: int) -> None:
+        self._configObj['hot_room_temp_control']['target_temp_preset_high'] = tempF

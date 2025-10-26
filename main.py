@@ -2,24 +2,16 @@ import time
 import threading
 from SaunaContext import SaunaContext
 from SaunaDevices import SaunaDevices
-from HeaterController import HeaterController
+from SaunaController import SaunaController
 from ErrorManager import ErrorManager
 from SaunaControllerUI import SaunaControlApp
 
-def saunaControllerLoop(ctx: SaunaContext, sd: SaunaDevices, hc: HeaterController):
+def saunaControllerLoop(ctx: SaunaContext, sd: SaunaDevices, hc: SaunaController):
     """Background thread for Sauna Control"""
     while True:
         # Heater Control
-        hc.process()
-        # Fan Control
-        if ctx.getRightFanOnStatus() and sd.isRightFanOff():
-            sd.turnRightFanOn()
-        elif not ctx.getRightFanOnStatus() and sd.isRightFanOn():
-            sd.turnRightFanOff()
-        if ctx.getLeftFanOnStatus() and sd.isLeftFanOff():
-            sd.turnLeftFanOn()
-        elif not ctx.getLeftFanOnStatus() and sd.isLeftFanOn():
-            sd.turnLeftFanOff()
+        hc.processHeater()
+        # TODO verify fan status and report error. Test fan control
         time.sleep(1)
 
 if __name__ == '__main__':
@@ -27,17 +19,18 @@ if __name__ == '__main__':
     errorMgr = ErrorManager()
 
     # Initialize classes
-#    sd = SaunaDevices(ctx, errorMgr)
-#    hc = HeaterController(ctx, sd, errorMgr)
-    sd = None
-    hc = None
-
+    sd = SaunaDevices(ctx, errorMgr)
+    sc = SaunaController(ctx, sd, errorMgr)
     # Start heater control loop in background thread
-    saunaControllerThread = threading.Thread(target=saunaControllerLoop, args=(ctx,sd,hc,), daemon=True)
+    saunaControllerThread = threading.Thread(target=saunaControllerLoop, args=(ctx,sd,sc,), daemon=True)
     saunaControllerThread.start()
 
+    # Initialize Fan status
+    sc.turnRightFanOnOff(ctx.getRightFanOnStatus())
+    sc.turnLeftFanOnOff(ctx.getLeftFanOnStatus())
+
     # Run the UI application (this blocks until app closes)
-    SaunaControlApp(ctx, errorMgr).run()
+    SaunaControlApp(ctx=ctx, sc=sc, sd=sd, errorMgr=errorMgr).run()
 
 
 
