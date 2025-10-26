@@ -114,6 +114,11 @@ class ErrorsScreen(Screen):
             has_errors = True
             self.add_error_item('Modbus Communication', str(self.errorMgr._modbusException))
 
+        # Check for Fan errors
+        if self.errorMgr._fanErrorMessage:
+            has_errors = True
+            self.add_error_item('Fan', str(self.errorMgr._fanErrorMessage))
+
         # If no errors, show message
         if not has_errors:
             no_error_label = Label(
@@ -167,6 +172,7 @@ class ErrorsScreen(Screen):
             self.errorMgr.eraseSensorModuleError()
             self.errorMgr.eraseHeaterError()
             self.errorMgr.eraseModbusError()
+            self.errorMgr.eraseFanError()
             print("All errors cleared")
         self.refresh_errors()
 

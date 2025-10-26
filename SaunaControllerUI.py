@@ -1,4 +1,10 @@
 import os
+
+from kivy.config import Config
+Config.set('kivy', 'log_level', 'warning')
+from kivy.uix.boxlayout import BoxLayout
+Config.write()
+
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
@@ -37,6 +43,7 @@ class MainScreen(Screen):
     """Main sauna control screen"""
     def __init__(self, ctx=None, errorMgr: ErrorManager=None, **kwargs):
         super().__init__(**kwargs)
+        # Dependencies
         self.ctx = ctx
         self.errorMgr = errorMgr
         self.active_preset = None

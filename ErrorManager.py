@@ -7,6 +7,7 @@ class ErrorManager:
     _sensorModuleErrorMessage = None
     _modbusException = None
     _heaterErrorMessage = None
+    _fanErrorMessage = None
 
     def __init__(self):
         pass
@@ -47,6 +48,12 @@ class ErrorManager:
     def eraseHeaterError(self) -> None:
         self._heaterErrorMessage = None
 
+    def raiseFanError(self, errorMessage: str) -> None:
+        self._fanErrorMessage = errorMessage
+
+    def eraseFanError(self) -> None:
+        self._fanErrorMessage = None
+
     def hasAnyError(self) -> bool:
         """Check if there are any active errors"""
         return any([
@@ -55,5 +62,6 @@ class ErrorManager:
             self._fanModuleErrorMessage,
             self._sensorModuleErrorMessage,
             self._modbusException,
-            self._heaterErrorMessage
+            self._heaterErrorMessage,
+            self._fanErrorMessage
         ])

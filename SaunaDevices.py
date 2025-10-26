@@ -1,14 +1,16 @@
 import asyncio
 import time
-import atexit
+import logging
 from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.exceptions import ModbusException
 from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
 
+
 class DummyErrorResponse():
     def isError(self):
         return True
+
 
 class SaunaDevices:
 
@@ -59,6 +61,10 @@ class SaunaDevices:
     _lastHeaterOnStatus = False
 
     def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
+        # Set modbus Logging Level
+        pymodbus_logger = logging.getLogger('pymodbus')
+        pymodbus_logger.setLevel(logging.WARN)
+        # Dependencies
         self._ctx = ctx
         self._errorMgr = errorMgr
 #        self._rs485Client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
@@ -92,12 +98,13 @@ class SaunaDevices:
         self.getHotRoomHumidity()
         # Initialize Heater
         self.turnHeaterOff()
+        # Initialize hot room light
+        self.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
         # Release resources on exit
-        atexit.register(self._onExit)
+#        atexit.register(self._onExit)
 
     # Release resources on exit
-    def _onExit(self):
-        pass
+#    def _onExit(self):
 #        if self._rs485Client:
 #            self._rs485Client.close()
 

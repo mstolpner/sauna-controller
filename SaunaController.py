@@ -38,7 +38,12 @@ class SaunaController:
             self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
             self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
             self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
-            # TODO verify fan status and report error. Test fan control
+            # Check fan health
+            if not self._sd.isLeftFanOk() or not self._sd.isRightFanOk():
+                self._errorMgr.raiseFanError("One or more fans do not work properly.")
+            else:
+                self._errorMgr.eraseFanError()
+            # Turn hot room light on/off
             self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
 
 
