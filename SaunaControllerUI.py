@@ -455,11 +455,9 @@ class MainScreen(Screen):
 
 class SaunaControlApp(App):
     """Main application class"""
-    def __init__(self, ctx=None, sc=None, sd=None, errorMgr=None, **kwargs):
+    def __init__(self, ctx=None, errorMgr=None, **kwargs):
         super().__init__(**kwargs)
         self.ctx = ctx
-        self.sc = sc
-        self.sd = sd
         self.errorMgr = errorMgr
 
     def build(self):

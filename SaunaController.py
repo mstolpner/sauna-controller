@@ -1,96 +1,42 @@
+import threading
 import time
-from SaunaContext import SaunaContext
-from SaunaDevices import SaunaDevices
+
 from ErrorManager import ErrorManager
-from Timer import Timer
-from datetime import datetime
+from HeaterController import HeaterController
+from SaunaContext import SaunaContext
+from SaunaControllerUI import SaunaControlApp
+from SaunaDevices import SaunaDevices
+
 
 class SaunaController:
 
-    # Dependencies
-    _errorMgr = None
     _ctx = None
-    _devices = None
+    _errorMgr = None
+    _sd = None
+    _hc = None
 
-    # Heater state
-    _isHeaterOn = False
-
-    # Cooling grace timer. See comments in the method below.
-    _coolingGracePeriodTimer = None
-
-    # Heater Health 
-    _heaterHealthCoolDownTimer = None
-    _heaterHealthWarmUpTimer = None
-    _heaterHealthLastRefPointTemp = None
-
-    def __init__(self, ctx: SaunaContext, devices: SaunaDevices, errorMgr: ErrorManager):
-        # Initialize classes
-        self._errorMgr = errorMgr
+    def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
         self._ctx = ctx
-        self._devices = devices
-        # Initialize timers
-        self._coolingGracePeriodTimer = Timer(self._ctx.getCoolingGracePeriod())
-        self._heaterHealthCoolDownTimer = Timer(self._ctx.getHeaterHealthCooldownTime())
-        self._heaterHealthWarmUpTimer = Timer(self._ctx.getHeaterHealthWarmUpTime())
-        # Initialize member variables
-        self._heaterHealthLastRefPointTemp = self._devices.getHotRoomTemperature('F')
+        self._errorMgr = errorMgr
+        self._sd = SaunaDevices(self._ctx, self._errorMgr)
+        self._hc = HeaterController(self._ctx, self._sd, self._errorMgr)
 
-    def processHeater(self) -> None:
-        priorHeaterOnStatus = self._isHeaterOn
-        self._isHeaterOn = self._devices.isHeaterOn()
-        self._ctx.setHotRoomTempF(self._devices.getHotRoomTemperature('F'))
-        self._ctx.setHotRoomHumidity(self._devices.getHotRoomHumidity())
 
-        # TODO remove debug
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Sauna is ' + str(self._ctx.isSaunaOn()) + '. Heater is ' +  str(self._isHeaterOn)
-              + '. T: ' + str(self._ctx.getHotRoomTempF()) + 'F' + '\r', end='')
+    # ----------------------------------- Sauna Controller Run Methods ------------------------------------
 
-        # If sauna is off, ensure the heater is off.
-        if self._ctx.isSaunaOff():
-            if self._isHeaterOn:
-                self._devices.turnHeaterOff()
-                self._heaterHealthCoolDownTimer.start()
+    def run(self):
+        # Start sauna control loop in background thread
+        saunaControllerThread = threading.Thread(target=self._run(), args=(), daemon=True)
+        saunaControllerThread.start()
 
-        # Allow for cooling grace period as a door might be open for a short period causing temperature to drop temporarily
-        elif not self._isHeaterOn and self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF() \
-           and self._coolingGracePeriodTimer.isActive():
-            # Wait for the grace cooling timer
-            pass
-
-        # Turn Heater Off if needed
-        elif self._isHeaterOn and self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() + self._ctx.getUpperHotRoomTempThresholdF():
-            self._devices.turnHeaterOff()
-            self._isHeaterOn = False
-            self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
-            # Set up heater health timers
-            self._heaterHealthWarmUpTimer.stop()
-            self._heaterHealthCoolDownTimer.start()
-
-        # Turn Heater On if needed
-        elif not self._isHeaterOn and self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF():
-            self._devices.turnHeaterOn()
-            self._isHeaterOn = True
-            self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
-            # Set up heater health timers
-            self._heaterHealthCoolDownTimer.stop()
-            self._heaterHealthWarmUpTimer.start()
-            # Set up grace period timer
-            self._coolingGracePeriodTimer.start()
-
-        # Ensure contactor works properly - temperature is rising or falling as expected
-        if self._isHeaterOn and self._heaterHealthWarmUpTimer.isFinished():
-            if self._ctx.getHotRoomTempF() <= self._heaterHealthLastRefPointTemp:
-                self._errorMgr.raiseHeaterError('Hot room temperature is not rising.')
-            else:
-                # All good, restart the cycle
-                self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
-            self._heaterHealthWarmUpTimer.start()
-        if not self._isHeaterOn and \
-           self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF() and \
-           self._heaterHealthCoolDownTimer.isFinished():
-            if self._ctx.getHotRoomTempF() >= self._heaterHealthLastRefPointTemp:
-                self._errorMgr.raiseHeaterError('Hot room temperature is not falling.')
-            else:
-                # All good, restart the cycle
-                self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
-            self._heaterHealthCoolDownTimer.start()
+    def _run(self):
+        """Background thread for Sauna Control"""
+        while True:
+            # Heater Control
+            self._hc.process()
+            # Process fans
+            self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
+            self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
+            self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
+            # TODO verify fan status and report error. Test fan control
+            time.sleep(0.5)

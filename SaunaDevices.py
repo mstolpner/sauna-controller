@@ -95,7 +95,8 @@ class SaunaDevices:
 
     # Release resources on exit
     def _onExit(self):
-        self._rs485Client.close()
+        if self._rs485Client:
+            self._rs485Client.close()
 
     # ---------------------------------------- Sauna Sensors ---------------------------------------
 
@@ -243,23 +244,23 @@ class SaunaDevices:
     def isLeftFanOff(self) -> bool:
         return not self.isLeftFanOn()
 
-    def turnLeftFanOnOff(self, state: bool):
-        self._setFanRelayStatus(self._leftFanCoilId, state)
-
     def turnLeftFanOn(self) -> None:
         self.turnLeftFanOnOff(True)
 
     def turnLeftFanOff(self) -> None:
         self.turnLeftFanOnOff(False)
 
-    def turnRightFanOnOff(self, state: bool):
-        self._setFanRelayStatus(self._rightFanCoilId, state)
+    def turnLeftFanOnOff(self, state: bool) -> None:
+        self._setFanRelayStatus(self._leftFanCoilId, state)
 
     def turnRightFanOn(self) -> None:
         self.turnRightFanOnOff(True)
 
     def turnRightFanOff(self) -> None:
         self.turnRightFanOnOff(False)
+
+    def turnRightFanOnOff(self, state: bool) -> None:
+        self._setFanRelayStatus(self._rightFanCoilId, state)
 
     def getNumberOfFans(self) -> int:
         response = self._modbus_read_holding_registers(self._numberOfFansAddress, self._fanControlModuleRs485SlaveId)
