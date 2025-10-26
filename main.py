@@ -1,3 +1,7 @@
+from kivy.config import Config
+# Enable virtual keyboard - must be before other kivy imports
+Config.set('kivy', 'keyboard_mode', 'systemanddock')
+
 import time
 import threading
 from SaunaContext import SaunaContext
@@ -11,6 +15,10 @@ def saunaControllerLoop(ctx: SaunaContext, sd: SaunaDevices, hc: SaunaController
     while True:
         # Heater Control
         hc.processHeater()
+        # Process fans
+        sd.turnLeftFanOnOff(ctx.getLeftFanOnStatus())
+        sd.turnRightFanOnOff(ctx.getRightFanOnStatus())
+        sd.setFanSpeed((ctx.getFanSpeedPct()))
         # TODO verify fan status and report error. Test fan control
         time.sleep(1)
 
@@ -26,8 +34,8 @@ if __name__ == '__main__':
     saunaControllerThread.start()
 
     # Initialize Fan status
-    sc.turnRightFanOnOff(ctx.getRightFanOnStatus())
-    sc.turnLeftFanOnOff(ctx.getLeftFanOnStatus())
+    sd.turnRightFanOnOff(ctx.getRightFanOnStatus())
+    sd.turnLeftFanOnOff(ctx.getLeftFanOnStatus())
 
     # Run the UI application (this blocks until app closes)
     SaunaControlApp(ctx=ctx, sc=sc, sd=sd, errorMgr=errorMgr).run()

@@ -94,9 +94,3 @@ class SaunaController:
                 # All good, restart the cycle
                 self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
             self._heaterHealthCoolDownTimer.start()
-
-    def turnRightFanOnOff(self, state: bool) -> None:
-        self._devices.turnRightFanOnOff(state)
-
-    def turnLeftFanOnOff(self, state: bool) -> None:
-        self._devices.turnLeftFanOnOff(state)

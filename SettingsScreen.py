@@ -1,6 +1,3 @@
-from kivy.config import Config
-# Enable virtual keyboard - must be before other kivy imports
-Config.set('kivy', 'keyboard_mode', 'systemanddock')
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -9,19 +6,16 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from SaunaContext import SaunaContext
-from SaunaController import SaunaController
 
 class SettingsScreen(Screen):
     """Settings configuration screen"""
 
     _ctx: SaunaContext = None
-    _sc: SaunaController = None
 
-    def __init__(self, ctx: SaunaContext=None, sc: SaunaController=None, **kwargs):
+    def __init__(self, ctx: SaunaContext=None, **kwargs):
         super().__init__(**kwargs)
 
         self._ctx = ctx
-        self._sc = sc
 
         layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
 
@@ -106,7 +100,6 @@ class SettingsScreen(Screen):
         self._ctx.setCoolingGracePeriod(int(self.setting_inputs['Hot Room Cooling Grace Period (seconds)'].text))
         self._ctx.setLHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
         self._ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Health Check Cooldown Time (seconds)'].text))
-        # Save RS485 settings # TODO - reset connection
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
         self._ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
         self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout (seconds)'].text))
