@@ -26,7 +26,7 @@ class SaunaController:
 
     def run(self):
         # Start sauna control loop in background thread
-        saunaControllerThread = threading.Thread(target=self._run(), args=(), daemon=True)
+        saunaControllerThread = threading.Thread(target=self._run, args=(), daemon=True)
         saunaControllerThread.start()
 
     def _run(self):

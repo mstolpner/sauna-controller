@@ -35,10 +35,9 @@ class StatusIcon(Button):
 
 class MainScreen(Screen):
     """Main sauna control screen"""
-    def __init__(self, ctx=None, errorMgr: ErrorManager=None, sd: SaunaDevices=None, **kwargs):
+    def __init__(self, ctx=None, errorMgr: ErrorManager=None, **kwargs):
         super().__init__(**kwargs)
         self.ctx = ctx
-        self.sd = sd
         self.errorMgr = errorMgr
         self.active_preset = None
         self.preset_buttons = []

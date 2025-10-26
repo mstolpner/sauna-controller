@@ -28,6 +28,7 @@ class SaunaDevices:
     # Relay Module Configuration
     _relayModuleRs485SlaveId = 2
     _heaterCoilId = 0
+    # TODO add processing for hot room light
     _notUsedCoilId = 1
     _rightFanCoilId = 2
     _leftFanCoilId = 3
