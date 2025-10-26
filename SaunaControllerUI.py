@@ -378,14 +378,8 @@ class MainScreen(Screen):
         """Toggle preset button - activate selected, deactivate others"""
         clicked_btn = self.preset_buttons[preset_index]
 
-        # If clicking OFF button or already active preset, turn everything off
-        if clicked_btn.preset_temp == 0 or clicked_btn.is_active:
-            self.deactivate_all_presets()
-            print("All presets turned OFF")
-        else:
-            # Deactivate all presets first
-            self.deactivate_all_presets()
-
+        # If clicking already active preset, ignore
+        if not clicked_btn.is_active:
             # Activate clicked preset
             clicked_btn.is_active = True
             if clicked_btn.img:
@@ -395,18 +389,7 @@ class MainScreen(Screen):
             # Set target temperature based on preset
             self.ctx.setHotRoomTargetTempF(clicked_btn.preset_temp)
             # Also update the slider to reflect the new temperature
-            if hasattr(self, 'temp_slider'):
-                self.temp_slider.value = clicked_btn.preset_temp
-
-    # TODO
-    def deactivate_all_presets(self):
-        pass
-        """Deactivate all preset buttons"""
-        for btn in self.preset_buttons:
-            btn.is_active = False
-            if btn.img:
-                btn.img.source = btn.passive_img
-        self.active_preset = None
+            self.temp_slider.value = clicked_btn.preset_temp
 
     def set_temperature(self, temp):
         """Set target temperature (kept for compatibility)"""

@@ -96,8 +96,9 @@ class SaunaDevices:
 
     # Release resources on exit
     def _onExit(self):
-        if self._rs485Client:
-            self._rs485Client.close()
+        pass
+#        if self._rs485Client:
+#            self._rs485Client.close()
 
     # ---------------------------------------- Sauna Sensors ---------------------------------------
 

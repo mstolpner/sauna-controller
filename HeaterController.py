@@ -52,13 +52,17 @@ class HeaterController:
                 self._heaterHealthCoolDownTimer.start()
 
         # Allow for cooling grace period as a door might be open for a short period causing temperature to drop temporarily
-        elif not self._isHeaterOn and self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF() \
-           and self._coolingGracePeriodTimer.isActive():
-            # Wait for the grace cooling timer
-            pass
+        elif (not self._isHeaterOn and
+              self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+              and self._coolingGracePeriodTimer.isActive()):
+            # If sauna is On, do not wait grace cooling period
+            if self._ctx.isSaunaOn():
+                self._coolingGracePeriodTimer.stop()
 
         # Turn Heater Off if needed
-        elif self._isHeaterOn and self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() + self._ctx.getUpperHotRoomTempThresholdF():
+        elif (self._isHeaterOn and
+              self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() + self._ctx.getUpperHotRoomTempThresholdF()
+              and self._ctx.isSaunaOn()):
             self._sd.turnHeaterOff()
             self._isHeaterOn = False
             self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
@@ -67,7 +71,9 @@ class HeaterController:
             self._heaterHealthCoolDownTimer.start()
 
         # Turn Heater On if needed
-        elif not self._isHeaterOn and self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF():
+        elif (not self._isHeaterOn and
+              self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+              and self._ctx.isSaunaOn()):
             self._sd.turnHeaterOn()
             self._isHeaterOn = True
             self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
