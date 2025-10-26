@@ -39,6 +39,7 @@ class SettingsScreen(Screen):
             ('Hot Room Cooling Grace Period (seconds)', str(self._ctx.getCoolingGracePeriod())),
             ('Heater Health Check Warmup Time (seconds)', str(self._ctx.getHeaterHealthWarmUpTime())),
             ('Heater Health Check Cooldown Time (seconds)', str(self._ctx.getHeaterHealthCooldownTime())),
+            ('Turn Hot Room Light Off When Sauna is Off', str(not self._ctx.getHotRoomLightAlwaysOn())),
             ('RS485 Serial Port', self._ctx.getRs485SerialPort()),
             ('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate())),
             ('RS485 Timeout (seconds)', str(self._ctx.getRs485SerialTimeout())),
@@ -100,6 +101,9 @@ class SettingsScreen(Screen):
         self._ctx.setCoolingGracePeriod(int(self.setting_inputs['Hot Room Cooling Grace Period (seconds)'].text))
         self._ctx.setLHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
         self._ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Health Check Cooldown Time (seconds)'].text))
+        # Parse and save light setting (inverted logic: label asks about turning OFF, config is about always ON)
+        turn_off_when_sauna_off = self.setting_inputs['Turn Hot Room Light Off When Sauna is Off'].text.lower() == 'true'
+        self._ctx.setHotRoomLightAlwaysOn(not turn_off_when_sauna_off)
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
         self._ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
         self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout (seconds)'].text))

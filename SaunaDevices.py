@@ -29,10 +29,11 @@ class SaunaDevices:
     _relayModuleRs485SlaveId = 2
     _heaterCoilId = 0
     # TODO add processing for hot room light
-    _notUsedCoilId = 1
+    _hotRoomLightCoilId = 1
     _rightFanCoilId = 2
     _leftFanCoilId = 3
     _lastFanRelayStatus = [False, False]
+    _lastHotRoomLightOnStatus = False
 
     # Fan Module Configuration
     _fanControlModuleRs485SlaveId = 3
@@ -67,7 +68,7 @@ class SaunaDevices:
 #                                               retries=self._ctx.getRs485SerialRetries())
 #        self._rs485Client.connect()
         # Initialize Relay Module
-        self._setRelayStatus(self._notUsedCoilId, False)
+        self._setRelayStatus(self._hotRoomLightCoilId, False)
         # Initialize Fans
         if self.getNumberOfFans() != self._ctx.getNumberOfFans():
             self.setNumberOfFans(self._ctx.getNumberOfFans())
@@ -170,6 +171,24 @@ class SaunaDevices:
     def turnHeaterOff(self) -> None:
         self.setHeaterRelay(False)
         self._ctx.setHeaterOff()
+
+    def getHotRoomLightStatus(self) -> bool:
+        response = self._modbus_read_coils(self._hotRoomLightCoilId, self._relayModuleRs485SlaveId)
+        if response.isError():
+            self._errorMgr.raiseRelayModuleError('Cannot get Hot Room Light status.')
+        else:
+            self._errorMgr.eraseRelayModuleError()
+            self._lastHotRoomLightOnStatus = response.bits[self._hotRoomLightCoilId]
+        return self._lastHotRoomLightOnStatus
+
+    def turnHotRoomLightOnOff(self, status: bool) -> None:
+        response = self._modbus_write_coil(self._hotRoomLightCoilId, status, self._relayModuleRs485SlaveId)
+        if response.isError():
+            self._errorMgr.raiseRelayModuleError('Cannot Turn the Hot Room Light On or Off.')
+        else:
+            self._errorMgr.eraseRelayModuleError()
+            self._lastHotRoomLightOnStatus = status
+
 
     # ------------------------------------- Vent Fans Functions -------------------------------------
 

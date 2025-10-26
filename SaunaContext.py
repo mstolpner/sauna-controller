@@ -25,6 +25,8 @@ class SaunaContext:
     _numberOfFans = 2
     _leftFanOnStatus = False
     _rightFanOnStatus = True
+    _hotRoomLightAlwaysOn = False
+    _hotRoomLightOn = False
     # Dependencies
     _configObj = None
     _configFileName = 'sauna.ini'
@@ -66,6 +68,8 @@ class SaunaContext:
         self._configObj['fan_control']['number_of_fans'] = self._numberOfFans
         self._configObj['fan_control']['left_fan_on_status'] = self._leftFanOnStatus
         self._configObj['fan_control']['right_fan_on_status'] = self._rightFanOnStatus
+        self._configObj['hot_room_control'] = {}
+        self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
 
     # Save configuration on exit
     def _onExit(self):
@@ -238,3 +242,16 @@ class SaunaContext:
 
     def setTargetTempPresetHigh(self, tempF: int) -> None:
         self._configObj['hot_room_temp_control']['target_temp_preset_high'] = tempF
+
+    def getHotRoomLightAlwaysOn(self) -> bool:
+        return self._configObj['hot_room_control'].as_bool('hot_room_light_always_on')
+
+    def setHotRoomLightAlwaysOn(self, value: bool) -> None:
+        self._configObj['hot_room_control']['hot_room_light_always_on'] = value
+
+
+    def isHotRoomLightOn(self) -> bool:
+        return self._hotRoomLightOn
+
+    def setHotRoomLightOnOff(self, value: bool) -> None:
+        self._hotRoomLightOn = value

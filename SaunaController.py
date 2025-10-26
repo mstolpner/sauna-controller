@@ -39,4 +39,7 @@ class SaunaController:
             self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
             self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
             # TODO verify fan status and report error. Test fan control
+            self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+
+
             time.sleep(0.5)
