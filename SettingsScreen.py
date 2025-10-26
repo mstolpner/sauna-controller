@@ -39,7 +39,6 @@ class SettingsScreen(Screen):
             ('Hot Room Cooling Grace Period (seconds)', str(self._ctx.getCoolingGracePeriod())),
             ('Heater Health Check Warmup Time (seconds)', str(self._ctx.getHeaterHealthWarmUpTime())),
             ('Heater Health Check Cooldown Time (seconds)', str(self._ctx.getHeaterHealthCooldownTime())),
-            ('Turn Hot Room Light Off When Sauna is Off', str(not self._ctx.getHotRoomLightAlwaysOn())),
             ('RS485 Serial Port', self._ctx.getRs485SerialPort()),
             ('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate())),
             ('RS485 Timeout (seconds)', str(self._ctx.getRs485SerialTimeout())),
@@ -72,6 +71,35 @@ class SettingsScreen(Screen):
             self.setting_inputs[setting_name] = input_field
             settings_layout.add_widget(input_field)
 
+        # Add checkbox for Hot Room Light setting
+        light_label = Label(
+            text='Turn Hot Room Light Off When Sauna is Off',
+            font_size='16sp',
+            size_hint_y=None,
+            height=50,
+            halign='left',
+            valign='middle'
+        )
+        light_label.bind(size=light_label.setter('text_size'))
+        settings_layout.add_widget(light_label)
+
+        # Checkbox button
+        self.light_checkbox = Button(
+            size_hint=(None, None),
+            size=(45, 45),
+            background_normal='icons/checkbox-unchecked.png',
+            background_down='icons/checkbox-unchecked.png',
+            border=(0, 0, 0, 0)
+        )
+        # Set initial state based on config (inverted: label asks about turning OFF, config is about always ON)
+        self.light_checkbox.active = not self._ctx.getHotRoomLightAlwaysOn()
+        if self.light_checkbox.active:
+            self.light_checkbox.background_normal = 'icons/checkbox-checked.png'
+            self.light_checkbox.background_down = 'icons/checkbox-checked.png'
+        self.light_checkbox.bind(on_press=self.toggle_light_checkbox)
+
+        settings_layout.add_widget(self.light_checkbox)
+
         scroll_view.add_widget(settings_layout)
         layout.add_widget(scroll_view)
 
@@ -89,6 +117,16 @@ class SettingsScreen(Screen):
 
         self.add_widget(layout)
 
+    def toggle_light_checkbox(self, instance):
+        """Toggle light checkbox state"""
+        self.light_checkbox.active = not self.light_checkbox.active
+        if self.light_checkbox.active:
+            self.light_checkbox.background_normal = 'icons/checkbox-checked.png'
+            self.light_checkbox.background_down = 'icons/checkbox-checked.png'
+        else:
+            self.light_checkbox.background_normal = 'icons/checkbox-unchecked.png'
+            self.light_checkbox.background_down = 'icons/checkbox-unchecked.png'
+
     def save_settings(self, instance):
         """Save all settings"""
         print("Saving settings:")
@@ -101,9 +139,8 @@ class SettingsScreen(Screen):
         self._ctx.setCoolingGracePeriod(int(self.setting_inputs['Hot Room Cooling Grace Period (seconds)'].text))
         self._ctx.setLHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
         self._ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Health Check Cooldown Time (seconds)'].text))
-        # Parse and save light setting (inverted logic: label asks about turning OFF, config is about always ON)
-        turn_off_when_sauna_off = self.setting_inputs['Turn Hot Room Light Off When Sauna is Off'].text.lower() == 'true'
-        self._ctx.setHotRoomLightAlwaysOn(not turn_off_when_sauna_off)
+        # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)
+        self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
         self._ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
         self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout (seconds)'].text))
