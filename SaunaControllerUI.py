@@ -1,13 +1,9 @@
 import os
-
+from datetime import datetime
 from kivy.config import Config
-Config.set('kivy', 'log_level', 'warning')
-from kivy.uix.boxlayout import BoxLayout
-Config.write()
-
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.image import Image
@@ -17,9 +13,7 @@ from kivy.graphics import Color, Line
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
-from datetime import datetime
 from ErrorManager import ErrorManager
-from SaunaDevices import SaunaDevices
 from SettingsScreen import SettingsScreen
 from FanScreen import FanScreen
 from WiFiScreen import WiFiScreen
@@ -43,6 +37,9 @@ class MainScreen(Screen):
     """Main sauna control screen"""
     def __init__(self, ctx=None, errorMgr: ErrorManager=None, **kwargs):
         super().__init__(**kwargs)
+        # Set kivy log level
+        Config.set('kivy', 'log_level', 'warning')
+        Config.write()
         # Dependencies
         self.ctx = ctx
         self.errorMgr = errorMgr
@@ -385,18 +382,16 @@ class MainScreen(Screen):
         """Toggle preset button - activate selected, deactivate others"""
         clicked_btn = self.preset_buttons[preset_index]
 
-        # If clicking already active preset, ignore
-        if not clicked_btn.is_active:
-            # Activate clicked preset
-            clicked_btn.is_active = True
-            if clicked_btn.img:
-                clicked_btn.img.source = clicked_btn.active_img
-            self.active_preset = preset_index
+        # Activate clicked preset
+        clicked_btn.is_active = True
+        if clicked_btn.img:
+            clicked_btn.img.source = clicked_btn.active_img
+        self.active_preset = preset_index
 
-            # Set target temperature based on preset
-            self.ctx.setHotRoomTargetTempF(clicked_btn.preset_temp)
-            # Also update the slider to reflect the new temperature
-            self.temp_slider.value = clicked_btn.preset_temp
+        # Set target temperature based on preset
+        self.ctx.setHotRoomTargetTempF(clicked_btn.preset_temp)
+        # Also update the slider to reflect the new temperature
+        self.temp_slider.value = clicked_btn.preset_temp
 
     def set_temperature(self, temp):
         """Set target temperature (kept for compatibility)"""
