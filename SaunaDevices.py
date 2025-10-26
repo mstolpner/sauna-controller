@@ -16,7 +16,7 @@ class SaunaDevices:
     _ctx = None
 
     # RS485 Client
-    _rs485Client = None
+#    _rs485Client = None
 
     # Sensor Module Configuration
     _sensorModuleRs485SlaveId = 1
@@ -378,7 +378,7 @@ class SaunaDevices:
                 return DummyErrorResponse()
         return asyncio.run(_read())
 
-
+"""
     def _modbus_read_holding_registers_sync(self, address: int, slave: int, count: int=1):
         try:
             response = self._rs485Client.read_holding_registers(address, count=1, slave=slave)
@@ -414,3 +414,4 @@ class SaunaDevices:
         except ModbusException as e:
             self._errorMgr.raiseModbusError(e)
             return DummyErrorResponse()
+"""

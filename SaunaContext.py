@@ -83,6 +83,9 @@ class SaunaContext:
     def turnSaunaOff(self) -> None:
         self._isSaunaOn = False
 
+    def turnSaunaOnOff(self, state: bool) -> None:
+        self._isSaunaOn = state
+
     def isHeaterOn(self) -> bool:
         return self._isHeaterOn
 

@@ -169,8 +169,8 @@ class MainScreen(Screen):
         preset_stack = BoxLayout(orientation='vertical', spacing=20, size_hint_y=None, height=180)
 
         # Get preset temperatures from context
-        preset_high_temp = self.ctx.getTargetTempPresetHigh() if self.ctx else 200
-        preset_medium_temp = self.ctx.getTargetTempPresetMedium() if self.ctx else 180
+        preset_high_temp = self.ctx.getTargetTempPresetHigh()
+        preset_medium_temp = self.ctx.getTargetTempPresetMedium()
 
         presets = [
             ('High', preset_high_temp, 'icons/preset_high.png', 'icons/preset_high.png'),
@@ -225,7 +225,6 @@ class MainScreen(Screen):
 
         # Temperature value
         target_temp = self.ctx.getHotRoomTargetTempF() if self.ctx else 190
-
         self.target_temp_label = Label(
             text=f'{target_temp}°F',
             font_size='135sp',
@@ -272,8 +271,6 @@ class MainScreen(Screen):
 
         # Temperature slider at the bottom
         slider_container = BoxLayout(orientation='vertical', size_hint_y=0.1, padding=[40, 10], spacing=10)
-
-        # Temperature slider
         initial_temp = self.ctx.getHotRoomTargetTempF() if self.ctx else 190
         max_temp = self.ctx.getHotRoomMaxTempF() if self.ctx else 250
         self.temp_slider = Slider(
@@ -284,9 +281,7 @@ class MainScreen(Screen):
         )
         self.temp_slider.bind(value=self.on_slider_change)
         slider_container.add_widget(self.temp_slider)
-
         layout.add_widget(slider_container)
-
         self.add_widget(layout)
 
         # Update sensor readings every 2 seconds
@@ -311,20 +306,19 @@ class MainScreen(Screen):
 
     def update_temperature_display(self):
         """Update temperature display based on current unit"""
-        if self.ctx:
-            temp_f = self.ctx.getHotRoomTempF()
-            target_temp_f = self.ctx.getHotRoomTargetTempF()
+        temp_f = self.ctx.getHotRoomTempF()
+        target_temp_f = self.ctx.getHotRoomTargetTempF()
 
-            if self.temp_unit == 'F':
-                self.temp_label.text = f'{int(temp_f)}°F'
-                if hasattr(self, 'target_temp_label'):
-                    self.target_temp_label.text = f'{int(target_temp_f)}°F'
-            else:
-                temp_c = (temp_f - 32) * 5 / 9
-                self.temp_label.text = f'{int(temp_c)}°C'
-                if hasattr(self, 'target_temp_label'):
-                    target_temp_c = (target_temp_f - 32) * 5 / 9
-                    self.target_temp_label.text = f'{int(target_temp_c)}°C'
+        if self.temp_unit == 'F':
+            self.temp_label.text = f'{int(temp_f)}°F'
+            if hasattr(self, 'target_temp_label'):
+                self.target_temp_label.text = f'{int(target_temp_f)}°F'
+        else:
+            temp_c = (temp_f - 32) * 5 / 9
+            self.temp_label.text = f'{int(temp_c)}°C'
+            if hasattr(self, 'target_temp_label'):
+                target_temp_c = (target_temp_f - 32) * 5 / 9
+                self.target_temp_label.text = f'{int(target_temp_c)}°C'
 
     def update_sensors(self, dt):
         """Update sensor readings from SaunaContext"""
@@ -365,37 +359,20 @@ class MainScreen(Screen):
 
     def toggle_sauna(self, instance):
         """Toggle sauna heater on/off"""
-        if self.ctx:
-            if self.ctx.isSaunaOn():
-                self.ctx.turnSaunaOff()
-                print("Sauna turned OFF")
-            else:
-                self.ctx.turnSaunaOn()
-                print("Sauna turned ON")
-            self.update_sauna_button()
+        self.ctx.turnSaunaOnOff(self.ctx.isSaunaOff())
+        self.update_sauna_button()
 
     def update_sauna_button(self):
         """Update heater button appearance based on sauna state"""
-        if self.ctx and hasattr(self, 'sauna_btn'):
-            if self.ctx.isSaunaOn():
-                # Sauna is on - use active image
-                self.sauna_btn.img.source = self.sauna_active_img_path
-            else:
-                # Sauna is off - use passive image
-                self.sauna_btn.img.source = self.sauna_passive_img_path
+        if self.ctx.isSaunaOn():
+            self.sauna_btn.img.source = self.sauna_active_img_path
+        else:
+            self.sauna_btn.img.source = self.sauna_passive_img_path
 
     def on_slider_change(self, instance, value):
         """Handle temperature slider value change"""
-        if self.ctx:
-            self.ctx.setHotRoomTargetTempF(int(value))
-            # Update the target temperature display immediately
-            if hasattr(self, 'target_temp_label'):
-                if self.temp_unit == 'F':
-                    self.target_temp_label.text = f'{int(value)}°F'
-                else:
-                    temp_c = (value - 32) * 5 / 9
-                    self.target_temp_label.text = f'{int(temp_c)}°C'
-            print(f"Target temperature set to {int(value)}°F")
+        self.ctx.setHotRoomTargetTempF(int(value))
+        self.update_temperature_display()
 
     def toggle_preset(self, preset_index):
         """Toggle preset button - activate selected, deactivate others"""
