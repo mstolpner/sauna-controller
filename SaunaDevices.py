@@ -165,9 +165,11 @@ class SaunaDevices:
 
     def turnHeaterOn(self) -> None:
         self.setHeaterRelay(True)
+        self._ctx.setHeaterOn()
 
     def turnHeaterOff(self) -> None:
         self.setHeaterRelay(False)
+        self._ctx.setHeaterOff()
 
     # ------------------------------------- Vent Fans Functions -------------------------------------
 
