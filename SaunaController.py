@@ -1,10 +1,10 @@
+import atexit
 import threading
 import time
 
 from ErrorManager import ErrorManager
 from HeaterController import HeaterController
 from SaunaContext import SaunaContext
-from SaunaControllerUI import SaunaControlApp
 from SaunaDevices import SaunaDevices
 
 
@@ -20,7 +20,14 @@ class SaunaController:
         self._errorMgr = errorMgr
         self._sd = SaunaDevices(self._ctx, self._errorMgr)
         self._hc = HeaterController(self._ctx, self._sd, self._errorMgr)
+        # Ensure safe exit
+        atexit.register(self._onExit)
 
+    def _onExit(self):
+        self._ctx.turnSaunaOff()
+        self._sd.turnHeaterOff()
+        # Give it a chance to turn heater off
+        time.sleep(10)
 
     # ----------------------------------- Sauna Controller Run Methods ------------------------------------
 

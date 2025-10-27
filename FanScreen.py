@@ -18,20 +18,22 @@ class FanScreen(Screen):
         layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
 
         # Header
-        header = BoxLayout(size_hint_y=0.15)
+        header = BoxLayout(size_hint_y=0.10)
         header.add_widget(Label(text='Fan Configuration', font_size='30sp', bold=True))
         layout.add_widget(header)
 
         # Fan controls - top third of screen
-        fan_layout = BoxLayout(orientation='vertical', spacing=60, size_hint_y=0.33, padding=[0, 40, 0, 0])
+        fan_layout = BoxLayout(orientation='vertical', spacing=60, size_hint_y=0.20, padding=[0, 10, 0, 0])
 
         # Make label clickable
         class ClickableLabel(ButtonBehavior, Label):
             pass
 
+        # Both fans in one horizontal row
+        fans_box = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=45)
+        fans_box.add_widget(Label(size_hint_x=0.15))  # Left spacer - 15% from left
+
         # Left Fan
-        left_fan_box = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=45)
-        left_fan_box.add_widget(Label(size_hint_x=0.15))  # Left spacer - 15% from left
         self.left_fan_btn = Button(
             size_hint=(None, None),
             size=(45, 45),
@@ -46,17 +48,15 @@ class FanScreen(Screen):
             self.left_fan_btn.background_normal = 'icons/checkbox-checked.png'
             self.left_fan_btn.background_down = 'icons/checkbox-checked.png'
         self.left_fan_btn.bind(on_press=self.toggle_left_fan)
-        left_fan_box.add_widget(self.left_fan_btn)
-        left_label = ClickableLabel(text='Left Fan', font_size='30sp', bold=True, halign='left', size_hint_x=1)
+        fans_box.add_widget(self.left_fan_btn)
+
+        left_label = ClickableLabel(text='Left Fan', font_size='30sp', bold=True, halign='left', size_hint_x=0.4)
         left_label.text_size = (left_label.width, None)
         left_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
         left_label.bind(on_press=self.toggle_left_fan)
-        left_fan_box.add_widget(left_label)
-        fan_layout.add_widget(left_fan_box)
+        fans_box.add_widget(left_label)
 
         # Right Fan
-        right_fan_box = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=45)
-        right_fan_box.add_widget(Label(size_hint_x=0.15))  # Left spacer - 15% from left
         self.right_fan_btn = Button(
             size_hint=(None, None),
             size=(45, 45),
@@ -71,17 +71,19 @@ class FanScreen(Screen):
             self.right_fan_btn.background_normal = 'icons/checkbox-checked.png'
             self.right_fan_btn.background_down = 'icons/checkbox-checked.png'
         self.right_fan_btn.bind(on_press=self.toggle_right_fan)
-        right_fan_box.add_widget(self.right_fan_btn)
-        right_label = ClickableLabel(text='Right Fan', font_size='30sp', bold=True, halign='left', size_hint_x=1)
+        fans_box.add_widget(self.right_fan_btn)
+
+        right_label = ClickableLabel(text='Right Fan', font_size='30sp', bold=True, halign='left', size_hint_x=0.4)
         right_label.text_size = (right_label.width, None)
         right_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
         right_label.bind(on_press=self.toggle_right_fan)
-        right_fan_box.add_widget(right_label)
-        fan_layout.add_widget(right_fan_box)
+        fans_box.add_widget(right_label)
+
+        fan_layout.add_widget(fans_box)
         layout.add_widget(fan_layout)
 
         # Fan Speed Control
-        speed_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.20, padding=[60, 20, 60, 0])
+        speed_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 10, 60, 0])
         speed_label = Label(
             text='Fan Speed',
             font_size='30sp',
@@ -96,7 +98,7 @@ class FanScreen(Screen):
             min=0,
             max=100,
             value=initial_speed,
-            step=1,
+            step=5,
             size_hint_y=0.4
         )
         self.speed_slider.bind(value=self.on_speed_change)
@@ -112,7 +114,7 @@ class FanScreen(Screen):
         layout.add_widget(speed_layout)
 
         # Fan Running Time After Sauna Off Control
-        runtime_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.20, padding=[60, 20, 60, 0])
+        runtime_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 10, 60, 0])
         runtime_label = Label(
             text='Time to keep fan running after sauna is off, hrs',
             font_size='24sp',
@@ -125,9 +127,9 @@ class FanScreen(Screen):
         initial_runtime = self._ctx.getFanRunningTimeAfterSaunaOffHrs() if self._ctx else 0.5
         self.runtime_slider = Slider(
             min=0,
-            max=10,
+            max=12,
             value=initial_runtime,
-            step=0.25,
+            step=0.5,
             size_hint_y=0.4
         )
         self.runtime_slider.bind(value=self.on_runtime_change)
@@ -143,7 +145,7 @@ class FanScreen(Screen):
         layout.add_widget(runtime_layout)
 
         # Spacer to push OK button up from bottom
-        layout.add_widget(Label(size_hint_y=0.05))
+        layout.add_widget(Label(size_hint_y=0.20))
 
         # OK button
         ok_btn = Button(
@@ -184,15 +186,15 @@ class FanScreen(Screen):
         """Handle fan speed slider change"""
         speed_pct = int(value)
         self.speed_value_label.text = f'{speed_pct}%'
-        self._ctx.setFanSpeedPct(speed_pct)
 
     def on_runtime_change(self, instance, value):
         """Handle fan running time slider change"""
         runtime_hrs = value
         self.runtime_value_label.text = f'{runtime_hrs:.2f} hrs'
-        self._ctx.setFanRunningTimeAfterSaunaOffHrs(runtime_hrs)
 
     def on_ok(self, instance):
         self._ctx.setRightFanOnStatus(self.right_fan_btn.active)
         self._ctx.setLeftFanOnStatus(self.left_fan_btn.active)
+        self._ctx.setFanSpeedPct(self.speed_slider.value)
+        self._ctx.setFanRunningTimeAfterSaunaOffHrs(self.runtime_slider.value)
         self.manager.current = 'main'

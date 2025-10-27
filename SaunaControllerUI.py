@@ -90,7 +90,7 @@ class MainScreen(Screen):
         layout.add_widget(self.status_bar)
 
         # Spacer to push content down
-        layout.add_widget(Label(size_hint_y=0.12))
+        layout.add_widget(Label(size_hint_y=0.05))
 
         # Clock row
         clock_row = BoxLayout(size_hint_y=0.15, spacing=5)
@@ -112,7 +112,7 @@ class MainScreen(Screen):
         layout.add_widget(Label(size_hint_y=0.10))
 
         # Temperature and Humidity Display
-        sensor_layout = BoxLayout(orientation='vertical', size_hint_y=0.35, spacing=20)
+        sensor_layout = BoxLayout(orientation='vertical', size_hint_y=0.35, spacing=5)
 
         # Large temperature display - takes full row - touchable to toggle C/F
         temp_display = '0°F' if not self.ctx else f'{int(self.ctx.getHotRoomTempF())}°F'
@@ -122,7 +122,7 @@ class MainScreen(Screen):
 
         self.temp_label = TouchableLabel(
             text=temp_display,
-            font_size='200sp',
+            font_size='240sp',
             bold=True,
             color=(1, 0.5, 0, 1),
             size_hint_y=0.50
@@ -135,19 +135,20 @@ class MainScreen(Screen):
         humidity_outer = BoxLayout(orientation='vertical', size_hint_y=0.50)
 
         # Top spacer to push humidity down
-        humidity_outer.add_widget(Label(size_hint_y=0.3))
+        humidity_outer.add_widget(Label(size_hint_y=0.0))
 
-        humidity_container = BoxLayout(orientation='horizontal', size_hint_y=0.7)
+        humidity_container = BoxLayout(orientation='horizontal', size_hint_y=1.0)
         humidity_container.add_widget(Label())  # Left spacer
 
-        humidity_row = BoxLayout(orientation='horizontal', size_hint_x=None, spacing=20)
+        humidity_row = BoxLayout(orientation='horizontal', size_hint_x=None, spacing=0)
         humidity_row.bind(minimum_width=humidity_row.setter('width'))
 
         # Water drop icon
         humidity_icon = Image(
             source='icons/waterdrop.png',
             size_hint=(None, None),
-            size=(100, 100)
+            size=(70, 70),
+            pos_hint={'center_y': 0.5}
         )
         humidity_row.add_widget(humidity_icon)
 
@@ -155,12 +156,12 @@ class MainScreen(Screen):
         humidity_display = '0%' if not self.ctx else f'{int(self.ctx.getHotRoomHumidity())}%'
         self.humidity_label = Label(
             text=humidity_display,
-            font_size='120sp',
+            font_size='90sp',
             color=(0.5, 0.8, 1, 1),
             size_hint_x=None,
-            width=300,
+            width=250,
             halign='center',
-            valign='middle'
+            valign='center'
         )
         self.humidity_label.bind(size=self.humidity_label.setter('text_size'))
         humidity_row.add_widget(self.humidity_label)

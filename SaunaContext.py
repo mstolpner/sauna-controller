@@ -204,7 +204,7 @@ class SaunaContext:
         return self._configObj['fan_control'].as_int('fan_speed_pct')
 
     def setFanSpeedPct(self, fanSpeedPct: int) -> None:
-        self._configObj['fan_control']['fan_speed_pct'] = fanSpeedPct
+        self._configObj['fan_control']['fan_speed_pct'] = int(fanSpeedPct)
 
     def getNumberOfFans(self) -> int:
         return self._configObj['fan_control'].as_int('number_of_fans')
@@ -301,12 +301,12 @@ class SaunaContext:
             self._configObj['appearance'] = {}
         self._configObj['appearance']['screen_rotation'] = rotation
 
-    def getFanRunningTimeAfterSaunaOffHrs(self) -> float:
+    def getFanRunningTimeAfterSaunaOffHrs(self) -> int:
         try:
-            return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')
+            return self._configObj['fan_control'].as_int('running_time_after_sauna_off_hrs')
         except KeyError:
             self.setFanRunningTimeAfterSaunaOffHrs(self._fanRunningTimeAfterSaunaOffHrs)
             return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')
 
-    def setFanRunningTimeAfterSaunaOffHrs(self, hours: float) -> None:
-        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = hours
+    def setFanRunningTimeAfterSaunaOffHrs(self, hours: int) -> None:
+        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = int(hours)
