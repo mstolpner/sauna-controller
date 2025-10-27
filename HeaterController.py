@@ -41,10 +41,6 @@ class HeaterController:
         self._ctx.setHotRoomTempF(self._sd.getHotRoomTemperature('F'))
         self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
 
-        # TODO remove debug
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Sauna is ' + str(self._ctx.isSaunaOn()) + '. Heater is ' +  str(self._isHeaterOn)
-              + '. T: ' + str(self._ctx.getHotRoomTempF()) + 'F' + '\r', end='')
-
         # If sauna is off, ensure the heater is off.
         if self._ctx.isSaunaOff():
             if self._isHeaterOn:
