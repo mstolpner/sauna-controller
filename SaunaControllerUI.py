@@ -10,7 +10,7 @@ from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.slider import Slider
 from kivy.clock import Clock
-from kivy.graphics import Color, Line
+from kivy.graphics import Color, Line, Rectangle
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
@@ -42,6 +42,12 @@ class MainScreen(Screen):
 
     def __init__(self, ctx=None, errorMgr: ErrorManager=None, **kwargs):
         super().__init__(**kwargs)
+
+        # Set deep dark grey background
+        with self.canvas.before:
+            Color(0.1, 0.1, 0.1, 1)  # Deep dark grey
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self._update_bg, size=self._update_bg)
 
         # Set kivy log level
         Config.set('kivy', 'log_level', 'warning')
@@ -260,7 +266,7 @@ class MainScreen(Screen):
         preset_layout.add_widget(target_temp_wrapper)
 
         # Column 3: Sauna button
-        sauna_btn = ImageButton(size_hint_x=0.35)
+        sauna_btn = ImageButton(size_hint_x=0.23)
         self.sauna_passive_img_path = 'icons/sauna_off.png'
         self.sauna_active_img_path = 'icons/sauna_on.png'
 
@@ -433,6 +439,11 @@ class MainScreen(Screen):
 
     def open_errors_screen(self, instance):
         self.manager.current = 'errors'
+
+    def _update_bg(self, instance, value):
+        """Update background rectangle size and position"""
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
 
 
 class SaunaControlApp(App):
