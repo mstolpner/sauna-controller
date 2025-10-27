@@ -5,7 +5,6 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 
 
-# TODO add error count in ErrorManager and here
 class ErrorsScreen(Screen):
     """Errors display screen"""
     def __init__(self, errorMgr=None, **kwargs):

@@ -8,6 +8,7 @@ from SaunaContext import SaunaContext
 
 
 class FanScreen(Screen):
+
     _ctx: SaunaContext = None
 
     def __init__(self, ctx: SaunaContext = None, **kwargs):
@@ -25,7 +26,6 @@ class FanScreen(Screen):
         fan_layout = BoxLayout(orientation='vertical', spacing=60, size_hint_y=0.33, padding=[0, 40, 0, 0])
 
         # Make label clickable
-        # TODO test if moving outside of init works
         class ClickableLabel(ButtonBehavior, Label):
             pass
 
