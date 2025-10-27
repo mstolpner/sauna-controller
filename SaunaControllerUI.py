@@ -235,7 +235,7 @@ class MainScreen(Screen):
             orientation='vertical',
             size_hint=(None, None),
             size=(400, 180),
-            pos_hint={'center_x': 0.55, 'center_y': 0.5}
+            pos_hint={'center_x': 0.50, 'center_y': 0.5}
         )
 
         # Temperature value
