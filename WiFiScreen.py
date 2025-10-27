@@ -7,7 +7,6 @@ from kivy.uix.textinput import TextInput
 
 
 class WiFiScreen(Screen):
-    """WiFi configuration screen"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -49,6 +48,7 @@ class WiFiScreen(Screen):
         # Left spacer to center buttons
         buttons_row.add_widget(Label())
 
+        # Connect button
         connect_btn = Button(
             text='Connect',
             font_size='24sp',
@@ -59,6 +59,7 @@ class WiFiScreen(Screen):
         connect_btn.bind(on_press=self.connect_wifi)
         buttons_row.add_widget(connect_btn)
 
+        # Ok button
         ok_btn = Button(
             text='OK',
             font_size='24sp',
@@ -71,20 +72,19 @@ class WiFiScreen(Screen):
 
         # Right spacer to center buttons
         buttons_row.add_widget(Label())
-
         settings_layout.add_widget(buttons_row)
 
         # Small spacer at bottom
         settings_layout.add_widget(Label(size_hint_y=None, height=20))
-
         layout.add_widget(settings_layout)
+
         self.add_widget(layout)
 
     def connect_wifi(self, instance):
         ssid = self.ssid_input.text
         password = self.pwd_input
         self.status_label.text = f'Connecting to {ssid}...'
-        """Set WiFi using NetworkManager"""
+        # Set WiFi using NetworkManager
         try:
             # Check if connection already exists
             check_cmd = f"nmcli connection show '{ssid}'"
@@ -97,11 +97,13 @@ class WiFiScreen(Screen):
                 # Create new connection
                 cmd = f"nmcli device wifi connect '{ssid}' password '{password}'"
                 subprocess.run(cmd, shell=True, check=True)
+
             # Activate the connection
             activate_cmd = f"nmcli connection up '{ssid}'"
             subprocess.run(activate_cmd, shell=True, check=True)
             self.status_label.color((0, 1, 0, 1))
             self.status_label.text = f'Connected to {ssid}...'
+
         except subprocess.CalledProcessError as e:
             self.status_label.color((1, 0, 0, 1))
             self.status_label.text = f'Could not connect to {ssid}...'

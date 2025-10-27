@@ -21,11 +21,14 @@ from WiFiScreen import WiFiScreen
 from ErrorsScreen import ErrorsScreen
 
 # Set window size for Raspberry Pi touchscreen (portrait)
+# TODO move to SaunaContext persisted
 Window.size = (800, 1280)
 Window.rotation = 270
 
+
+# Custom status icon button with image
 class StatusIcon(Button):
-    """Custom status icon button with image"""
+
     def __init__(self, icon_image, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
@@ -34,13 +37,16 @@ class StatusIcon(Button):
         self.background_down = icon_image
         self.border = (0, 0, 0, 0)
 
+
 class MainScreen(Screen):
-    """Main sauna control screen"""
+
     def __init__(self, ctx=None, errorMgr: ErrorManager=None, **kwargs):
         super().__init__(**kwargs)
+
         # Set kivy log level
         Config.set('kivy', 'log_level', 'warning')
         Config.write()
+
         # Dependencies
         self.ctx = ctx
         self.errorMgr = errorMgr
@@ -158,7 +164,7 @@ class MainScreen(Screen):
         
         layout.add_widget(sensor_layout)
 
-        # Preset Temperature Buttons - 3 columns: [High/Medium stacked], [Target Temp], [OFF]
+        # Preset Temperature Buttons - 3 columns: [High/Medium stacked], [Target Temp], [Sauna On/Off]
         preset_layout = BoxLayout(orientation='horizontal', size_hint_y=0.3, spacing=5, padding=[0, 0])
 
         # Use FloatLayout as button base
@@ -253,10 +259,10 @@ class MainScreen(Screen):
         target_temp_wrapper.add_widget(target_temp_container)
         preset_layout.add_widget(target_temp_wrapper)
 
-        # Column 3: Heater button
+        # Column 3: Sauna button
         sauna_btn = ImageButton(size_hint_x=0.35)
-        self.sauna_passive_img_path = 'icons/passive.png'
-        self.sauna_active_img_path = 'icons/active.png'
+        self.sauna_passive_img_path = 'icons/sauna_off.png'
+        self.sauna_active_img_path = 'icons/sauna_on.png'
 
         sauna_btn.img = Image(
             source=self.sauna_passive_img_path,
@@ -426,12 +432,11 @@ class MainScreen(Screen):
         self.manager.current = 'settings'
 
     def open_errors_screen(self, instance):
-        """Open errors screen to display error details"""
         self.manager.current = 'errors'
 
 
 class SaunaControlApp(App):
-    """Main application class"""
+
     def __init__(self, ctx=None, errorMgr=None, **kwargs):
         super().__init__(**kwargs)
         self.ctx = ctx

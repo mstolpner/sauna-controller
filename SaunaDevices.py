@@ -7,6 +7,7 @@ from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
 
 
+# TODO try moving it just before the methods inside the class
 class DummyErrorResponse():
     def isError(self):
         return True
@@ -337,7 +338,8 @@ class SaunaDevices:
 
 # ----------------------------------- RS485 Modbus Helpers -------------------------------------
 
-
+#TODO try to use different speed with thermometer and other clients
+#TODO add configuration routines for thermometer and fan module
     def _modbus_read_holding_registers(self, address: int, slave: int, count: int=1):
         async def _read():
             try:

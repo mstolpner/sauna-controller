@@ -1,9 +1,8 @@
-import time
 from SaunaContext import SaunaContext
 from SaunaDevices import SaunaDevices
 from ErrorManager import ErrorManager
 from Timer import Timer
-from datetime import datetime
+
 
 class HeaterController:
 
