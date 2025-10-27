@@ -70,8 +70,6 @@ class MainScreen(Screen):
 
         self.errors_icon = StatusIcon('icons/errors.png')
         self.errors_icon.bind(on_press=self.open_errors_screen)
-        self.errors_icon.background_color = (1, 0, 0, 1)  # Red when errors present
-        # Don't add errors icon yet - will be added only when there are errors
 
         layout.add_widget(self.status_bar)
 
