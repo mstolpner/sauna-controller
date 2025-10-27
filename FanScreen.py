@@ -111,8 +111,39 @@ class FanScreen(Screen):
         speed_layout.add_widget(self.speed_value_label)
         layout.add_widget(speed_layout)
 
+        # Fan Running Time After Sauna Off Control
+        runtime_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.20, padding=[60, 20, 60, 0])
+        runtime_label = Label(
+            text='Time to keep fan running after sauna is off, hrs',
+            font_size='24sp',
+            bold=True,
+            size_hint_y=0.3
+        )
+        runtime_layout.add_widget(runtime_label)
+
+        # Fan running time slider
+        initial_runtime = self._ctx.getFanRunningTimeAfterSaunaOffHrs() if self._ctx else 0.5
+        self.runtime_slider = Slider(
+            min=0,
+            max=10,
+            value=initial_runtime,
+            step=0.25,
+            size_hint_y=0.4
+        )
+        self.runtime_slider.bind(value=self.on_runtime_change)
+        runtime_layout.add_widget(self.runtime_slider)
+
+        # Runtime value display
+        self.runtime_value_label = Label(
+            text=f'{initial_runtime:.2f} hrs',
+            font_size='24sp',
+            size_hint_y=0.3
+        )
+        runtime_layout.add_widget(self.runtime_value_label)
+        layout.add_widget(runtime_layout)
+
         # Spacer to push OK button up from bottom
-        layout.add_widget(Label(size_hint_y=0.25))
+        layout.add_widget(Label(size_hint_y=0.05))
 
         # OK button
         ok_btn = Button(
@@ -154,6 +185,12 @@ class FanScreen(Screen):
         speed_pct = int(value)
         self.speed_value_label.text = f'{speed_pct}%'
         self._ctx.setFanSpeedPct(speed_pct)
+
+    def on_runtime_change(self, instance, value):
+        """Handle fan running time slider change"""
+        runtime_hrs = value
+        self.runtime_value_label.text = f'{runtime_hrs:.2f} hrs'
+        self._ctx.setFanRunningTimeAfterSaunaOffHrs(runtime_hrs)
 
     def on_ok(self, instance):
         self._ctx.setRightFanOnStatus(self.right_fan_btn.active)

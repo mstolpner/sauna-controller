@@ -27,6 +27,10 @@ class SaunaContext:
     _rightFanOnStatus = True
     _hotRoomLightAlwaysOn = False
     _hotRoomLightOn = False
+    _screenWidth = 800
+    _screenHeight = 1280
+    _screenRotation = 270
+    _fanRunningTimeAfterSaunaOffHrs = 0.5
     # Dependencies
     _configObj = None
     _configFileName = 'sauna.ini'
@@ -68,8 +72,13 @@ class SaunaContext:
         self._configObj['fan_control']['number_of_fans'] = self._numberOfFans
         self._configObj['fan_control']['left_fan_on_status'] = self._leftFanOnStatus
         self._configObj['fan_control']['right_fan_on_status'] = self._rightFanOnStatus
+        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = self._fanRunningTimeAfterSaunaOffHrs
         self._configObj['hot_room_control'] = {}
         self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
+        self._configObj['appearance'] = {}
+        self._configObj['appearance']['screen_width'] = self._screenWidth
+        self._configObj['appearance']['screen_height'] = self._screenHeight
+        self._configObj['appearance']['screen_rotation'] = self._screenRotation
 
     # Save configuration on exit
     def _onExit(self):
@@ -255,3 +264,49 @@ class SaunaContext:
 
     def setHotRoomLightOnOff(self, value: bool) -> None:
         self._hotRoomLightOn = value
+
+    def getScreenWidth(self) -> int:
+        try:
+            return self._configObj['appearance'].as_int('screen_width')
+        except KeyError:
+            self.setScreenWidth(self._screenWidth)
+            return self._configObj['appearance'].as_int('screen_width')
+
+    def setScreenWidth(self, width: int) -> None:
+        if 'appearance' not in self._configObj:
+            self._configObj['appearance'] = {}
+        self._configObj['appearance']['screen_width'] = width
+
+    def getScreenHeight(self) -> int:
+        try:
+            return self._configObj['appearance'].as_int('screen_height')
+        except KeyError:
+            self.setScreenHeight(self._screenHeight)
+            return self._configObj['appearance'].as_int('screen_height')
+
+    def setScreenHeight(self, height: int) -> None:
+        if 'appearance' not in self._configObj:
+            self._configObj['appearance'] = {}
+        self._configObj['appearance']['screen_height'] = height
+
+    def getScreenRotation(self) -> int:
+        try:
+            return self._configObj['appearance'].as_int('screen_rotation')
+        except KeyError:
+            self.setScreenRotation(self._screenRotation)
+            return self._configObj['appearance'].as_int('screen_rotation')
+
+    def setScreenRotation(self, rotation: int) -> None:
+        if 'appearance' not in self._configObj:
+            self._configObj['appearance'] = {}
+        self._configObj['appearance']['screen_rotation'] = rotation
+
+    def getFanRunningTimeAfterSaunaOffHrs(self) -> float:
+        try:
+            return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')
+        except KeyError:
+            self.setFanRunningTimeAfterSaunaOffHrs(self._fanRunningTimeAfterSaunaOffHrs)
+            return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')
+
+    def setFanRunningTimeAfterSaunaOffHrs(self, hours: float) -> None:
+        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = hours

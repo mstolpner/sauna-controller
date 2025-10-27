@@ -19,11 +19,10 @@ from SettingsScreen import SettingsScreen
 from FanScreen import FanScreen
 from WiFiScreen import WiFiScreen
 from ErrorsScreen import ErrorsScreen
+from SaunaContext import SaunaContext
+from ErrorManager import ErrorManager
 
 # Set window size for Raspberry Pi touchscreen (portrait)
-# TODO move to SaunaContext persisted
-Window.size = (800, 1280)
-Window.rotation = 270
 
 
 # Custom status icon button with image
@@ -40,7 +39,11 @@ class StatusIcon(Button):
 
 class MainScreen(Screen):
 
-    def __init__(self, ctx=None, errorMgr: ErrorManager=None, **kwargs):
+    def __init__(self, ctx: SaunaContext=None, errorMgr: ErrorManager=None, **kwargs):
+        # TODO move to SaunaContext persisted
+        Window.size = (ctx.getScreenWidth(), ctx.getScreenHeight())
+        Window.rotation = ctx.getScreenRotation()
+
         super().__init__(**kwargs)
 
         # Set deep dark grey background
