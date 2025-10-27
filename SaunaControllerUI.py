@@ -1,4 +1,5 @@
 import os
+import socket
 from datetime import datetime
 from kivy.config import Config
 from kivy.app import App
@@ -322,6 +323,15 @@ class MainScreen(Screen):
                 target_temp_c = (target_temp_f - 32) * 5 / 9
                 self.target_temp_label.text = f'{int(target_temp_c)}°C'
 
+    def is_wifi_connected(self):
+        """Check if WiFi/network is connected"""
+        try:
+            # Try to create a socket connection to Google DNS
+            socket.create_connection(("8.8.8.8", 53), timeout=1)
+            return True
+        except OSError:
+            return False
+
     def update_sensors(self, dt):
         """Update sensor readings from SaunaContext"""
         if self.ctx:
@@ -344,6 +354,14 @@ class MainScreen(Screen):
                 # Heater is off - show heater_off icon
                 self.heater_icon.background_normal = 'icons/heater_off.png'
                 self.heater_icon.background_down = 'icons/heater_off.png'
+
+        # Update WiFi icon based on connection status
+        if self.is_wifi_connected():
+            self.wifi_icon.background_normal = 'icons/wifi.png'
+            self.wifi_icon.background_down = 'icons/wifi.png'
+        else:
+            self.wifi_icon.background_normal = 'icons/wifi_nc.png'
+            self.wifi_icon.background_down = 'icons/wifi_nc.png'
 
         # Update error icon visibility - show only when there are errors
         if self.errorMgr and self.errorMgr.hasAnyError():

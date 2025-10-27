@@ -1,4 +1,5 @@
-from kivy.uix.screenmanager import ScreenManager, Screen
+import subprocess
+from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -15,9 +16,6 @@ class WiFiScreen(Screen):
 
         # Header
         header = BoxLayout(size_hint_y=0.1)
-        back_btn = Button(text='← Back', size_hint_x=0.3, font_size='20sp')
-        back_btn.bind(on_press=self.go_back)
-        header.add_widget(back_btn)
         header.add_widget(Label(text='WiFi Configuration', font_size='30sp', bold=True))
         layout.add_widget(header)
 
@@ -38,19 +36,29 @@ class WiFiScreen(Screen):
         pwd_box.add_widget(self.pwd_input)
         settings_layout.add_widget(pwd_box)
 
-        # Connect button
+        # Buttons row
+        buttons_row = BoxLayout(orientation='horizontal', size_hint_y=None, height=80, spacing=15)
+
         connect_btn = Button(
             text='Connect',
-            size_hint_y=None,
-            height=80,
             font_size='24sp',
             background_color=(0.2, 0.7, 0.3, 1)
         )
         connect_btn.bind(on_press=self.connect_wifi)
-        settings_layout.add_widget(connect_btn)
+        buttons_row.add_widget(connect_btn)
+
+        ok_btn = Button(
+            text='OK',
+            font_size='24sp',
+            background_color=(0.3, 0.5, 0.8, 1)
+        )
+        ok_btn.bind(on_press=self.go_back)
+        buttons_row.add_widget(ok_btn)
+
+        settings_layout.add_widget(buttons_row)
 
         # Status
-        self.status_label = Label(text='', font_size='18sp', color=(1, 1, 0, 1))
+        self.status_label = Label(text='Status Here', font_size='24sp', color=(0, 1, 0, 1))
         settings_layout.add_widget(self.status_label)
 
         layout.add_widget(settings_layout)
@@ -58,9 +66,29 @@ class WiFiScreen(Screen):
 
     def connect_wifi(self, instance):
         ssid = self.ssid_input.text
+        password = self.pwd_input
         self.status_label.text = f'Connecting to {ssid}...'
-        # Implement actual WiFi connection here
-        print(f"Connecting to WiFi: {ssid}")
+        """Set WiFi using NetworkManager"""
+        try:
+            # Check if connection already exists
+            check_cmd = f"nmcli connection show '{ssid}'"
+            result = subprocess.run(check_cmd, shell=True, capture_output=True)
+            if result.returncode == 0:
+                # Connection exists, modify it
+                cmd = f"nmcli connection modify '{ssid}' wifi-sec.key-mgmt wpa-psk wifi-sec.psk '{password}'"
+                subprocess.run(cmd, shell=True, check=True)
+            else:
+                # Create new connection
+                cmd = f"nmcli device wifi connect '{ssid}' password '{password}'"
+                subprocess.run(cmd, shell=True, check=True)
+            # Activate the connection
+            activate_cmd = f"nmcli connection up '{ssid}'"
+            subprocess.run(activate_cmd, shell=True, check=True)
+            self.status_label.color((0, 1, 0, 1))
+            self.status_label.text = f'Connected to {ssid}...'
+        except subprocess.CalledProcessError as e:
+            self.status_label.color((1, 0, 0, 1))
+            self.status_label.text = f'Could not connect to {ssid}...'
 
     def go_back(self, instance):
         self.manager.current = 'main'
