@@ -24,25 +24,37 @@ class WiFiScreen(Screen):
 
         # SSID
         ssid_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=60)
-        ssid_box.add_widget(Label(text='SSID:', font_size='20sp', size_hint_x=0.3))
-        self.ssid_input = TextInput(multiline=False, font_size='20sp')
+        ssid_box.add_widget(Label(text='SSID:', font_size='24sp', size_hint_x=0.3))
+        self.ssid_input = TextInput(multiline=False, font_size='32sp')
         ssid_box.add_widget(self.ssid_input)
         settings_layout.add_widget(ssid_box)
 
         # Password
         pwd_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=60)
-        pwd_box.add_widget(Label(text='Password:', font_size='20sp', size_hint_x=0.3))
-        self.pwd_input = TextInput(multiline=False, password=True, font_size='20sp')
+        pwd_box.add_widget(Label(text='Password:', font_size='24sp', size_hint_x=0.3))
+        self.pwd_input = TextInput(multiline=False, password=True, font_size='32sp')
         pwd_box.add_widget(self.pwd_input)
         settings_layout.add_widget(pwd_box)
 
+        # Status
+        self.status_label = Label(text='', font_size='32sp', color=(0, 1, 0, 1), size_hint_y=None, height=80)
+        settings_layout.add_widget(self.status_label)
+
+        # Spacer to push buttons down
+        settings_layout.add_widget(Label())
+
         # Buttons row
-        buttons_row = BoxLayout(orientation='horizontal', size_hint_y=None, height=80, spacing=15)
+        buttons_row = BoxLayout(orientation='horizontal', size_hint_y=None, height=60, spacing=15)
+
+        # Left spacer to center buttons
+        buttons_row.add_widget(Label())
 
         connect_btn = Button(
             text='Connect',
             font_size='24sp',
-            background_color=(0.2, 0.7, 0.3, 1)
+            background_color=(0.2, 0.7, 0.3, 1),
+            size_hint_x=None,
+            width=150
         )
         connect_btn.bind(on_press=self.connect_wifi)
         buttons_row.add_widget(connect_btn)
@@ -50,16 +62,20 @@ class WiFiScreen(Screen):
         ok_btn = Button(
             text='OK',
             font_size='24sp',
-            background_color=(0.3, 0.5, 0.8, 1)
+            background_color=(0.3, 0.5, 0.8, 1),
+            size_hint_x=None,
+            width=150
         )
         ok_btn.bind(on_press=self.go_back)
         buttons_row.add_widget(ok_btn)
 
+        # Right spacer to center buttons
+        buttons_row.add_widget(Label())
+
         settings_layout.add_widget(buttons_row)
 
-        # Status
-        self.status_label = Label(text='Status Here', font_size='24sp', color=(0, 1, 0, 1))
-        settings_layout.add_widget(self.status_label)
+        # Small spacer at bottom
+        settings_layout.add_widget(Label(size_hint_y=None, height=20))
 
         layout.add_widget(settings_layout)
         self.add_widget(layout)

@@ -12,6 +12,8 @@ class SettingsScreen(Screen):
 
     _ctx: SaunaContext = None
 
+# TODO - fan should only be running so much after the sauna is off
+
     def __init__(self, ctx: SaunaContext=None, **kwargs):
         super().__init__(**kwargs)
 
@@ -51,7 +53,8 @@ class SettingsScreen(Screen):
             # Setting Label
             label = Label(
                 text=setting_name,
-                font_size='16sp',
+                font_size='20sp',
+                size_hint_x=0.6,
                 size_hint_y=None,
                 height=50,
                 halign='left',
@@ -64,7 +67,8 @@ class SettingsScreen(Screen):
             input_field = TextInput(
                 text=default_value,
                 multiline=False,
-                font_size='16sp',
+                font_size='28sp',
+                size_hint_x=0.4,
                 size_hint_y=None,
                 height=50
             )
@@ -74,7 +78,7 @@ class SettingsScreen(Screen):
         # Add checkbox for Hot Room Light setting
         light_label = Label(
             text='Turn Hot Room Light Off When Sauna is Off',
-            font_size='16sp',
+            font_size='20sp',
             size_hint_y=None,
             height=50,
             halign='left',
