@@ -40,11 +40,10 @@ class StatusIcon(Button):
 class MainScreen(Screen):
 
     def __init__(self, ctx: SaunaContext=None, errorMgr: ErrorManager=None, **kwargs):
-        # TODO move to SaunaContext persisted
+        super().__init__(**kwargs)
+
         Window.size = (ctx.getScreenWidth(), ctx.getScreenHeight())
         Window.rotation = ctx.getScreenRotation()
-
-        super().__init__(**kwargs)
 
         # Set deep dark grey background
         with self.canvas.before:

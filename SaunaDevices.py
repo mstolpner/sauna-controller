@@ -7,7 +7,6 @@ from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
 
 
-# TODO try moving it just before the methods inside the class
 class DummyErrorResponse():
     def isError(self):
         return True
@@ -18,8 +17,8 @@ class SaunaDevices:
     # Sauna Context Manager
     _ctx = None
 
-    # RS485 Client
-#    _rs485Client = None
+    # Configure logging for all libraries
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     # Sensor Module Configuration
     _sensorModuleRs485SlaveId = 1

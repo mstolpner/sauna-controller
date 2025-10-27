@@ -12,8 +12,6 @@ class SettingsScreen(Screen):
 
     _ctx: SaunaContext = None
 
-# TODO - fan should only be running so much after the sauna is off
-
     def __init__(self, ctx: SaunaContext=None, **kwargs):
         super().__init__(**kwargs)
 
