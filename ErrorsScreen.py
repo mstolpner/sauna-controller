@@ -4,7 +4,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 
-
+# TODO on critical error raise dialog
 class ErrorsScreen(Screen):
     """Errors display screen"""
     def __init__(self, errorMgr=None, **kwargs):
