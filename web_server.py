@@ -3,8 +3,6 @@ import logging
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from SaunaContext import SaunaContext
 from ErrorManager import ErrorManager
-from SaunaController import SaunaController
-import threading
 import socket
 import os
 

@@ -1,5 +1,4 @@
 from configobj import ConfigObj
-import atexit
 import os
 
 
@@ -323,13 +322,13 @@ class SaunaContext:
         self._configObj['appearance']['screen_rotation'] = rotation
         self.persist()
 
-    def getFanRunningTimeAfterSaunaOffHrs(self) -> int:
+    def getFanRunningTimeAfterSaunaOffHrs(self) -> float:
         try:
             return self._configObj['fan_control'].as_int('running_time_after_sauna_off_hrs')
         except KeyError:
             self.setFanRunningTimeAfterSaunaOffHrs(self._fanRunningTimeAfterSaunaOffHrs)
             return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')
 
-    def setFanRunningTimeAfterSaunaOffHrs(self, hours: int) -> None:
-        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = int(hours)
+    def setFanRunningTimeAfterSaunaOffHrs(self, hours: float) -> None:
+        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = hours
         self.persist()
