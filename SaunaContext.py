@@ -245,7 +245,6 @@ class SaunaContext:
     def setHotRoomTempF(self, tempF: float) -> None:
         """Set current hot room temperature in Fahrenheit (runtime-only, not persisted)"""
         self._hotRoomTempF = tempF
-        self.persist()
 
     def getHotRoomHumidity(self) -> float:
         """Get current hot room humidity percentage (runtime-only, not persisted)"""
@@ -254,7 +253,6 @@ class SaunaContext:
     def setHotRoomHumidity(self, humidity: float) -> None:
         """Set current hot room humidity percentage (runtime-only, not persisted)"""
         self._hotRoomHumidity = humidity
-        self.persist()
 
     def getTargetTempPresetMedium(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('target_temp_preset_medium')
@@ -324,7 +322,7 @@ class SaunaContext:
 
     def getFanRunningTimeAfterSaunaOffHrs(self) -> float:
         try:
-            return self._configObj['fan_control'].as_int('running_time_after_sauna_off_hrs')
+            return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')
         except KeyError:
             self.setFanRunningTimeAfterSaunaOffHrs(self._fanRunningTimeAfterSaunaOffHrs)
             return self._configObj['fan_control'].as_float('running_time_after_sauna_off_hrs')

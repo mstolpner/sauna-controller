@@ -197,7 +197,6 @@ class MainScreen(Screen):
 
         for idx, (name, temp, passive_img, active_img) in enumerate(presets):
             full_path = os.path.abspath(passive_img)
-            print(f"Loading preset '{name}': {passive_img} -> {full_path}, exists: {os.path.exists(passive_img)}")
 
             btn = ImageButton(size_hint_y=None, height=80)
 
