@@ -17,7 +17,6 @@ _errorMgr: ErrorManager = None
 
 
 def start_web_ui(ctx: SaunaContext, errorMgr: ErrorManager):
-    """Initialize sauna controller components and start web server"""
     global _ctx, _errorMgr
     _ctx = ctx
     _errorMgr = errorMgr
@@ -28,7 +27,7 @@ def start_web_ui(ctx: SaunaContext, errorMgr: ErrorManager):
 
 
 def is_wifi_connected():
-    """Check if WiFi/network is connected"""
+    # Check if WiFi/network is connected
     try:
         socket.create_connection(("8.8.8.8", 53), timeout=1)
         return True
@@ -149,10 +148,53 @@ def api_settings_get():
         'max_temp_f': _ctx.getHotRoomMaxTempF(),
         'preset_medium': _ctx.getTargetTempPresetMedium(),
         'preset_high': _ctx.getTargetTempPresetHigh(),
+        'lower_threshold_f': _ctx.getLowerHotRoomTempThresholdF(),
+        'upper_threshold_f': _ctx.getUpperHotRoomTempThresholdF(),
+        'cooling_grace_period': _ctx.getCoolingGracePeriod(),
+        'warmup_time': _ctx.getHeaterHealthWarmUpTime(),
+        'cooldown_time': _ctx.getHeaterHealthCooldownTime(),
+        'serial_port': _ctx.getRs485SerialPort(),
+        'baud_rate': _ctx.getRs485SerialBaudRate(),
+        'rs485_timeout': _ctx.getRs485SerialTimeout(),
+        'rs485_retries': _ctx.getRs485SerialRetries(),
+        'light_off_when_sauna_off': not _ctx.getHotRoomLightAlwaysOn(),
         'screen_width': _ctx.getScreenWidth(),
         'screen_height': _ctx.getScreenHeight(),
         'screen_rotation': _ctx.getScreenRotation()
     })
+
+
+@app.route('/api/settings/update', methods=['POST'])
+def api_settings_update():
+    """Update settings"""
+    data = request.json
+    if 'max_temp_f' in data:
+        _ctx.setHotRoomMaxTempF(int(data['max_temp_f']))
+    if 'preset_medium' in data:
+        _ctx.setTargetTempPresetMedium(int(data['preset_medium']))
+    if 'preset_high' in data:
+        _ctx.setTargetTempPresetHigh(int(data['preset_high']))
+    if 'lower_threshold_f' in data:
+        _ctx.setLowerHotRoomTempThresholdF(int(data['lower_threshold_f']))
+    if 'upper_threshold_f' in data:
+        _ctx.setUpperHotRoomTempThresholdF(int(data['upper_threshold_f']))
+    if 'cooling_grace_period' in data:
+        _ctx.setCoolingGracePeriod(int(data['cooling_grace_period']))
+    if 'warmup_time' in data:
+        _ctx.setLHeaterHealthWarmupTime(int(data['warmup_time']))
+    if 'cooldown_time' in data:
+        _ctx.setHeaterHealthCooldownTime(int(data['cooldown_time']))
+    if 'serial_port' in data:
+        _ctx.setRs485SerialPort(data['serial_port'])
+    if 'baud_rate' in data:
+        _ctx.setRs485SerialBaudRate(int(data['baud_rate']))
+    if 'rs485_timeout' in data:
+        _ctx.setRs485SerialTimeout(float(data['rs485_timeout']))
+    if 'rs485_retries' in data:
+        _ctx.setRs485SerialRetries(int(data['rs485_retries']))
+    if 'light_off_when_sauna_off' in data:
+        _ctx.setHotRoomLightAlwaysOn(not data['light_off_when_sauna_off'])
+    return jsonify({'success': True})
 
 
 @app.route('/api/errors/get')

@@ -66,6 +66,24 @@ http://<raspberry-pi-ip>:8080
 
 ### Settings
 - `GET /api/settings/get` - Get all settings
+- `POST /api/settings/update` - Update settings
+  ```json
+  {
+    "max_temp_f": 240,
+    "preset_medium": 180,
+    "preset_high": 200,
+    "lower_threshold_f": 5,
+    "upper_threshold_f": 0,
+    "cooling_grace_period": 60,
+    "warmup_time": 300,
+    "cooldown_time": 1200,
+    "serial_port": "/dev/ttyAMA0",
+    "baud_rate": 9600,
+    "rs485_timeout": 0.3,
+    "rs485_retries": 3,
+    "light_off_when_sauna_off": true
+  }
+  ```
 
 ### Errors
 - `GET /api/errors/get` - Get current errors
@@ -84,6 +102,13 @@ http://<raspberry-pi-ip>:8080
 - Adjust fan speed (0-100%, increments of 5)
 - Set fan running time after sauna off (0-12 hours, increments of 0.5)
 - Click "Ok" to save settings and return to main screen
+
+### Settings Screen
+- **Temperature Settings**: Max temperature, presets, heater thresholds, cooling grace period
+- **Heater Health Check Settings**: Warmup and cooldown times
+- **RS485 Communication Settings**: Serial port, baud rate, timeout, retries
+- **Hot Room Light Settings**: Control light behavior when sauna is off
+- Click "Save" to apply changes or "Cancel" to return without saving
 
 ## Styling
 

@@ -45,8 +45,6 @@ class SaunaContext:
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
             self.setDefaultSettings()
-        # Save configuration on exit
-        atexit.register(self._onExit)
 
     def setDefaultSettings(self):
         self._configObj['rs485'] = {}
@@ -80,8 +78,7 @@ class SaunaContext:
         self._configObj['appearance']['screen_height'] = self._screenHeight
         self._configObj['appearance']['screen_rotation'] = self._screenRotation
 
-    # Save configuration on exit
-    def _onExit(self):
+    def persist(self):
         self._configObj.write()
 
     def isSaunaOn(self) -> bool:
@@ -113,30 +110,35 @@ class SaunaContext:
 
     def setSaunaSensorsDeviceId(self, saunaSensorsDeviceId: int) -> None:
         self._configObj['rs485']['sensors_module_device_id'] = saunaSensorsDeviceId
+        self.persist()
 
     def getRelayModuleDeviceId(self) -> int:
         return self._configObj['rs485'].as_int('relay_module_device_id')
 
     def setRelayModuleDeviceId(self, relayModuleDeviceId: int) -> None:
         self._configObj['rs485']['relay_module_device_id'] = relayModuleDeviceId
+        self.persist()
 
     def getFanControlModuleDeviceId(self) -> int:
         return self._configObj['rs485'].as_int('fan_module_device_id')
 
     def setFanControlModuleDeviceId(self, fanControlModuleDeviceId: int) -> None:
         self._configObj['rs485']['fan_module_device_id'] = fanControlModuleDeviceId
+        self.persist()
 
     def getRs485SerialPort(self) -> str:
         return self._configObj['rs485']['serial_port_name']
 
     def setRs485SerialPort(self, rs485SerialPort: str) -> None:
         self._configObj['rs485']['serial_port_name'] = rs485SerialPort
+        self.persist()
 
     def getRs485SerialBaudRate(self) -> int:
         return self._configObj['rs485'].as_int('serial_baud_rate')
 
     def setRs485SerialBaudRate(self, rs485SerialBaudRate: int) -> None:
         self._configObj['rs485']['serial_baud_rate'] = rs485SerialBaudRate
+        self.persist()
 
     def getRs485SerialTimeout(self) -> float:
         try:
@@ -147,6 +149,7 @@ class SaunaContext:
 
     def setRs485SerialTimeout(self, rs485SerialTimeout: float) -> None:
         self._configObj['rs485']['serial_timeout'] = rs485SerialTimeout
+        self.persist()
 
     def getRs485SerialRetries(self) -> int:
         try:
@@ -157,72 +160,84 @@ class SaunaContext:
 
     def setRs485SerialRetries(self, rs485SerialRetries: int) -> None:
         self._configObj['rs485']['serial_retries'] = rs485SerialRetries
+        self.persist()
 
     def getHotRoomTargetTempF(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('target_temp_f')
 
     def setHotRoomTargetTempF(self, targetTemperatureF: int) -> None:
         self._configObj['hot_room_temp_control']['target_temp_f'] = targetTemperatureF
+        self.persist()
 
     def getCoolingGracePeriod(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('cooling_grace_period')
 
     def setCoolingGracePeriod(self, coolingGracePeriod: int) -> None:
         self._configObj['hot_room_temp_control']['cooling_grace_period'] = coolingGracePeriod
+        self.persist()
 
     def getLowerHotRoomTempThresholdF(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('lower_hot_room_temp_threshold_f')
 
     def setLowerHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
         self._configObj['hot_room_temp_control']['lower_hot_room_temp_threshold_f'] = thresholdTempF
+        self.persist()
 
     def getUpperHotRoomTempThresholdF(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('upper_hot_room_temp_threshold_f')
 
     def setUpperHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
         self._configObj['hot_room_temp_control']['upper_hot_room_temp_threshold_f'] = thresholdTempF
+        self.persist()
 
     def getHeaterHealthWarmUpTime(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('heater_health_warmup_time')
 
     def setLHeaterHealthWarmupTime(self, warmupTime: int) -> None:
         self._configObj['hot_room_temp_control']['heater_health_warmup_time'] = warmupTime
+        self.persist()
 
     def getHeaterHealthCooldownTime(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('heater_health_cooldown_time')
 
     def setHeaterHealthCooldownTime(self, cooldownTime: int) -> None:
         self._configObj['hot_room_temp_control']['heater_health_cooldown_time'] = cooldownTime
+        self.persist()
 
     def getHotRoomMaxTempF(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('max_temp_f')
 
     def setHotRoomMaxTempF(self, maxTempF: int) -> None:
         self._configObj['hot_room_temp_control']['max_temp_f'] = maxTempF
+        self.persist()
 
     def getFanSpeedPct(self) -> int:
         return self._configObj['fan_control'].as_int('fan_speed_pct')
 
     def setFanSpeedPct(self, fanSpeedPct: int) -> None:
         self._configObj['fan_control']['fan_speed_pct'] = int(fanSpeedPct)
+        self.persist()
 
     def getNumberOfFans(self) -> int:
         return self._configObj['fan_control'].as_int('number_of_fans')
 
     def setNumberOfFans(self, numberOfFans: int) -> None:
         self._configObj['fan_control']['number_of_fans'] = numberOfFans
+        self.persist()
 
     def getRightFanOnStatus(self) -> bool:
         return self._configObj['fan_control'].as_bool('right_fan_on_status')
 
     def setRightFanOnStatus(self, status: bool) -> None:
         self._configObj['fan_control']['right_fan_on_status'] = status
+        self.persist()
 
     def getLeftFanOnStatus(self) -> bool:
         return self._configObj['fan_control'].as_bool('left_fan_on_status')
 
     def setLeftFanOnStatus(self, status: bool) -> None:
         self._configObj['fan_control']['left_fan_on_status'] = status
+        self.persist()
 
     def getHotRoomTempF(self) -> float:
         """Get current hot room temperature in Fahrenheit (runtime-only, not persisted)"""
@@ -231,6 +246,7 @@ class SaunaContext:
     def setHotRoomTempF(self, tempF: float) -> None:
         """Set current hot room temperature in Fahrenheit (runtime-only, not persisted)"""
         self._hotRoomTempF = tempF
+        self.persist()
 
     def getHotRoomHumidity(self) -> float:
         """Get current hot room humidity percentage (runtime-only, not persisted)"""
@@ -239,25 +255,28 @@ class SaunaContext:
     def setHotRoomHumidity(self, humidity: float) -> None:
         """Set current hot room humidity percentage (runtime-only, not persisted)"""
         self._hotRoomHumidity = humidity
+        self.persist()
 
     def getTargetTempPresetMedium(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('target_temp_preset_medium')
 
     def setTargetTempPresetMedium(self, tempF: int) -> None:
         self._configObj['hot_room_temp_control']['target_temp_preset_medium'] = tempF
+        self.persist()
 
     def getTargetTempPresetHigh(self) -> int:
         return self._configObj['hot_room_temp_control'].as_int('target_temp_preset_high')
 
     def setTargetTempPresetHigh(self, tempF: int) -> None:
         self._configObj['hot_room_temp_control']['target_temp_preset_high'] = tempF
+        self.persist()
 
     def getHotRoomLightAlwaysOn(self) -> bool:
         return self._configObj['hot_room_control'].as_bool('hot_room_light_always_on')
 
     def setHotRoomLightAlwaysOn(self, value: bool) -> None:
         self._configObj['hot_room_control']['hot_room_light_always_on'] = value
-
+        self.persist()
 
     def isHotRoomLightOn(self) -> bool:
         return self._hotRoomLightOn
@@ -276,6 +295,7 @@ class SaunaContext:
         if 'appearance' not in self._configObj:
             self._configObj['appearance'] = {}
         self._configObj['appearance']['screen_width'] = width
+        self.persist()
 
     def getScreenHeight(self) -> int:
         try:
@@ -288,6 +308,7 @@ class SaunaContext:
         if 'appearance' not in self._configObj:
             self._configObj['appearance'] = {}
         self._configObj['appearance']['screen_height'] = height
+        self.persist()
 
     def getScreenRotation(self) -> int:
         try:
@@ -300,6 +321,7 @@ class SaunaContext:
         if 'appearance' not in self._configObj:
             self._configObj['appearance'] = {}
         self._configObj['appearance']['screen_rotation'] = rotation
+        self.persist()
 
     def getFanRunningTimeAfterSaunaOffHrs(self) -> int:
         try:
@@ -310,3 +332,4 @@ class SaunaContext:
 
     def setFanRunningTimeAfterSaunaOffHrs(self, hours: int) -> None:
         self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = int(hours)
+        self.persist()
