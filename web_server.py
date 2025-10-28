@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from SaunaContext import SaunaContext
 from ErrorManager import ErrorManager
@@ -12,18 +14,17 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Global instances
 _ctx: SaunaContext = None
 _errorMgr: ErrorManager = None
-_sc: SaunaController = None
 
 
-def start_web_ui(ctx: SaunaContext, sc: SaunaController, errorMgr: ErrorManager):
-    """Initialize sauna controller components"""
-    global _ctx, _errorMgr, _sc
+def start_web_ui(ctx: SaunaContext, errorMgr: ErrorManager):
+    """Initialize sauna controller components and start web server"""
+    global _ctx, _errorMgr
     _ctx = ctx
     _errorMgr = errorMgr
-    _sc = sc
-    # Run sauna controller in background thread
-#    threading.Thread(target=_sc.run, daemon=True).start()
-    app.run(host='0.0.0.0', port=8080, debug=True, use_reloader=False)
+    log = logging.getLogger('werkzeug')
+    log.disabled = True
+    # Run web server
+    app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
 
 
 def is_wifi_connected():
