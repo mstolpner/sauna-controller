@@ -8,12 +8,13 @@ body {
     font-family: Arial, sans-serif;
     background-color: #1a1a1a;
     color: #ffffff;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .container {
-    width: 100vw;
-    height: 100vh;
+    max-width: 1280px;
+    margin: 0 auto;
+    min-height: 100vh;
     background-color: #1a1a1a;
     display: flex;
     flex-direction: column;
@@ -37,8 +38,8 @@ body {
 }
 
 .status-icon {
-    width: 50px;
-    height: 50px;
+    width: clamp(30px, 4vw, 50px);
+    height: clamp(30px, 4vw, 50px);
 }
 
 .icon-link {
@@ -53,7 +54,7 @@ body {
 }
 
 .clock {
-    font-size: 120px;
+    font-size: clamp(40px, 8vw, 120px);
     font-weight: bold;
     color: #99cc99;
     font-family: 'Courier New', monospace;
@@ -73,7 +74,7 @@ body {
 }
 
 .temperature {
-    font-size: 240px;
+    font-size: clamp(60px, 15vw, 240px);
     font-weight: bold;
     color: #ff8000;
     cursor: pointer;
@@ -88,12 +89,12 @@ body {
 }
 
 .humidity-icon {
-    width: 70px;
-    height: 70px;
+    width: clamp(35px, 5vw, 70px);
+    height: clamp(35px, 5vw, 70px);
 }
 
 .humidity-value {
-    font-size: 90px;
+    font-size: clamp(40px, 7vw, 90px);
     color: #80ccff;
 }
 
@@ -104,7 +105,7 @@ body {
     align-items: center;
     justify-content: center;
     margin: 20px 0;
-    height: 200px;
+    min-height: 150px;
 }
 
 .preset-stack {
@@ -119,7 +120,7 @@ body {
     border: none;
     cursor: pointer;
     padding: 0;
-    height: 80px;
+    height: clamp(50px, 6vh, 80px);
 }
 
 .preset-btn img {
@@ -138,14 +139,14 @@ body {
 .target-temp-box {
     border: 2px solid #d9ff66;
     border-radius: 20px;
-    padding: 20px 40px;
-    display: flex;
+    padding: 5px 15px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
 .target-temp {
-    font-size: 135px;
+    font-size: clamp(50px, 10vw, 135px);
     font-weight: bold;
     color: rgba(217, 255, 102, 0.6);
 }
@@ -163,7 +164,7 @@ body {
     cursor: pointer;
     padding: 0;
     width: 100%;
-    height: 180px;
+    height: clamp(100px, 15vh, 180px);
 }
 
 .sauna-btn img {
@@ -174,7 +175,7 @@ body {
 
 /* Slider */
 .slider-container {
-    padding: 10px 40px;
+    padding: 10px clamp(20px, 4vw, 40px);
     margin-bottom: 20px;
 }
 
@@ -214,16 +215,16 @@ body {
 .header {
     text-align: center;
     padding: 20px;
-    height: 10vh;
+    min-height: 60px;
 }
 
 .header h1 {
-    font-size: 30px;
+    font-size: clamp(24px, 3vw, 30px);
     font-weight: bold;
 }
 
 .fan-controls {
-    padding: 20px 60px;
+    padding: 20px clamp(20px, 5vw, 60px);
     margin-top: 20px;
 }
 
@@ -238,29 +239,29 @@ body {
     align-items: center;
     gap: 20px;
     cursor: pointer;
-    font-size: 30px;
+    font-size: clamp(20px, 2.5vw, 30px);
     font-weight: bold;
     user-select: none;
 }
 
 .checkbox-container input {
-    width: 45px;
-    height: 45px;
+    width: clamp(30px, 3.5vw, 45px);
+    height: clamp(30px, 3.5vw, 45px);
     cursor: pointer;
 }
 
 .checkbox-label {
-    font-size: 30px;
+    font-size: clamp(20px, 2.5vw, 30px);
     font-weight: bold;
 }
 
 .control-section {
-    padding: 20px 60px;
+    padding: 20px clamp(20px, 5vw, 60px);
     margin-top: 20px;
 }
 
 .control-label {
-    font-size: 24px;
+    font-size: clamp(18px, 2vw, 24px);
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
@@ -268,7 +269,7 @@ body {
 
 .value-display {
     text-align: center;
-    font-size: 24px;
+    font-size: clamp(18px, 2vw, 24px);
     margin-top: 10px;
 }
 
@@ -281,9 +282,9 @@ body {
 }
 
 .ok-btn {
-    width: 200px;
-    height: 60px;
-    font-size: 20px;
+    width: clamp(150px, 20vw, 200px);
+    height: clamp(45px, 6vh, 60px);
+    font-size: clamp(16px, 1.8vw, 20px);
     background-color: #80ccff;
     color: #000;
     border: none;
@@ -298,13 +299,13 @@ body {
 
 /* Settings Page */
 .settings-content {
-    padding: 20px 40px;
+    padding: 20px clamp(20px, 4vw, 40px);
     flex: 1;
     overflow-y: auto;
 }
 
 .section-title {
-    font-size: 22px;
+    font-size: clamp(18px, 2vw, 22px);
     font-weight: bold;
     color: #80ccff;
     margin-top: 20px;
@@ -321,16 +322,16 @@ body {
 }
 
 .setting-item label {
-    font-size: 18px;
+    font-size: clamp(14px, 1.6vw, 18px);
     font-weight: bold;
     flex: 1;
 }
 
 .setting-item input[type="number"],
 .setting-item input[type="text"] {
-    width: 150px;
-    height: 45px;
-    font-size: 20px;
+    width: clamp(100px, 12vw, 150px);
+    height: clamp(35px, 4vh, 45px);
+    font-size: clamp(16px, 1.8vw, 20px);
     padding: 5px 15px;
     background-color: #404040;
     color: #fff;
@@ -362,13 +363,13 @@ body {
 }
 
 .error-type {
-    font-size: 20px;
+    font-size: clamp(16px, 1.8vw, 20px);
     font-weight: bold;
     color: #ff6666;
     margin-bottom: 10px;
 }
 
 .error-message {
-    font-size: 18px;
+    font-size: clamp(14px, 1.6vw, 18px);
     color: #ffcccc;
 }

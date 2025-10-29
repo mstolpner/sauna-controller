@@ -15,10 +15,10 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
 from ErrorManager import ErrorManager
-from SettingsScreen import SettingsScreen
-from FanScreen import FanScreen
-from WiFiScreen import WiFiScreen
-from ErrorsScreen import ErrorsScreen
+from SaunaUISettingsScreen import SaunaUISettingsScreen
+from SaunaUIFanScreen import SaunaUIFanScreen
+from SaunaUIWiFiScreen import SaunaUIWiFiScreen
+from SaunaUIErrorsScreen import SaunaUIErrorsScreen
 from SaunaContext import SaunaContext
 from ErrorManager import ErrorManager
 
@@ -37,7 +37,7 @@ class StatusIcon(Button):
         self.border = (0, 0, 0, 0)
 
 
-class MainScreen(Screen):
+class SaunaUIMainScreen(Screen):
 
     def __init__(self, ctx: SaunaContext=None, errorMgr: ErrorManager=None, **kwargs):
         super().__init__(**kwargs)
@@ -457,9 +457,9 @@ class SaunaControlApp(App):
 
     def build(self):
         sm = ScreenManager()
-        sm.add_widget(MainScreen(name='main', ctx=self.ctx, errorMgr=self.errorMgr))
-        sm.add_widget(FanScreen(name='fan', ctx=self.ctx))
-        sm.add_widget(WiFiScreen(name='wifi'))
-        sm.add_widget(SettingsScreen(name='settings', ctx=self.ctx))
-        sm.add_widget(ErrorsScreen(name='errors', errorMgr=self.errorMgr))
+        sm.add_widget(SaunaUIMainScreen(name='main', ctx=self.ctx, errorMgr=self.errorMgr))
+        sm.add_widget(SaunaUIFanScreen(name='fan', ctx=self.ctx))
+        sm.add_widget(SaunaUIWiFiScreen(name='wifi'))
+        sm.add_widget(SaunaUISettingsScreen(name='settings', ctx=self.ctx))
+        sm.add_widget(SaunaUIErrorsScreen(name='errors', errorMgr=self.errorMgr))
         return sm

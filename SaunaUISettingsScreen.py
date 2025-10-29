@@ -7,7 +7,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from SaunaContext import SaunaContext
 
-class SettingsScreen(Screen):
+class SaunaUISettingsScreen(Screen):
     """Settings configuration screen"""
 
     _ctx: SaunaContext = None

@@ -30,6 +30,8 @@ class SaunaContext:
     _screenHeight = 1280
     _screenRotation = 270
     _fanRunningTimeAfterSaunaOffHrs = 0.5
+    _httpServer = '0.0.0.0'
+    _httpPort = 8080
     # Dependencies
     _configObj = None
     _configFileName = 'sauna.ini'
@@ -76,6 +78,9 @@ class SaunaContext:
         self._configObj['appearance']['screen_width'] = self._screenWidth
         self._configObj['appearance']['screen_height'] = self._screenHeight
         self._configObj['appearance']['screen_rotation'] = self._screenRotation
+        self._configObj['webui'] = {}
+        self._configObj['webui']['http_host'] = self._httpServer
+        self._configObj['webui']['http_port'] = self._httpPort
 
     def persist(self):
         self._configObj.write()
@@ -329,4 +334,30 @@ class SaunaContext:
 
     def setFanRunningTimeAfterSaunaOffHrs(self, hours: float) -> None:
         self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = hours
+        self.persist()
+
+    def getHttpHost(self) -> str:
+        try:
+            return self._configObj['webui']['http_host']
+        except KeyError:
+            self.setHttpHost(self._httpServer)
+            return self._configObj['webui']['http_host']
+
+    def setHttpHost(self, server: str) -> None:
+        if 'webui' not in self._configObj:
+            self._configObj['webui'] = {}
+        self._configObj['webui']['http_host'] = server
+        self.persist()
+
+    def getHttpPort(self) -> int:
+        try:
+            return self._configObj['webui'].as_int('http_port')
+        except KeyError:
+            self.setHttpPort(self._httpPort)
+            return self._configObj['webui'].as_int('http_port')
+
+    def setHttpPort(self, port: int) -> None:
+        if 'webui' not in self._configObj:
+            self._configObj['webui'] = {}
+        self._configObj['webui']['http_port'] = port
         self.persist()

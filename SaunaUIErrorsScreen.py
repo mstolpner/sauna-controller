@@ -5,7 +5,7 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 
 # TODO on critical error raise dialog
-class ErrorsScreen(Screen):
+class SaunaUIErrorsScreen(Screen):
     """Errors display screen"""
     def __init__(self, errorMgr=None, **kwargs):
         super().__init__(**kwargs)

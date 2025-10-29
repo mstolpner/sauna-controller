@@ -7,7 +7,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from SaunaContext import SaunaContext
 
 
-class FanScreen(Screen):
+class SaunaUIFanScreen(Screen):
 
     _ctx: SaunaContext = None
 

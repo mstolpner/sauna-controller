@@ -6,7 +6,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 
 
-class WiFiScreen(Screen):
+class SaunaUIWiFiScreen(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

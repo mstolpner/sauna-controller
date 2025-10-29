@@ -59,6 +59,3 @@ class SaunaController:
                 self._errorMgr.raiseFanError(errMsg)
             # Turn hot room light on/off
             self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
-
-
-            time.sleep(0.5)

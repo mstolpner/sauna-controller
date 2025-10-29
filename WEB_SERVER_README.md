@@ -21,7 +21,7 @@ pip install flask
 
 1. Start the web server:
 ```bash
-python web_server.py
+python SaunaWebUIServer.py
 ```
 
 2. Open your web browser and navigate to:
