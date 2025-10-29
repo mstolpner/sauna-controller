@@ -34,8 +34,6 @@ if __name__ == '__main__':
     )
     web_thread.start()
 
-    #    server.run()
-
     # Run the Kivy UI application (this blocks until app closes)
     SaunaControlApp(ctx=_ctx, errorMgr=_errorMgr).run()
 
