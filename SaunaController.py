@@ -7,7 +7,7 @@ from HeaterController import HeaterController
 from SaunaContext import SaunaContext
 from SaunaDevices import SaunaDevices
 
-
+# TODO add timer for max sauna on
 class SaunaController:
 
     _ctx = None
@@ -26,8 +26,6 @@ class SaunaController:
     def _onExit(self):
         self._ctx.turnSaunaOff()
         self._sd.turnHeaterOff()
-        # Give it a chance to turn heater off
-        time.sleep(10)
 
     # ----------------------------------- Sauna Controller Run Methods ------------------------------------
 

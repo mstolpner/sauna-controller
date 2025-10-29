@@ -302,7 +302,7 @@ class SaunaUIMainScreen(Screen):
         self.add_widget(layout)
 
         # Update sensor readings every 2 seconds
-        Clock.schedule_interval(self.update_sensors, 2)
+        Clock.schedule_interval(self.update_sensors, 1)
         # Update clock every second
         Clock.schedule_interval(self.update_clock, 1)
         # Initialize heater button state
