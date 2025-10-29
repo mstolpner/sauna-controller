@@ -234,6 +234,31 @@ body {
     align-items: center;
 }
 
+.fan-rpm-display {
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+    justify-content: flex-start;
+}
+
+.rpm-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.rpm-label {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: bold;
+    color: #80ccff;
+}
+
+.rpm-value {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: bold;
+    color: #d9ff66;
+}
+
 .checkbox-container {
     display: flex;
     align-items: center;

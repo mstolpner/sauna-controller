@@ -37,7 +37,6 @@ class SaunaController:
         saunaControllerThread.start()
 
     def _run(self):
-        """Background thread for Sauna Control"""
         while True:
             # Heater Control
             self._hc.process()
@@ -45,6 +44,8 @@ class SaunaController:
             self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
             self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
             self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
+            self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
+            self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
             # Check fan health
             leftFanOk = self._sd.isLeftFanOk()
             rightFanOk = self._sd.isRightFanOk()

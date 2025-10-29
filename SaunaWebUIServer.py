@@ -79,6 +79,8 @@ class SaunaWebUIServer:
                 'left_fan_on': self._ctx.getLeftFanOnStatus(),
                 'right_fan_on': self._ctx.getRightFanOnStatus(),
                 'fan_speed_pct': self._ctx.getFanSpeedPct(),
+                'left_fan_rpm': self._ctx.getLeftFanRpm(),
+                'right_fan_rpm': self._ctx.getRightFanRpm(),
                 'running_time_after_sauna_off_hrs': self._ctx.getFanRunningTimeAfterSaunaOffHrs()
             })
 

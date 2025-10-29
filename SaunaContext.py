@@ -40,6 +40,8 @@ class SaunaContext:
     _isHeaterOn = False
     _hotRoomTempF = 20
     _hotRoomHumidity = 50
+    _leftFanRpm = 0
+    _rightFanRpm = 0
 
     def __init__(self):
         iniFileExists = os.path.exists(self._configFileName)
@@ -405,4 +407,16 @@ class SaunaContext:
 
     def setHotRoomLightOnOff(self, value: bool) -> None:
         self._hotRoomLightOn = value
+
+    def getLeftFanRpm(self) -> int:
+        return self._leftFanRpm
+
+    def setLeftFanRpm(self, rpm: int) -> None:
+        self._leftFanRpm = rpm
+
+    def getRightFanRpm(self) -> int:
+        return self._rightFanRpm
+
+    def setRightFanRpm(self, rpm: int) -> None:
+        self._rightFanRpm = rpm
 

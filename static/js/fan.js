@@ -15,10 +15,15 @@ function loadFanSettings() {
             document.getElementById('fan-speed-slider').value = fanSpeed;
             document.getElementById('fan-speed-value').textContent = `${fanSpeed}%`;
 
+            // Set fan RPM displays
+            document.getElementById('left-fan-rpm').textContent = `${data.left_fan_rpm} RPM`;
+            document.getElementById('right-fan-rpm').textContent = `${data.right_fan_rpm} RPM`;
+
             // Set fan runtime
             fanRuntime = data.running_time_after_sauna_off_hrs;
             document.getElementById('fan-runtime-slider').value = fanRuntime;
             document.getElementById('fan-runtime-value').textContent = `${fanRuntime.toFixed(2)} hrs`;
+
         })
         .catch(error => console.error('Error loading fan settings:', error));
 }
@@ -64,5 +69,19 @@ function saveFanSettings() {
     .catch(error => console.error('Error saving fan settings:', error));
 }
 
+// Update RPM displays periodically
+function updateRpmDisplays() {
+    fetch('/api/fan/status')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('left-fan-rpm').textContent = `${data.left_fan_rpm} RPM`;
+            document.getElementById('right-fan-rpm').textContent = `${data.right_fan_rpm} RPM`;
+        })
+        .catch(error => console.error('Error updating RPM:', error));
+}
+
 // Initialize
 loadFanSettings();
+
+// Update RPM displays every 2 seconds
+setInterval(updateRpmDisplays, 1000);
