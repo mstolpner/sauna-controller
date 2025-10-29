@@ -28,10 +28,20 @@ function loadFanSettings() {
         .catch(error => console.error('Error loading fan settings:', error));
 }
 
-// Update fan speed display
+// Update fan speed display and context
 function updateFanSpeed(value) {
     fanSpeed = parseInt(value);
     document.getElementById('fan-speed-value').textContent = `${fanSpeed}%`;
+
+    // Update context immediately
+    fetch('/api/fan/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            fan_speed_pct: fanSpeed
+        })
+    })
+    .catch(error => console.error('Error updating fan speed:', error));
 }
 
 // Update fan runtime display
