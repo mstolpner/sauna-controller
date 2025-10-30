@@ -133,9 +133,9 @@ class SaunaWebUIServer:
                 'preset_high': self._ctx.getTargetTempPresetHigh(),
                 'lower_threshold_f': self._ctx.getLowerHotRoomTempThresholdF(),
                 'upper_threshold_f': self._ctx.getUpperHotRoomTempThresholdF(),
-                'cooling_grace_period': self._ctx.getCoolingGracePeriod(),
-                'warmup_time': self._ctx.getHeaterHealthWarmUpTime(),
-                'cooldown_time': self._ctx.getHeaterHealthCooldownTime(),
+                'cooling_grace_period': self._ctx.getCoolingGracePeriodMin(),
+                'warmup_time': self._ctx.getHeaterHealthWarmUpTimeMin(),
+                'cooldown_time': self._ctx.getHeaterHealthCooldownTimeMin(),
                 'max_safe_runtime_min': self._ctx.getHeaterMaxSafeRuntimeMin(),
                 'serial_port': self._ctx.getRs485SerialPort(),
                 'baud_rate': self._ctx.getRs485SerialBaudRate(),
@@ -162,11 +162,11 @@ class SaunaWebUIServer:
             if 'upper_threshold_f' in data:
                 self._ctx.setUpperHotRoomTempThresholdF(int(data['upper_threshold_f']))
             if 'cooling_grace_period' in data:
-                self._ctx.setCoolingGracePeriod(int(data['cooling_grace_period']))
+                self._ctx.setCoolingGracePeriodMin(int(data['cooling_grace_period']))
             if 'warmup_time' in data:
-                self._ctx.setHeaterHealthWarmupTime(int(data['warmup_time']))
+                self._ctx.setHeaterHealthWarmupTimeMin(int(data['warmup_time']))
             if 'cooldown_time' in data:
-                self._ctx.setHeaterHealthCooldownTime(int(data['cooldown_time']))
+                self._ctx.setHeaterHealthCooldownTimeMin(int(data['cooldown_time']))
             if 'max_safe_runtime_min' in data:
                 self._ctx.setHeaterMaxSafeRuntimeMin(int(data['max_safe_runtime_min']))
             if 'serial_port' in data:

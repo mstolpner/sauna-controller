@@ -75,8 +75,9 @@ class SaunaDevices:
         if self.getNumberOfFans() != self._ctx.getNumberOfFans():
             self.setNumberOfFans(self._ctx.getNumberOfFans())
         self.setFanSpeed(self._ctx.getFanSpeedPct())
-        self._setFanRelayStatus(self._rightFanCoilId, self._ctx.getRightFanOnStatus())
-        self._setFanRelayStatus(self._leftFanCoilId, self._ctx.getLeftFanOnStatus())
+        # Fans are off initially and get managed by the SaunaController
+        self._setFanRelayStatus(self._rightFanCoilId, False)
+        self._setFanRelayStatus(self._leftFanCoilId, False)
         # These 2 functions will populate _lastFanRelayStatus[]
         self._getFanRelayStatus(self._rightFanCoilId)
         self._getFanRelayStatus(self._leftFanCoilId)

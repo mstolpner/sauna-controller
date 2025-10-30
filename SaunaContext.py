@@ -10,11 +10,11 @@ class SaunaContext:
     _relayModuleDeviceId: int = 2
     _fanControlModuleDeviceId: int = 3
     _hotRoomTargetTempF: int = 190
-    _coolingGracePeriod: int = 60  # seconds
+    _coolingGracePeriodMin: int = 1
     _lowerHotRoomTempThreshold: int = 5
     _upperHotRoomTempThreshold: int = 0
-    _heaterHealthWarmUpTime: int = 300
-    _heaterHealthCoolDownTime: int = 1200
+    _heaterHealthWarmUpTimeMin: int = 5
+    _heaterHealthCoolDownTimeMin: int = 20
     _maxHotRoomTempF: int = 240
     _targetTempPresetMedium: int = 180
     _targetTempPresetHigh: int = 200
@@ -63,7 +63,7 @@ class SaunaContext:
         self._configObj['rs485']['serial_retries'] = self._rs485SerialRetries
         self._configObj['hot_room_temp_control'] = {}
         self._configObj['hot_room_temp_control']['target_temp_f'] = self._hotRoomTargetTempF
-        self._configObj['hot_room_temp_control']['cooling_grace_period'] = self._coolingGracePeriod
+        self._configObj['hot_room_temp_control']['cooling_grace_period_min'] = self._coolingGracePeriodMin
         self._configObj['hot_room_temp_control']['lower_hot_room_temp_threshold_f'] = self._lowerHotRoomTempThreshold
         self._configObj['hot_room_temp_control']['upper_hot_room_temp_threshold_f'] = self._upperHotRoomTempThreshold
         self._configObj['hot_room_temp_control']['max_temp_f'] = self._maxHotRoomTempF
@@ -78,8 +78,8 @@ class SaunaContext:
         self._configObj['hot_room_control'] = {}
         self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
         self._configObj['heater_control'] = {}
-        self._configObj['heater_control']['heater_health_warmup_time'] = self._heaterHealthWarmUpTime
-        self._configObj['heater_control']['heater_health_cooldown_time'] = self._heaterHealthCoolDownTime
+        self._configObj['heater_control']['heater_health_warmup_time_min'] = self._heaterHealthWarmUpTimeMin
+        self._configObj['heater_control']['heater_health_cooldown_time_min'] = self._heaterHealthCoolDownTimeMin
         self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
         self._configObj['appearance'] = {}
         self._configObj['appearance']['screen_width'] = self._screenWidth
@@ -170,11 +170,11 @@ class SaunaContext:
     def setHotRoomTargetTempF(self, targetTemperatureF: int) -> None:
         self._set('hot_room_temp_control', 'target_temp_f', targetTemperatureF)
 
-    def getCoolingGracePeriod(self) -> int:
-        return self._get('hot_room_temp_control', 'cooling_grace_period', self._coolingGracePeriod)
+    def getCoolingGracePeriodMin(self) -> int:
+        return self._get('hot_room_temp_control', 'cooling_grace_period_min', self._coolingGracePeriodMin)
 
-    def setCoolingGracePeriod(self, coolingGracePeriod: int) -> None:
-        self._set('hot_room_temp_control', 'cooling_grace_period', coolingGracePeriod)
+    def setCoolingGracePeriodMin(self, coolingGracePeriodMin: int) -> None:
+        self._set('hot_room_temp_control', 'cooling_grace_period_min', coolingGracePeriodMin)
 
     def getLowerHotRoomTempThresholdF(self) -> int:
         return self._get('hot_room_temp_control', 'lower_hot_room_temp_threshold_f', self._lowerHotRoomTempThreshold)
@@ -208,17 +208,17 @@ class SaunaContext:
 
     # ----------------------- Heater Control attributes --------------------------
 
-    def getHeaterHealthWarmUpTime(self) -> int:
-        return self._get('heater_control', 'heater_health_warmup_time', self._heaterHealthWarmUpTime)
+    def getHeaterHealthWarmUpTimeMin(self) -> int:
+        return self._get('heater_control', 'heater_health_warmup_time_min', self._heaterHealthWarmUpTimeMin)
 
-    def setHeaterHealthWarmupTime(self, warmupTime: int) -> None:
-        self._set('heater_control', 'heater_health_warmup_time', warmupTime)
+    def setHeaterHealthWarmupTimeMin(self, warmupTimeMin: int) -> None:
+        self._set('heater_control', 'heater_health_warmup_time_min', warmupTimeMin)
 
-    def getHeaterHealthCooldownTime(self) -> int:
-        return self._get('heater_control', 'heater_health_cooldown_time', self._heaterHealthCoolDownTime)
+    def getHeaterHealthCooldownTimeMin(self) -> int:
+        return self._get('heater_control', 'heater_health_cooldown_time_min', self._heaterHealthCoolDownTimeMin)
 
-    def setHeaterHealthCooldownTime(self, cooldownTime: int) -> None:
-        self._set('heater_control', 'heater_health_cooldown_time', cooldownTime)
+    def setHeaterHealthCooldownTimeMin(self, cooldownTimeMin: int) -> None:
+        self._set('heater_control', 'heater_health_cooldown_time_min', cooldownTimeMin)
 
     def getHeaterMaxSafeRuntimeMin(self) -> int:
         return self._get('heater_control', 'heater_max_safe_runtime_min', self._heaterMaxSafeRuntimeMin)

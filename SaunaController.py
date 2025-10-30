@@ -44,6 +44,7 @@ class SaunaController:
                 # Heater Control
                 self._hc.process()
                 # Process fans
+                # TODO process SaunaOFF situation with a delayed turingn off
                 self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
                 self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
                 self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))

@@ -29,9 +29,9 @@ class HeaterController:
         self._ctx = ctx
         self._sd = sd
         # Initialize timers
-        self._coolingGracePeriodTimer = Timer(self._ctx.getCoolingGracePeriod())
-        self._heaterHealthCoolDownTimer = Timer(self._ctx.getHeaterHealthCooldownTime())
-        self._heaterHealthWarmUpTimer = Timer(self._ctx.getHeaterHealthWarmUpTime())
+        self._coolingGracePeriodTimer = Timer(self._ctx.getCoolingGracePeriodMin() * 60)
+        self._heaterHealthCoolDownTimer = Timer(self._ctx.getHeaterHealthCooldownTimeMin() * 60)
+        self._heaterHealthWarmUpTimer = Timer(self._ctx.getHeaterHealthWarmUpTimeMin() * 60)
         self._heaterMaxSafeRuntimeTimer = Timer(self._ctx.getHeaterMaxSafeRuntimeMin() * 60)
         # Initialize member variables
         self._heaterHealthLastRefPointTemp = self._sd.getHotRoomTemperature('F')
@@ -45,7 +45,7 @@ class HeaterController:
         # Ensure the heater does not run longer than allowed max time
         if self._heaterMaxSafeRuntimeTimer.isUp():
             self._ctx.turnSaunaOff()
-            self._errorMgr.raiseCriticalError(f"Heater was continuously on over {self._ctx.getHeaterMaxSafeRuntimeMin()} minute(s).")
+            self._errorMgr.raiseCriticalError(f"Heater has been continuously on for over {self._ctx.getHeaterMaxSafeRuntimeMin()} minutes.")
 
         # If sauna is off, ensure the heater is off.
         if self._ctx.isSaunaOff():

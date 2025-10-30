@@ -80,18 +80,18 @@ class SaunaUISettingsScreen(Screen):
 
         # Temperature Settings
         add_section_header('Temperature Settings')
-        add_setting('Max Hot Room Temperature (°F)', str(self._ctx.getHotRoomMaxTempF()))
-        add_setting('Preset Medium Hot Room Temperature (°F)', str(self._ctx.getTargetTempPresetMedium()))
-        add_setting('Preset High Hot Room Temperature (°F)', str(self._ctx.getTargetTempPresetHigh()))
-        add_setting('Heater On Lower Temperature Threshold (°F)', str(self._ctx.getLowerHotRoomTempThresholdF()))
-        add_setting('Heater Off Upper Temperature Threshold (°F)', str(self._ctx.getUpperHotRoomTempThresholdF()))
-        add_setting('Hot Room Cooling Grace Period (seconds)', str(self._ctx.getCoolingGracePeriod()))
+        add_setting('Max Hot Room Temperature, °F', str(self._ctx.getHotRoomMaxTempF()))
+        add_setting('Preset Medium Hot Room Temperature, °F', str(self._ctx.getTargetTempPresetMedium()))
+        add_setting('Preset High Hot Room Temperature, °F', str(self._ctx.getTargetTempPresetHigh()))
+        add_setting('Heater On Lower Temperature Threshold, °F', str(self._ctx.getLowerHotRoomTempThresholdF()))
+        add_setting('Heater Off Upper Temperature Threshold, °F', str(self._ctx.getUpperHotRoomTempThresholdF()))
+        add_setting('Hot Room Cooling Grace Period, minutes', str(self._ctx.getCoolingGracePeriodMin()))
 
         # Heater Health Check Settings
         add_section_header('Heater Health Check Settings')
-        add_setting('Heater Health Check Warmup Time (seconds)', str(self._ctx.getHeaterHealthWarmUpTime()))
-        add_setting('Heater Health Check Cooldown Time (seconds)', str(self._ctx.getHeaterHealthCooldownTime()))
-        add_setting('Heater Max Safe Runtime (minutes)', str(self._ctx.getHeaterMaxSafeRuntimeMin()))
+        add_setting('Heater Health Check Warmup Time, minutes', str(self._ctx.getHeaterHealthWarmUpTimeMin()))
+        add_setting('Heater Health Check Cooldown Time, minutes', str(self._ctx.getHeaterHealthCooldownTimeMin()))
+        add_setting('Heater Max Safe Runtime, minutes', str(self._ctx.getHeaterMaxSafeRuntimeMin()))
 
         # RS485 Communication Settings
         add_section_header('RS485 Communication Settings')
@@ -159,15 +159,15 @@ class SaunaUISettingsScreen(Screen):
 
     def save_settings(self, instance):
         # Save temperature settings
-        self._ctx.setHotRoomMaxTempF(int(self.setting_inputs['Max Hot Room Temperature (°F)'].text))
-        self._ctx.setTargetTempPresetMedium(int(self.setting_inputs['Preset Medium Hot Room Temperature (°F)'].text))
-        self._ctx.setTargetTempPresetHigh(int(self.setting_inputs['Preset High Hot Room Temperature (°F)'].text))
-        self._ctx.setLowerHotRoomTempThresholdF(int(self.setting_inputs['Heater On Lower Temperature Threshold (°F)'].text))
-        self._ctx.setUpperHotRoomTempThresholdF(int(self.setting_inputs['Heater Off Upper Temperature Threshold (°F)'].text))
-        self._ctx.setCoolingGracePeriod(int(self.setting_inputs['Hot Room Cooling Grace Period (seconds)'].text))
-        self._ctx.setHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
-        self._ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Health Check Cooldown Time (seconds)'].text))
-        self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime (minutes)'].text))
+        self._ctx.setHotRoomMaxTempF(int(self.setting_inputs['Max Hot Room Temperature, °F'].text))
+        self._ctx.setTargetTempPresetMedium(int(self.setting_inputs['Preset Medium Hot Room Temperature, °F'].text))
+        self._ctx.setTargetTempPresetHigh(int(self.setting_inputs['Preset High Hot Room Temperature, °F'].text))
+        self._ctx.setLowerHotRoomTempThresholdF(int(self.setting_inputs['Heater On Lower Temperature Threshold, °F'].text))
+        self._ctx.setUpperHotRoomTempThresholdF(int(self.setting_inputs['Heater Off Upper Temperature Threshold, °F'].text))
+        self._ctx.setCoolingGracePeriodMin(int(self.setting_inputs['Hot Room Cooling Grace Period, minutes'].text))
+        self._ctx.setHeaterHealthWarmupTimeMin(int(self.setting_inputs['Heater Health Check Warmup Time, minutes'].text))
+        self._ctx.setHeaterHealthCooldownTimeMin(int(self.setting_inputs['Heater Health Check Cooldown Time, minutes'].text))
+        self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime, minutes'].text))
         # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)
         self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
