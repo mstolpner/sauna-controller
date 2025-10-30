@@ -29,27 +29,27 @@ class SaunaUISettingsScreen(Screen):
         settings_layout = GridLayout(cols=2, spacing=10, size_hint_y=None, padding=10)
         settings_layout.bind(minimum_height=settings_layout.setter('height'))
 
-        # Load values from context or use defaults
-        settings = [
-            ('Max Hot Room Temperature (°F)', str(self._ctx.getHotRoomMaxTempF())),
-            ('Preset Medium Hot Room Temperature (°F)', str(self._ctx.getTargetTempPresetMedium())),
-            ('Preset High Hot Room Temperature (°F)', str(self._ctx.getTargetTempPresetHigh())),
-            ('Heater On Lower Temperature Threshold (°F)', str(self._ctx.getLowerHotRoomTempThresholdF())),
-            ('Heater Off Upper Temperature Threshold (°F)', str(self._ctx.getUpperHotRoomTempThresholdF())),
-            ('Hot Room Cooling Grace Period (seconds)', str(self._ctx.getCoolingGracePeriod())),
-            ('Heater Health Check Warmup Time (seconds)', str(self._ctx.getHeaterHealthWarmUpTime())),
-            ('Heater Health Check Cooldown Time (seconds)', str(self._ctx.getHeaterHealthCooldownTime())),
-            ('Heater Max Safe Runtime (minutes)', str(self._ctx.getHeaterMaxSafeRuntimeMin())),
-            ('RS485 Serial Port', self._ctx.getRs485SerialPort()),
-            ('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate())),
-            ('RS485 Timeout (seconds)', str(self._ctx.getRs485SerialTimeout())),
-            ('RS485 Retries', str(self._ctx.getRs485SerialRetries()))
-        ]
-
         self.setting_inputs = {}
 
-        for setting_name, default_value in settings:
-            # Setting Label
+        # Helper function to add section header
+        def add_section_header(title):
+            header_label = Label(
+                text=title,
+                font_size='24sp',
+                bold=True,
+                size_hint_y=None,
+                height=40,
+                color=(0.5, 0.8, 1.0, 1),
+                halign='left',
+                valign='middle'
+            )
+            header_label.bind(size=header_label.setter('text_size'))
+            settings_layout.add_widget(header_label)
+            # Empty cell for second column
+            settings_layout.add_widget(Label(size_hint_y=None, height=40))
+
+        # Helper function to add setting
+        def add_setting(setting_name, default_value):
             label = Label(
                 text=setting_name,
                 font_size='20sp',
@@ -62,7 +62,6 @@ class SaunaUISettingsScreen(Screen):
             label.bind(size=label.setter('text_size'))
             settings_layout.add_widget(label)
 
-            # Setting input field
             input_field = TextInput(
                 text=default_value,
                 multiline=False,
@@ -74,7 +73,30 @@ class SaunaUISettingsScreen(Screen):
             self.setting_inputs[setting_name] = input_field
             settings_layout.add_widget(input_field)
 
-        # Add checkbox for Hot Room Light setting
+        # Temperature Settings
+        add_section_header('Temperature Settings')
+        add_setting('Max Hot Room Temperature (°F)', str(self._ctx.getHotRoomMaxTempF()))
+        add_setting('Preset Medium Hot Room Temperature (°F)', str(self._ctx.getTargetTempPresetMedium()))
+        add_setting('Preset High Hot Room Temperature (°F)', str(self._ctx.getTargetTempPresetHigh()))
+        add_setting('Heater On Lower Temperature Threshold (°F)', str(self._ctx.getLowerHotRoomTempThresholdF()))
+        add_setting('Heater Off Upper Temperature Threshold (°F)', str(self._ctx.getUpperHotRoomTempThresholdF()))
+        add_setting('Hot Room Cooling Grace Period (seconds)', str(self._ctx.getCoolingGracePeriod()))
+
+        # Heater Health Check Settings
+        add_section_header('Heater Health Check Settings')
+        add_setting('Heater Health Check Warmup Time (seconds)', str(self._ctx.getHeaterHealthWarmUpTime()))
+        add_setting('Heater Health Check Cooldown Time (seconds)', str(self._ctx.getHeaterHealthCooldownTime()))
+        add_setting('Heater Max Safe Runtime (minutes)', str(self._ctx.getHeaterMaxSafeRuntimeMin()))
+
+        # RS485 Communication Settings
+        add_section_header('RS485 Communication Settings')
+        add_setting('RS485 Serial Port', self._ctx.getRs485SerialPort())
+        add_setting('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate()))
+        add_setting('RS485 Timeout (seconds)', str(self._ctx.getRs485SerialTimeout()))
+        add_setting('RS485 Retries', str(self._ctx.getRs485SerialRetries()))
+
+        # Hot Room Light Settings
+        add_section_header('Hot Room Light Settings')
         light_label = Label(
             text='Turn Hot Room Light Off When Sauna is Off',
             font_size='20sp',
