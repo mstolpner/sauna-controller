@@ -6,7 +6,7 @@ from HeaterController import HeaterController
 from SaunaContext import SaunaContext
 from SaunaDevices import SaunaDevices
 
-# TODO add timer for max sauna on
+
 class SaunaController:
 
     _ctx = None
@@ -41,27 +41,37 @@ class SaunaController:
                 self._sd.turnLeftFanOff()
                 self._sd.turnRightFanOff()
             else:
-                # Heater Control
-                self._hc.process()
-                # Process fans
-                # TODO process SaunaOFF situation with a delayed turingn off
-                self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
-                self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
-                self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
-                self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
-                self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
-                # Check fan health
-                leftFanOk = self._sd.isLeftFanOk()
-                rightFanOk = self._sd.isRightFanOk()
-                errMsg = ''
-                if not leftFanOk:
-                    errMsg += " Left fan does not work properly."
-                if not rightFanOk:
-                    errMsg += " Right fan does not work properly."
-                if rightFanOk and leftFanOk:
-                    self._errorMgr.eraseFanError()
-                else:
-                    self._errorMgr.raiseFanError(errMsg)
-                # Turn hot room light on/off
-                self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
-                self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+                self._hc.processHeaterControl()
+                self._processFanControl()
+                self._processHotRoomLight()
+
+    def _processFanControl(self):
+        # Process fans
+        # Process SaunaOFF situation with a delayed fan turn off
+        self._sd.turnRightFanOnOff((self._ctx.getRightFanOnStatus() and self._ctx._isSaunaOn) or
+                                   self._ctx.isFanAfterSaunaOffTimerRunning())
+        self._sd.turnLeftFanOnOff((self._ctx.getLeftFanOnStatus() and self._ctx._isSaunaOn) or
+                                  self._ctx.isFanAfterSaunaOffTimerRunning())
+        self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
+        self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
+        self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
+        # Check fan health only when fan(s) are supposed to be running
+        if ((self._ctx.getRightFanOnStatus() and self._ctx._isSaunaOn) or self._ctx.isFanAfterSaunaOffTimerRunning()):
+            leftFanOk = self._sd.isLeftFanOk()
+            rightFanOk = self._sd.isRightFanOk()
+            errMsg = ''
+            if not leftFanOk:
+                errMsg += " Left fan does not work properly."
+            if not rightFanOk:
+                errMsg += " Right fan does not work properly."
+            if rightFanOk and leftFanOk:
+                self._errorMgr.eraseFanError()
+            else:
+                self._errorMgr.raiseFanError(errMsg)
+        else:
+            self._errorMgr.eraseFanError()
+
+    def _processHotRoomLight(self):
+        # Turn hot room light on/off
+        self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())

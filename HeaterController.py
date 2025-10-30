@@ -36,7 +36,7 @@ class HeaterController:
         # Initialize member variables
         self._heaterHealthLastRefPointTemp = self._sd.getHotRoomTemperature('F')
 
-    def process(self) -> None:
+    def processHeaterControl(self) -> None:
         priorHeaterOnStatus = self._isHeaterOn
         self._isHeaterOn = self._sd.isHeaterOn()
         self._ctx.setHotRoomTempF(self._sd.getHotRoomTemperature('F'))

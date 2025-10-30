@@ -3,6 +3,8 @@ from typing import Any, Optional
 from configobj import ConfigObj
 import os
 
+from Timer import Timer
+
 
 class SaunaContext:
     # Default settings
@@ -45,12 +47,17 @@ class SaunaContext:
     _rightFanRpm = 0
     _leftFanOnStatus = False
     _rightFanOnStatus = True
+    # Fan control timer
+    _fanAfterSaunaOffTimer = None
 
     def __init__(self):
         iniFileExists = os.path.exists(self._configFileName)
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
             self.setDefaultSettings()
+        # Init suna timer
+        self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
+
 
     def setDefaultSettings(self):
         self._configObj['rs485'] = {}
@@ -248,6 +255,7 @@ class SaunaContext:
     def setNumberOfFans(self, numberOfFans: int) -> None:
         self._set('fan_control', 'number_of_fans', numberOfFans)
 
+    # TODO remove work Status
     def getRightFanOnStatus(self) -> bool:
         return self._get('fan_control', 'right_fan_on_status', self._rightFanOnStatus)
 
@@ -265,6 +273,7 @@ class SaunaContext:
 
     def setFanRunningTimeAfterSaunaOffHrs(self, hours: float) -> None:
         self._set('fan_control', 'running_time_after_sauna_off_hrs', hours)
+        self._fanAfterSaunaOffTimer.setTimeInterval(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60)
 
     # ----------------------- Appearance attributes --------------------------
 
@@ -310,12 +319,19 @@ class SaunaContext:
 
     def turnSaunaOn(self) -> None:
         self._isSaunaOn = True
+        self._fanAfterSaunaOffTimer.stop()
 
     def turnSaunaOff(self) -> None:
         self._isSaunaOn = False
+        self._fanAfterSaunaOffTimer.start()
 
     def turnSaunaOnOff(self, state: bool) -> None:
         self._isSaunaOn = state
+        if not self._isSaunaOn:
+            self._fanAfterSaunaOffTimer.stop()
+
+    def isFanAfterSaunaOffTimerRunning(self):
+        return self._fanAfterSaunaOffTimer.isRunning()
 
     def isHeaterOn(self) -> bool:
         return self._isHeaterOn
