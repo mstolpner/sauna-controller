@@ -69,8 +69,8 @@ class SaunaDevices:
         # Create persistent event loop for async operations
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
-        # Initialize Relay Module
-        self._setRelayStatus(self._hotRoomLightCoilId, False)
+        # Initialize Hot Room Light
+        self._setRelayStatus(self._hotRoomLightCoilId, self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
         # Initialize Fans
         if self.getNumberOfFans() != self._ctx.getNumberOfFans():
             self.setNumberOfFans(self._ctx.getNumberOfFans())

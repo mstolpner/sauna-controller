@@ -14,6 +14,7 @@ class SaunaController:
     _errorMgr = None
     _sd = None
     _hc = None
+    _onexit = False
 
     def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
         self._ctx = ctx
@@ -24,12 +25,8 @@ class SaunaController:
         atexit.register(self._onExit)
 
     def _onExit(self):
+        self._onexit = True
         self._ctx.turnSaunaOff()
-        self._sd.turnHeaterOff()
-        self._sd.turnHotRoomLightOnOff(False)
-        # TODO debug why not working
-        self._sd.turnLeftFanOff()
-        self._sd.turnRightFanOff()
 
     # ----------------------------------- Sauna Controller Run Methods ------------------------------------
 
@@ -40,26 +37,31 @@ class SaunaController:
 
     def _run(self):
         while True:
-            # Heater Control
-            self._hc.process()
-            # Process fans
-            self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
-            self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
-            self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
-            self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
-            self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
-            # Check fan health
-            leftFanOk = self._sd.isLeftFanOk()
-            rightFanOk = self._sd.isRightFanOk()
-            errMsg = ''
-            if not leftFanOk:
-                errMsg += " Left fan does not work properly."
-            if not rightFanOk:
-                errMsg += " Right fan does not work properly."
-            if rightFanOk and leftFanOk:
-                self._errorMgr.eraseFanError()
+            if self._onexit:
+                self._sd.turnHeaterOff()
+                self._sd.turnLeftFanOff()
+                self._sd.turnRightFanOff()
             else:
-                self._errorMgr.raiseFanError(errMsg)
-            # Turn hot room light on/off
-            self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
-            self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+                # Heater Control
+                self._hc.process()
+                # Process fans
+                self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus())
+                self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus())
+                self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
+                self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
+                self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
+                # Check fan health
+                leftFanOk = self._sd.isLeftFanOk()
+                rightFanOk = self._sd.isRightFanOk()
+                errMsg = ''
+                if not leftFanOk:
+                    errMsg += " Left fan does not work properly."
+                if not rightFanOk:
+                    errMsg += " Right fan does not work properly."
+                if rightFanOk and leftFanOk:
+                    self._errorMgr.eraseFanError()
+                else:
+                    self._errorMgr.raiseFanError(errMsg)
+                # Turn hot room light on/off
+                self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+                self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())

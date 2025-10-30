@@ -26,13 +26,15 @@ class SaunaUISettingsScreen(Screen):
 
         # Settings list with input fields
         scroll_view = ScrollView(size_hint=(1, 0.9))
-        settings_layout = GridLayout(cols=2, spacing=10, size_hint_y=None, padding=10)
+        settings_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, padding=10)
         settings_layout.bind(minimum_height=settings_layout.setter('height'))
 
         self.setting_inputs = {}
+        current_section = None
 
         # Helper function to add section header
         def add_section_header(title):
+            nonlocal current_section
             header_label = Label(
                 text=title,
                 font_size='24sp',
@@ -45,8 +47,11 @@ class SaunaUISettingsScreen(Screen):
             )
             header_label.bind(size=header_label.setter('text_size'))
             settings_layout.add_widget(header_label)
-            # Empty cell for second column
-            settings_layout.add_widget(Label(size_hint_y=None, height=40))
+
+            # Create a new GridLayout for this section's settings
+            current_section = GridLayout(cols=2, spacing=10, size_hint_y=None)
+            current_section.bind(minimum_height=current_section.setter('height'))
+            settings_layout.add_widget(current_section)
 
         # Helper function to add setting
         def add_setting(setting_name, default_value):
@@ -60,7 +65,7 @@ class SaunaUISettingsScreen(Screen):
                 valign='middle'
             )
             label.bind(size=label.setter('text_size'))
-            settings_layout.add_widget(label)
+            current_section.add_widget(label)
 
             input_field = TextInput(
                 text=default_value,
@@ -71,7 +76,7 @@ class SaunaUISettingsScreen(Screen):
                 height=50
             )
             self.setting_inputs[setting_name] = input_field
-            settings_layout.add_widget(input_field)
+            current_section.add_widget(input_field)
 
         # Temperature Settings
         add_section_header('Temperature Settings')
@@ -106,7 +111,7 @@ class SaunaUISettingsScreen(Screen):
             valign='middle'
         )
         light_label.bind(size=light_label.setter('text_size'))
-        settings_layout.add_widget(light_label)
+        current_section.add_widget(light_label)
 
         # Checkbox button
         self.light_checkbox = Button(
@@ -123,7 +128,7 @@ class SaunaUISettingsScreen(Screen):
             self.light_checkbox.background_down = 'icons/checkbox-checked.png'
         self.light_checkbox.bind(on_press=self.toggle_light_checkbox)
 
-        settings_layout.add_widget(self.light_checkbox)
+        current_section.add_widget(self.light_checkbox)
 
         scroll_view.add_widget(settings_layout)
         layout.add_widget(scroll_view)
