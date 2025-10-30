@@ -174,7 +174,7 @@ class SaunaContext:
         return self._get('hot_room_temp_control', 'cooling_grace_period', self._coolingGracePeriod)
 
     def setCoolingGracePeriod(self, coolingGracePeriod: int) -> None:
-        self._set('hot_room_temp_control', 'target_temp_f', coolingGracePeriod)
+        self._set('hot_room_temp_control', 'cooling_grace_period', coolingGracePeriod)
 
     def getLowerHotRoomTempThresholdF(self) -> int:
         return self._get('hot_room_temp_control', 'lower_hot_room_temp_threshold_f', self._lowerHotRoomTempThreshold)
@@ -229,7 +229,7 @@ class SaunaContext:
     # ----------------------- Hot Room Control attributes --------------------------
 
     def getHotRoomLightAlwaysOn(self) -> bool:
-        return self._get('heater_control', 'hot_room_light_always_on', self._hotRoomLightAlwaysOn)
+        return self._get('hot_room_control', 'hot_room_light_always_on', self._hotRoomLightAlwaysOn)
 
     def setHotRoomLightAlwaysOn(self, value: bool) -> None:
         self._set('hot_room_control', 'hot_room_light_always_on', value)
