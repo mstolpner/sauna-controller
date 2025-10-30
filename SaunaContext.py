@@ -80,7 +80,7 @@ class SaunaContext:
         self._configObj['heater_control'] = {}
         self._configObj['heater_control']['heater_health_warmup_time'] = self._heaterHealthWarmUpTime
         self._configObj['heater_control']['heater_health_cooldown_time'] = self._heaterHealthCoolDownTime
-        self._configObj['heater_control']['heater_max_safe_runtime_hr'] = self._heaterMaxSafeRuntimeMin
+        self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
         self._configObj['appearance'] = {}
         self._configObj['appearance']['screen_width'] = self._screenWidth
         self._configObj['appearance']['screen_height'] = self._screenHeight

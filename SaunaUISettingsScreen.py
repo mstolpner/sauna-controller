@@ -39,6 +39,7 @@ class SaunaUISettingsScreen(Screen):
             ('Hot Room Cooling Grace Period (seconds)', str(self._ctx.getCoolingGracePeriod())),
             ('Heater Health Check Warmup Time (seconds)', str(self._ctx.getHeaterHealthWarmUpTime())),
             ('Heater Health Check Cooldown Time (seconds)', str(self._ctx.getHeaterHealthCooldownTime())),
+            ('Heater Max Safe Runtime (minutes)', str(self._ctx.getHeaterMaxSafeRuntimeMin())),
             ('RS485 Serial Port', self._ctx.getRs485SerialPort()),
             ('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate())),
             ('RS485 Timeout (seconds)', str(self._ctx.getRs485SerialTimeout())),
@@ -139,6 +140,7 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setCoolingGracePeriod(int(self.setting_inputs['Hot Room Cooling Grace Period (seconds)'].text))
         self._ctx.setLHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
         self._ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Health Check Cooldown Time (seconds)'].text))
+        self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime (minutes)'].text))
         # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)
         self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)

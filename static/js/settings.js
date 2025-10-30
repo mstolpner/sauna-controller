@@ -14,6 +14,7 @@ function loadSettings() {
             // Heater health check settings
             document.getElementById('warmup-time').value = data.warmup_time;
             document.getElementById('cooldown-time').value = data.cooldown_time;
+            document.getElementById('max-safe-runtime').value = data.max_safe_runtime_min;
 
             // RS485 settings
             document.getElementById('serial-port').value = data.serial_port;
@@ -38,6 +39,7 @@ function saveSettings() {
         cooling_grace_period: parseInt(document.getElementById('cooling-grace-period').value),
         warmup_time: parseInt(document.getElementById('warmup-time').value),
         cooldown_time: parseInt(document.getElementById('cooldown-time').value),
+        max_safe_runtime_min: parseInt(document.getElementById('max-safe-runtime').value),
         serial_port: document.getElementById('serial-port').value,
         baud_rate: parseInt(document.getElementById('baud-rate').value),
         rs485_timeout: parseFloat(document.getElementById('rs485-timeout').value),
