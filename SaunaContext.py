@@ -327,8 +327,10 @@ class SaunaContext:
 
     def turnSaunaOnOff(self, state: bool) -> None:
         self._isSaunaOn = state
-        if not self._isSaunaOn:
+        if  self._isSaunaOn:
             self._fanAfterSaunaOffTimer.stop()
+        else:
+            self._fanAfterSaunaOffTimer.start()
 
     def isFanAfterSaunaOffTimerRunning(self):
         return self._fanAfterSaunaOffTimer.isRunning()
