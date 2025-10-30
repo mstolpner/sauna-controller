@@ -1,6 +1,5 @@
 import atexit
 import threading
-import time
 
 from ErrorManager import ErrorManager
 from HeaterController import HeaterController

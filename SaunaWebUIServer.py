@@ -164,7 +164,7 @@ class SaunaWebUIServer:
             if 'cooling_grace_period' in data:
                 self._ctx.setCoolingGracePeriod(int(data['cooling_grace_period']))
             if 'warmup_time' in data:
-                self._ctx.setLHeaterHealthWarmupTime(int(data['warmup_time']))
+                self._ctx.setHeaterHealthWarmupTime(int(data['warmup_time']))
             if 'cooldown_time' in data:
                 self._ctx.setHeaterHealthCooldownTime(int(data['cooldown_time']))
             if 'max_safe_runtime_min' in data:

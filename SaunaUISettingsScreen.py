@@ -165,7 +165,7 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setLowerHotRoomTempThresholdF(int(self.setting_inputs['Heater On Lower Temperature Threshold (°F)'].text))
         self._ctx.setUpperHotRoomTempThresholdF(int(self.setting_inputs['Heater Off Upper Temperature Threshold (°F)'].text))
         self._ctx.setCoolingGracePeriod(int(self.setting_inputs['Hot Room Cooling Grace Period (seconds)'].text))
-        self._ctx.setLHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
+        self._ctx.setHeaterHealthWarmupTime(int(self.setting_inputs['Heater Health Check Warmup Time (seconds)'].text))
         self._ctx.setHeaterHealthCooldownTime(int(self.setting_inputs['Heater Health Check Cooldown Time (seconds)'].text))
         self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime (minutes)'].text))
         # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)

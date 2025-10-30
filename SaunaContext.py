@@ -211,7 +211,7 @@ class SaunaContext:
     def getHeaterHealthWarmUpTime(self) -> int:
         return self._get('heater_control', 'heater_health_warmup_time', self._heaterHealthWarmUpTime)
 
-    def setLHeaterHealthWarmupTime(self, warmupTime: int) -> None:
+    def setHeaterHealthWarmupTime(self, warmupTime: int) -> None:
         self._set('heater_control', 'heater_health_warmup_time', warmupTime)
 
     def getHeaterHealthCooldownTime(self) -> int:
