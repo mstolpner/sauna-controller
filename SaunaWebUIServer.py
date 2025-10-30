@@ -65,6 +65,7 @@ class SaunaWebUIServer:
             return jsonify({
                 'sauna_on': self._ctx.isSaunaOn(),
                 'heater_on': self._ctx.isHeaterOn(),
+                'light_on': self._ctx.isHotRoomLightOn(),
                 'hot_room_temp_f': self._ctx.getHotRoomTempF(),
                 'hot_room_humidity': self._ctx.getHotRoomHumidity(),
                 'target_temp_f': self._ctx.getHotRoomTargetTempF(),

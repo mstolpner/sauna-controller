@@ -130,8 +130,6 @@ class SaunaUISettingsScreen(Screen):
             self.light_checkbox.background_down = 'icons/checkbox-unchecked.png'
 
     def save_settings(self, instance):
-        """Save all settings"""
-        print("Saving settings:")
         # Save temperature settings
         self._ctx.setHotRoomMaxTempF(int(self.setting_inputs['Max Hot Room Temperature (°F)'].text))
         self._ctx.setTargetTempPresetMedium(int(self.setting_inputs['Preset Medium Hot Room Temperature (°F)'].text))

@@ -107,6 +107,14 @@ function updateStatus() {
             // Update sauna button
             updateSaunaButton(data.sauna_on);
 
+            // Update light icon
+            const lightIcon = document.getElementById('light-icon');
+            if (data.light_on) {
+                lightIcon.src = '/icons/light_on.png';
+            } else {
+                lightIcon.src = '/icons/light_off.png';
+            }
+
             // Update heater icon
             const heaterIcon = document.getElementById('heater-icon');
             if (data.heater_on) {

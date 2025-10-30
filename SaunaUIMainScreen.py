@@ -80,6 +80,9 @@ class SaunaUIMainScreen(Screen):
 
         self.status_bar.add_widget(Label())  # Spacer
 
+        self.light_icon = StatusIcon('icons/light_off.png')
+        self.status_bar.add_widget(self.light_icon)
+
         self.heater_icon = StatusIcon('icons/heater_off.png')
         self.status_bar.add_widget(self.heater_icon)
 
@@ -307,14 +310,20 @@ class SaunaUIMainScreen(Screen):
         Clock.schedule_interval(self.update_clock, 1)
         # Initialize heater button state
         self.update_sauna_button()
+        # Initialize light icon state
+        if self.ctx.isHotRoomLightOn():
+            self.light_icon.background_normal = 'icons/light_on.png'
+            self.light_icon.background_down = 'icons/light_on.png'
+        else:
+            self.light_icon.background_normal = 'icons/light_off.png'
+            self.light_icon.background_down = 'icons/light_off.png'
         # Initialize heater icon state
-        if self.ctx:
-            if self.ctx.isHeaterOn():
-                self.heater_icon.background_normal = 'icons/heater_on.png'
-                self.heater_icon.background_down = 'icons/heater_on.png'
-            else:
-                self.heater_icon.background_normal = 'icons/heater_off.png'
-                self.heater_icon.background_down = 'icons/heater_off.png'
+        if self.ctx.isHeaterOn():
+            self.heater_icon.background_normal = 'icons/heater_on.png'
+            self.heater_icon.background_down = 'icons/heater_on.png'
+        else:
+            self.heater_icon.background_normal = 'icons/heater_off.png'
+            self.heater_icon.background_down = 'icons/heater_off.png'
     
     def toggle_temperature_unit(self, instance):
         """Toggle between Celsius and Fahrenheit"""
@@ -347,27 +356,33 @@ class SaunaUIMainScreen(Screen):
             return False
 
     def update_sensors(self, dt):
-        """Update sensor readings from SaunaContext"""
-        if self.ctx:
-            self.update_temperature_display()
-            self.humidity_label.text = f'{int(self.ctx.getHotRoomHumidity())}%'
-            target_temp = int(self.ctx.getHotRoomTargetTempF())
+        self.update_temperature_display()
+        self.humidity_label.text = f'{int(self.ctx.getHotRoomHumidity())}%'
+        target_temp = int(self.ctx.getHotRoomTargetTempF())
 
-            # Update slider if value differs (to reflect external changes)
-            if hasattr(self, 'temp_slider') and self.temp_slider.value != target_temp:
-                self.temp_slider.value = target_temp
+        # Update slider if value differs (to reflect external changes)
+        if hasattr(self, 'temp_slider') and self.temp_slider.value != target_temp:
+            self.temp_slider.value = target_temp
 
-            self.update_sauna_button()
+        self.update_sauna_button()
 
-            # Update heater icon - switch between heater_on and heater_off
-            if self.ctx.isHeaterOn():
-                # Heater is on - show heater_on icon
-                self.heater_icon.background_normal = 'icons/heater_on.png'
-                self.heater_icon.background_down = 'icons/heater_on.png'
-            else:
-                # Heater is off - show heater_off icon
-                self.heater_icon.background_normal = 'icons/heater_off.png'
-                self.heater_icon.background_down = 'icons/heater_off.png'
+        # Update light icon - switch between light_on and light_off
+        if self.ctx.isHotRoomLightOn():
+            self.light_icon.background_normal = 'icons/light_on.png'
+            self.light_icon.background_down = 'icons/light_on.png'
+        else:
+            self.light_icon.background_normal = 'icons/light_off.png'
+            self.light_icon.background_down = 'icons/light_off.png'
+
+        # Update heater icon - switch between heater_on and heater_off
+        if self.ctx.isHeaterOn():
+            # Heater is on - show heater_on icon
+            self.heater_icon.background_normal = 'icons/heater_on.png'
+            self.heater_icon.background_down = 'icons/heater_on.png'
+        else:
+            # Heater is off - show heater_off icon
+            self.heater_icon.background_normal = 'icons/heater_off.png'
+            self.heater_icon.background_down = 'icons/heater_off.png'
 
         # Update WiFi icon based on connection status
         if self.is_wifi_connected():

@@ -73,9 +73,9 @@ class SaunaUIErrorsScreen(Screen):
         if not self.errorMgr:
             error_label = Label(
                 text='Error Manager not available',
-                font_size='18sp',
+                font_size='24sp',
                 size_hint_y=None,
-                height=40,
+                height=50,
                 color=(0.7, 0.7, 0.7, 1)
             )
             self.errors_layout.add_widget(error_label)
@@ -122,24 +122,24 @@ class SaunaUIErrorsScreen(Screen):
         if not has_errors:
             no_error_label = Label(
                 text='No active errors',
-                font_size='20sp',
+                font_size='28sp',
                 size_hint_y=None,
-                height=60,
+                height=70,
                 color=(0.2, 0.8, 0.2, 1)
             )
             self.errors_layout.add_widget(no_error_label)
 
     def add_error_item(self, category, message):
         """Add an error item to the display"""
-        error_box = BoxLayout(orientation='vertical', size_hint_y=None, height=80, padding=5)
+        error_box = BoxLayout(orientation='vertical', size_hint_y=None, height=110, padding=5)
 
         # Category label
         category_label = Label(
             text=f'[{category}]',
-            font_size='18sp',
+            font_size='24sp',
             bold=True,
             size_hint_y=None,
-            height=30,
+            height=40,
             color=(1, 0.3, 0.3, 1),
             halign='left',
             valign='middle'
@@ -150,9 +150,9 @@ class SaunaUIErrorsScreen(Screen):
         # Message label
         message_label = Label(
             text=message,
-            font_size='16sp',
+            font_size='22sp',
             size_hint_y=None,
-            height=50,
+            height=60,
             color=(1, 1, 1, 1),
             halign='left',
             valign='top'

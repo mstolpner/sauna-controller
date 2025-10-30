@@ -26,6 +26,7 @@ class SaunaController:
     def _onExit(self):
         self._ctx.turnSaunaOff()
         self._sd.turnHeaterOff()
+        # TODO light and fan off
 
     # ----------------------------------- Sauna Controller Run Methods ------------------------------------
 
@@ -58,3 +59,4 @@ class SaunaController:
                 self._errorMgr.raiseFanError(errMsg)
             # Turn hot room light on/off
             self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+            self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
