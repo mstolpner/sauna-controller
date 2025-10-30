@@ -97,7 +97,7 @@ class SaunaUISettingsScreen(Screen):
         add_section_header('RS485 Communication Settings')
         add_setting('RS485 Serial Port', self._ctx.getRs485SerialPort())
         add_setting('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate()))
-        add_setting('RS485 Timeout (seconds)', str(self._ctx.getRs485SerialTimeout()))
+        add_setting('RS485 Timeout, seconds', str(self._ctx.getRs485SerialTimeout()))
         add_setting('RS485 Retries', str(self._ctx.getRs485SerialRetries()))
 
         # Hot Room Light Settings
@@ -172,7 +172,7 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
         self._ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
-        self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout (seconds)'].text))
+        self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout, seconds'].text))
         self._ctx.setRs485SerialRetries(int(self.setting_inputs['RS485 Retries'].text))
 
         self.manager.current = 'main'
