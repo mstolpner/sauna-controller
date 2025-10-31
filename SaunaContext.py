@@ -7,32 +7,38 @@ from Timer import Timer
 
 
 class SaunaContext:
-    # Default settings
-    _saunaSensorsDeviceId: int = 1
-    _relayModuleDeviceId: int = 2
-    _fanControlModuleDeviceId: int = 3
-    _hotRoomTargetTempF: int = 190
-    _coolingGracePeriodMin: int = 1
-    _lowerHotRoomTempThreshold: int = 5
-    _upperHotRoomTempThreshold: int = 0
-    _heaterHealthWarmUpTimeMin: int = 5
-    _heaterHealthCoolDownTimeMin: int = 20
-    _maxHotRoomTempF: int = 240
-    _targetTempPresetMedium: int = 180
-    _targetTempPresetHigh: int = 200
+    # RS485 Serial Port Default Settings
     _rs485SerialPort = '/dev/ttyAMA0'
     _rs485SerialBaudRate: int = 9600
     _rs485SerialTimeout: float = 0.3
     _rs485SerialRetries: int = 3
+    # Modbus Default Settings
+    _saunaSensorsDeviceId: int = 1
+    _relayModuleDeviceId: int = 2
+    _fanControlModuleDeviceId: int = 3
+    # Heater Default Settings
+    _hotRoomTargetTempF: int = 190
+    _coolingGracePeriodMin: int = 5
+    _lowerHotRoomTempThreshold: int = 5
+    _upperHotRoomTempThreshold: int = 0
+    _heaterHealthWarmUpTimeMin: int = 10
+    _heaterHealthCoolDownTimeMin: int = 20
+    _heaterMaxSafeRuntimeMin: int = 240
+    _maxHotRoomTempF: int = 240
+    _targetTempPresetMedium: int = 180
+    _targetTempPresetHigh: int = 200
+    # Fan Default Settings
     _fanSpeedPct: int = 100
     _numberOfFans: int = 2
+    _fanRunningTimeAfterSaunaOffHrs: float = 4.0
+    # Hot Room Light Default Settings
     _hotRoomLightAlwaysOn: bool = False
     _hotRoomLightOn: bool = False
-    _heaterMaxSafeRuntimeMin: int = 240
+    # Appearance Default Settings
     _screenWidth: int = 800
     _screenHeight: int = 1280
     _screenRotation: int = 270
-    _fanRunningTimeAfterSaunaOffHrs: float = 4.0
+    # Web Server Default Settings
     _httpHost = '0.0.0.0'
     _httpPort: int = 8080
     # Dependencies
