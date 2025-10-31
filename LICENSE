@@ -1,0 +1,76 @@
+Creative Commons Attribution-NonCommercial 4.0 International
+
+Copyright (c) 2025 mstolpner
+
+This Sauna Controller project is licensed under the Creative Commons 
+Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+
+You are free to:
+  • Share — copy and redistribute the material in any medium or format
+  • Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+  • Attribution — You must give appropriate credit, provide a link to the 
+    license, and indicate if changes were made. You may do so in any 
+    reasonable manner, but not in any way that suggests the licensor 
+    endorses you or your use.
+  
+  • NonCommercial — You may not use the material for commercial purposes.
+
+  • No additional restrictions — You may not apply legal terms or 
+    technological measures that legally restrict others from doing 
+    anything the license permits.
+
+COMMERCIAL USE DEFINITION:
+Commercial use includes, but is not limited to:
+  • Selling sauna controllers or components based on this design
+  • Offering sauna installation or maintenance services using this software
+  • Manufacturing controllers or PCBs based on this design for sale
+  • Operating a commercial sauna facility using this controller
+  • Any service or product where customers pay for use of this system
+
+WHAT IS PERMITTED (Non-Commercial Use):
+  • Building a controller for your personal home sauna
+  • Using in educational settings or demonstrations
+  • Contributing improvements back to the open source project
+  • Using in non-profit community projects or makerspaces
+  • Research and development purposes
+  • Sharing your modifications with the community
+
+COMMERCIAL LICENSING:
+If you are interested in using this project for commercial purposes, 
+please contact the author at: https://github.com/mstolpner
+
+SAFETY DISCLAIMER:
+This sauna controller interfaces with high-voltage electrical systems 
+and high-temperature heating elements. Improper installation, modification, 
+or use can result in:
+  • Fire hazard
+  • Electric shock
+  • Personal injury or death
+  • Property damage
+
+THE SOFTWARE AND HARDWARE DESIGNS ARE PROVIDED "AS IS", WITHOUT WARRANTY 
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
+USE OR OTHER DEALINGS IN THE SOFTWARE OR HARDWARE DESIGNS.
+
+PROFESSIONAL INSTALLATION REQUIRED:
+Installation must be performed by a licensed electrician in accordance 
+with all applicable local electrical codes and regulations. The author 
+assumes NO LIABILITY for any damages, injuries, or losses resulting from 
+the use of this project.
+
+By using this project, you acknowledge that you have read this license, 
+understand it, and agree to be bound by its terms.
+
+---
+
+Full license text available at:
+https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+Human-readable summary:
+https://creativecommons.org/licenses/by-nc/4.0/
