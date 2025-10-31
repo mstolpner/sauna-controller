@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sauna Controller</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-icons-left">
+                <a href="/fan" class="icon-link">
+                    <img src="/icons/fan.png" alt="Fan" class="status-icon">
+                </a>
+                <div id="wifi-icon" class="icon-link">
+                    <img src="/icons/wifi.png" alt="WiFi" class="status-icon">
+                </div>
+                <a href="/settings" class="icon-link">
+                    <img src="/icons/settings.png" alt="Settings" class="status-icon">
+                </a>
+            </div>
+            <div class="status-icons-right">
+                <img id="light-icon" src="/icons/light_off.png" alt="Light" class="status-icon">
+                <img id="heater-icon" src="/icons/heater_off.png" alt="Heater" class="status-icon">
+                <a href="/errors" id="errors-icon" class="icon-link" style="display: none;">
+                    <img src="/icons/errors.png" alt="Errors" class="status-icon">
+                </a>
+            </div>
+        </div>
+
+        <!-- Clock -->
+        <div class="clock-container">
+            <div id="clock" class="clock">12:00:00</div>
+        </div>
+
+        <!-- Temperature Display -->
+        <div class="sensor-layout">
+            <div class="temp-display">
+                <div id="temperature" class="temperature" onclick="toggleTempUnit()">75°F</div>
+            </div>
+
+            <!-- Humidity Display -->
+            <div class="humidity-display">
+                <img src="/icons/waterdrop.png" alt="Humidity" class="humidity-icon">
+                <span id="humidity" class="humidity-value">50%</span>
+            </div>
+        </div>
+
+        <!-- Preset and Control Buttons -->
+        <div class="preset-layout">
+            <!-- Preset Buttons -->
+            <div class="preset-stack">
+                <button class="preset-btn" onclick="setPreset('high')">
+                    <img id="preset-high-img" src="/icons/preset_high.png" alt="High">
+                </button>
+                <button class="preset-btn" onclick="setPreset('medium')">
+                    <img id="preset-medium-img" src="/icons/preset_medium.png" alt="Medium">
+                </button>
+            </div>
+
+            <!-- Target Temperature Display -->
+            <div class="target-temp-container">
+                <div class="target-temp-box">
+                    <div id="target-temp" class="target-temp">190°F</div>
+                </div>
+            </div>
+
+            <!-- Sauna On/Off Button -->
+            <div class="sauna-btn-container">
+                <button id="sauna-btn" class="sauna-btn" onclick="toggleSauna()">
+                    <img id="sauna-img" src="/icons/sauna_off.png" alt="Sauna">
+                </button>
+            </div>
+        </div>
+
+        <!-- Temperature Slider -->
+        <div class="slider-container">
+            <input type="range" id="temp-slider" class="temp-slider" min="100" max="250" value="190" step="1" oninput="updateTargetTemp(this.value)">
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

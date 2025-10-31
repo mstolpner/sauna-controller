@@ -1,39 +1,69 @@
+from typing import Any, Optional
+
 from configobj import ConfigObj
-import atexit
 import os
+
+from Timer import Timer
 
 
 class SaunaContext:
-    # Default settings
-    _saunaSensorsDeviceId = 1
-    _relayModuleDeviceId = 2
-    _fanControlModuleDeviceId = 3
-    _hotRoomTargetTempF = 190
-    _coolingGracePeriod = 60  # seconds
-    _lowerHotRoomTempThreashold = 5
-    _upperHotRoomTempThreashold = 0
-    _heaterHealthWarmUpTime = 300
-    _heaterHealthCoolDownTime = 1200
-    _maxHotRoomTempF = 240
+    # RS485 Serial Port Default Settings
     _rs485SerialPort = '/dev/ttyAMA0'
-    _rs485SerialBaudRate = 9600
-    _rs485Timeout = 0.3
-    _rs485Retries = 3
-    _fanSpeedPct = 100
-    _numberOfFans = 2
+    _rs485SerialBaudRate: int = 9600
+    _rs485SerialTimeout: float = 0.3
+    _rs485SerialRetries: int = 3
+    # Modbus Default Settings
+    _saunaSensorsDeviceId: int = 1
+    _relayModuleDeviceId: int = 2
+    _fanControlModuleDeviceId: int = 3
+    # Heater Default Settings
+    _hotRoomTargetTempF: int = 190
+    _coolingGracePeriodMin: int = 5
+    _lowerHotRoomTempThreshold: int = 5
+    _upperHotRoomTempThreshold: int = 0
+    _heaterHealthWarmUpTimeMin: int = 10
+    _heaterHealthCoolDownTimeMin: int = 20
+    _heaterMaxSafeRuntimeMin: int = 240
+    _maxHotRoomTempF: int = 240
+    _targetTempPresetMedium: int = 180
+    _targetTempPresetHigh: int = 200
+    # Fan Default Settings
+    _fanSpeedPct: int = 100
+    _numberOfFans: int = 2
+    _fanRunningTimeAfterSaunaOffHrs: float = 4.0
+    # Hot Room Light Default Settings
+    _hotRoomLightAlwaysOn: bool = False
+    _hotRoomLightOn: bool = False
+    # Appearance Default Settings
+    _screenWidth: int = 800
+    _screenHeight: int = 1280
+    _screenRotation: int = 270
+    # Web Server Default Settings
+    _httpHost = '0.0.0.0'
+    _httpPort: int = 8080
+    # Dependencies
+    _configObj = None
+    _configFileName = 'sauna.ini'
+    # Runtime-only, not saved to config
+    _isSaunaOn = False
+    _isHeaterOn = False
+    _hotRoomTempF = 20
+    _hotRoomHumidity = 50
+    _leftFanRpm = 0
+    _rightFanRpm = 0
     _leftFanOnStatus = False
     _rightFanOnStatus = True
-    _configObj = None
-    _isSaunaOn = False
-    _configFileName = 'sauna.ini'
+    # Fan control timer
+    _fanAfterSaunaOffTimer = None
 
     def __init__(self):
         iniFileExists = os.path.exists(self._configFileName)
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
             self.setDefaultSettings()
-        # Save configuration on exit
-        atexit.register(self._onExit)
+        # Init suna timer
+        self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
+
 
     def setDefaultSettings(self):
         self._configObj['rs485'] = {}
@@ -42,150 +72,310 @@ class SaunaContext:
         self._configObj['rs485']['fan_module_device_id'] = self._fanControlModuleDeviceId
         self._configObj['rs485']['serial_port_name'] = self._rs485SerialPort
         self._configObj['rs485']['serial_baud_rate'] = self._rs485SerialBaudRate
-        self._configObj['rs485']['serial_timeout'] = self._rs485Timeout
-        self._configObj['rs485']['serial_retries'] = self._rs485Retries
+        self._configObj['rs485']['serial_timeout'] = self._rs485SerialTimeout
+        self._configObj['rs485']['serial_retries'] = self._rs485SerialRetries
         self._configObj['hot_room_temp_control'] = {}
         self._configObj['hot_room_temp_control']['target_temp_f'] = self._hotRoomTargetTempF
-        self._configObj['hot_room_temp_control']['cooling_grace_period'] = self._coolingGracePeriod
-        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threashold_f'] = self._lowerHotRoomTempThreashold
-        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threashold_f'] = self._upperHotRoomTempThreashold
-        self._configObj['hot_room_temp_control']['heater_health_warmup_time'] = self._heaterHealthWarmUpTime
-        self._configObj['hot_room_temp_control']['heater_health_cooldown_time'] = self._heaterHealthCoolDownTime
+        self._configObj['hot_room_temp_control']['cooling_grace_period_min'] = self._coolingGracePeriodMin
+        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threshold_f'] = self._lowerHotRoomTempThreshold
+        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threshold_f'] = self._upperHotRoomTempThreshold
         self._configObj['hot_room_temp_control']['max_temp_f'] = self._maxHotRoomTempF
+        self._configObj['hot_room_temp_control']['target_temp_preset_medium'] = self._targetTempPresetMedium
+        self._configObj['hot_room_temp_control']['target_temp_preset_high'] = self._targetTempPresetHigh
         self._configObj['fan_control'] = {}
         self._configObj['fan_control']['fan_speed_pct'] = self._fanSpeedPct
         self._configObj['fan_control']['number_of_fans'] = self._numberOfFans
-        self._configObj['fan_control']['left_fan_on_status'] = self._leftFanOnStatus
-        self._configObj['fan_control']['right_fan_on_status'] = self._rightFanOnStatus
+        self._configObj['fan_control']['left_fan_enabled'] = self._leftFanOnStatus
+        self._configObj['fan_control']['right_fan_enabled'] = self._rightFanOnStatus
+        self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = self._fanRunningTimeAfterSaunaOffHrs
+        self._configObj['hot_room_control'] = {}
+        self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
+        self._configObj['heater_control'] = {}
+        self._configObj['heater_control']['heater_health_warmup_time_min'] = self._heaterHealthWarmUpTimeMin
+        self._configObj['heater_control']['heater_health_cooldown_time_min'] = self._heaterHealthCoolDownTimeMin
+        self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
+        self._configObj['appearance'] = {}
+        self._configObj['appearance']['screen_width'] = self._screenWidth
+        self._configObj['appearance']['screen_height'] = self._screenHeight
+        self._configObj['appearance']['screen_rotation'] = self._screenRotation
+        self._configObj['webui'] = {}
+        self._configObj['webui']['http_host'] = self._httpHost
+        self._configObj['webui']['http_port'] = self._httpPort
 
-    # Save configuration on exit
-    def _onExit(self):
+    def persist(self):
         self._configObj.write()
+
+    # ----------------------- RS485 configuration attributes --------------------------
+
+    def _initSection(self, section: str):
+        if section not in self._configObj:
+            self._configObj[section] = {}
+
+    def _get(self, section: str, key: str, default: Any) -> Any:
+        try:
+            if type(default) == float:
+                return self._configObj[section].as_float(key)
+            elif type(default) == int:
+                return self._configObj[section].as_int(key)
+            elif type(default) == bool:
+                return self._configObj[section].as_bool(key)
+            elif type(default) == str:
+                return self._configObj[section][key]
+        except KeyError:
+            self._initSection(section)
+            self._set(section, key, default)
+            return default
+
+    def _set(self, section: str, key: str, value: Any) -> None:
+        self._initSection(section)
+        self._configObj[section][key] = value
+        self.persist()
+
+    # ------------------------ RS485 Modbus Configuration -----------------------
+
+    def getSaunaSensorsDeviceId(self) -> int:
+        return self._get('rs485', 'sensors_module_device_id', self._saunaSensorsDeviceId)
+
+    def setSaunaSensorsDeviceId(self, saunaSensorsDeviceId: int) -> None:
+        self._set('rs485', 'sensors_module_device_id', saunaSensorsDeviceId)
+
+    def getRelayModuleDeviceId(self) -> int:
+        return self._get('rs485', 'relay_module_device_id', self._relayModuleDeviceId)
+
+    def setRelayModuleDeviceId(self, relayModuleDeviceId: int) -> None:
+        self._set('rs485', 'relay_module_device_id', relayModuleDeviceId)
+
+    def getFanControlModuleDeviceId(self) -> int:
+        return self._get('rs485', 'fan_module_device_id', self._fanControlModuleDeviceId)
+
+    def setFanControlModuleDeviceId(self, fanControlModuleDeviceId: int) -> None:
+        self._set('rs485', 'fan_module_device_id', fanControlModuleDeviceId)
+
+    def getRs485SerialPort(self) -> str:
+        return self._get('rs485', 'serial_port_name', self._rs485SerialPort)
+
+    def setRs485SerialPort(self, rs485SerialPort: str) -> None:
+        self._set('rs485', 'serial_port_name', rs485SerialPort)
+
+    def getRs485SerialBaudRate(self) -> int:
+        return self._get('rs485', 'serial_baud_rate', self._rs485SerialBaudRate)
+
+    def setRs485SerialBaudRate(self, rs485SerialBaudRate: int) -> None:
+        self._set('rs485', 'serial_baud_rate', rs485SerialBaudRate)
+
+    def getRs485SerialTimeout(self) -> float:
+        return self._get('rs485', 'serial_timeout', self._rs485SerialTimeout)
+
+    def setRs485SerialTimeout(self, rs485SerialTimeout: float) -> None:
+        self._set('rs485', 'serial_timeout', rs485SerialTimeout)
+
+    def getRs485SerialRetries(self) -> int:
+        return self._get('rs485', 'serial_retries', self._rs485SerialRetries)
+
+    def setRs485SerialRetries(self, rs485SerialRetries: int) -> None:
+        self._set('rs485', 'serial_retries', rs485SerialRetries)
+
+    # ----------------------- Hot Room Temp Control attributes --------------------------
+
+    def getHotRoomTargetTempF(self) -> int:
+        return self._get('hot_room_temp_control', 'target_temp_f', self._targetTempPresetMedium)
+
+    def setHotRoomTargetTempF(self, targetTemperatureF: int) -> None:
+        self._set('hot_room_temp_control', 'target_temp_f', targetTemperatureF)
+
+    def getCoolingGracePeriodMin(self) -> int:
+        return self._get('hot_room_temp_control', 'cooling_grace_period_min', self._coolingGracePeriodMin)
+
+    def setCoolingGracePeriodMin(self, coolingGracePeriodMin: int) -> None:
+        self._set('hot_room_temp_control', 'cooling_grace_period_min', coolingGracePeriodMin)
+
+    def getLowerHotRoomTempThresholdF(self) -> int:
+        return self._get('hot_room_temp_control', 'lower_hot_room_temp_threshold_f', self._lowerHotRoomTempThreshold)
+
+    def setLowerHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
+        self._set('hot_room_temp_control', 'lower_hot_room_temp_threshold_f', thresholdTempF)
+
+    def getUpperHotRoomTempThresholdF(self) -> int:
+        return self._get('hot_room_temp_control', 'upper_hot_room_temp_threshold_f', self._upperHotRoomTempThreshold)
+
+    def setUpperHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
+        self._set('hot_room_temp_control', 'upper_hot_room_temp_threshold_f', thresholdTempF)
+
+    def getHotRoomMaxTempF(self) -> int:
+        return self._get('hot_room_temp_control', 'max_temp_f', self._maxHotRoomTempF)
+
+    def setHotRoomMaxTempF(self, maxTempF: int) -> None:
+        self._set('hot_room_temp_control', 'max_temp_f', maxTempF)
+
+    def getTargetTempPresetMedium(self) -> int:
+        return self._get('hot_room_temp_control', 'target_temp_preset_medium', self._targetTempPresetMedium)
+
+    def setTargetTempPresetMedium(self, tempF: int) -> None:
+        self._set('hot_room_temp_control', 'target_temp_preset_medium', tempF)
+
+    def getTargetTempPresetHigh(self) -> int:
+        return self._get('hot_room_temp_control', 'target_temp_preset_high', self._targetTempPresetHigh)
+
+    def setTargetTempPresetHigh(self, tempF: int) -> None:
+        self._set('hot_room_temp_control', 'target_temp_preset_high', tempF)
+
+    # ----------------------- Heater Control attributes --------------------------
+
+    def getHeaterHealthWarmUpTimeMin(self) -> int:
+        return self._get('heater_control', 'heater_health_warmup_time_min', self._heaterHealthWarmUpTimeMin)
+
+    def setHeaterHealthWarmupTimeMin(self, warmupTimeMin: int) -> None:
+        self._set('heater_control', 'heater_health_warmup_time_min', warmupTimeMin)
+
+    def getHeaterHealthCooldownTimeMin(self) -> int:
+        return self._get('heater_control', 'heater_health_cooldown_time_min', self._heaterHealthCoolDownTimeMin)
+
+    def setHeaterHealthCooldownTimeMin(self, cooldownTimeMin: int) -> None:
+        self._set('heater_control', 'heater_health_cooldown_time_min', cooldownTimeMin)
+
+    def getHeaterMaxSafeRuntimeMin(self) -> int:
+        return self._get('heater_control', 'heater_max_safe_runtime_min', self._heaterMaxSafeRuntimeMin)
+
+    def setHeaterMaxSafeRuntimeMin(self, value: int) -> None:
+        self._set('heater_control', 'heater_max_safe_runtime_min', value)
+
+    # ----------------------- Hot Room Control attributes --------------------------
+
+    def getHotRoomLightAlwaysOn(self) -> bool:
+        return self._get('hot_room_control', 'hot_room_light_always_on', self._hotRoomLightAlwaysOn)
+
+    def setHotRoomLightAlwaysOn(self, value: bool) -> None:
+        self._set('hot_room_control', 'hot_room_light_always_on', value)
+
+    # ----------------------- Fan Control attributes --------------------------
+
+    def getFanSpeedPct(self) -> int:
+        return self._get('fan_control', 'fan_speed_pct', self._fanSpeedPct)
+
+    def setFanSpeedPct(self, fanSpeedPct: int) -> None:
+        self._set('fan_control', 'fan_speed_pct', fanSpeedPct)
+
+    def getNumberOfFans(self) -> int:
+        return self._get('fan_control', 'number_of_fans', self._numberOfFans)
+
+    def setNumberOfFans(self, numberOfFans: int) -> None:
+        self._set('fan_control', 'number_of_fans', numberOfFans)
+
+    def isRightFanEnabled(self) -> bool:
+        return self._get('fan_control', 'right_fan_enabled', self._rightFanOnStatus)
+
+    def setRightFanEnabled(self, status: bool) -> None:
+        self._set('fan_control', 'right_fan_enabled', status)
+
+    def isLeftFanEnabled(self) -> bool:
+        return self._get('fan_control', 'left_fan_enabled', self._leftFanOnStatus)
+
+    def setLeftFanEnabled(self, status: bool) -> None:
+        self._set('fan_control', 'left_fan_enabled', status)
+
+    def getFanRunningTimeAfterSaunaOffHrs(self) -> float:
+        return self._get('fan_control', 'running_time_after_sauna_off_hrs', self._fanRunningTimeAfterSaunaOffHrs)
+
+    def setFanRunningTimeAfterSaunaOffHrs(self, hours: float) -> None:
+        self._set('fan_control', 'running_time_after_sauna_off_hrs', hours)
+        self._fanAfterSaunaOffTimer.setTimeInterval(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60)
+
+    # ----------------------- Appearance attributes --------------------------
+
+    def getScreenWidth(self) -> int:
+        return self._get('appearance', 'screen_width', self._screenWidth)
+
+    def setScreenWidth(self, width: int) -> None:
+        self._set('appearance', 'screen_width', width)
+
+    def getScreenHeight(self) -> int:
+        return self._get('appearance', 'screen_height', self._screenHeight)
+
+    def setScreenHeight(self, height: int) -> None:
+        self._set('appearance', 'screen_height', height)
+
+    def getScreenRotation(self) -> int:
+        return self._get('appearance', 'screen_rotation', self._screenRotation)
+
+    def setScreenRotation(self, rotation: int) -> None:
+        self._set('appearance', 'screen_rotation', rotation)
+
+    # -------------------------- Web UI --------------------------------
+
+    def getHttpHost(self) -> str:
+        return self._get('webui', 'http_host', self._httpHost)
+
+    def setHttpHost(self, host: str) -> None:
+        self._set('webui', 'http_host', host)
+
+    def getHttpPort(self) -> int:
+        return self._get('webui', 'http_port', self._httpPort)
+
+    def setHttpPort(self, port: int) -> None:
+        self._set('webui', 'http_port', port)
+
+    # ----------------------- Not persisted attributes --------------------------
 
     def isSaunaOn(self) -> bool:
         return self._isSaunaOn
 
     def isSaunaOff(self) -> bool:
         return not self._isSaunaOn
-    
+
     def turnSaunaOn(self) -> None:
         self._isSaunaOn = True
-    
+        self._fanAfterSaunaOffTimer.stop()
+
     def turnSaunaOff(self) -> None:
         self._isSaunaOn = False
+        self._fanAfterSaunaOffTimer.start()
 
-    def getSaunaSensorsDeviceId(self) -> int:
-        return self._configObj['rs485'].as_int('sensors_module_device_id')
+    def turnSaunaOnOff(self, state: bool) -> None:
+        self._isSaunaOn = state
+        if  self._isSaunaOn:
+            self._fanAfterSaunaOffTimer.stop()
+        else:
+            self._fanAfterSaunaOffTimer.start()
 
-    def setSaunaSensorsDeviceId(self, saunaSensorsDeviceId: int) -> None:
-        self._configObj['rs485']['sensors_module_device_id'] = saunaSensorsDeviceId
+    def isFanAfterSaunaOffTimerRunning(self):
+        return self._fanAfterSaunaOffTimer.isRunning()
 
-    def getRelayModuleDeviceId(self) -> int:
-        return self._configObj['rs485'].as_int('relay_module_device_id')
+    def isHeaterOn(self) -> bool:
+        return self._isHeaterOn
 
-    def setRelayModuleDeviceId(self, relayModuleDeviceId: int) -> None:
-        self._configObj['rs485']['relay_module_device_id'] = relayModuleDeviceId
+    def setHeaterOn(self) -> None:
+        self._isHeaterOn = True
 
-    def getFanControlModuleDeviceId(self) -> int:
-        return self._configObj['rs485'].as_int('fan_module_device_id')
+    def setHeaterOff(self) -> None:
+        self._isHeaterOn = False
 
-    def setFanControlModuleDeviceId(self, fanControlModuleDeviceId: int) -> None:
-        self._configObj['rs485']['fan_module_device_id'] = fanControlModuleDeviceId
+    def getHotRoomTempF(self) -> float:
+        return self._hotRoomTempF
 
-    def getRs485SerialPort(self) -> str:
-        return self._configObj['rs485']['serial_port_name']
+    def setHotRoomTempF(self, tempF: float) -> None:
+        self._hotRoomTempF = tempF
 
-    def setRs485SerialPort(self, rs485SerialPort: str) -> None:
-        self._configObj['rs485']['serial_port_name'] = rs485SerialPort
+    def getHotRoomHumidity(self) -> float:
+        return self._hotRoomHumidity
 
-    def getRs485SerialBaudRate(self) -> int:
-        return self._configObj['rs485'].as_int('serial_baud_rate')
+    def setHotRoomHumidity(self, humidity: float) -> None:
+        self._hotRoomHumidity = humidity
 
-    def setRs485SerialBaudRate(self, rs485SerialBaudRate: int) -> None:
-        self._configObj['rs485']['serial_baud_rate'] = rs485SerialBaudRate
+    def isHotRoomLightOn(self) -> bool:
+        return self._hotRoomLightOn
 
-    def getRs485SerialTimeout(self) -> float:
-        try:
-            return self._configObj['rs485'].as_float('serial_timeout')
-        except KeyError:
-            self.setRs485SerialTimeout(self._rs485Timeout)
-            return self._configObj['rs485'].as_float('serial_timeout')
+    def setHotRoomLightOnOff(self, value: bool) -> None:
+        self._hotRoomLightOn = value
 
-    def setRs485SerialTimeout(self, rs485SerialTimeout: float) -> None:
-        self._configObj['rs485']['serial_timeout'] = rs485SerialTimeout
+    def getLeftFanRpm(self) -> int:
+        return self._leftFanRpm
 
-    def getRs485SerialRetries(self) -> int:
-        try:
-            return self._configObj['rs485'].as_int('serial_retries')
-        except KeyError:
-            self.setRs485SerialRetries(self._rs485Retries)
-            return self._configObj['rs485'].as_int('serial_retries')
+    def setLeftFanRpm(self, rpm: int) -> None:
+        self._leftFanRpm = rpm
 
-    def setRs485SerialRetries(self, rs485SerialRetries: int) -> None:
-        self._configObj['rs485']['serial_retries'] = rs485SerialRetries
+    def getRightFanRpm(self) -> int:
+        return self._rightFanRpm
 
-    def getHotRoomTargetTempF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('target_temp_f')
+    def setRightFanRpm(self, rpm: int) -> None:
+        self._rightFanRpm = rpm
 
-    def setHotRoomTargetTempF(self, targetTemperatureF: int) -> None:
-        self._configObj['hot_room_temp_control']['target_temp_f'] = targetTemperatureF
-
-    def getCoolingGracePeriod(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('cooling_grace_period')
-
-    def setCoolingGracePeriod(self, coolingGracePeriod: int) -> None:
-        self._configObj['hot_room_temp_control']['cooling_grace_period'] = coolingGracePeriod
-
-    def getLowerHotRoomTempThreasholdF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('lower_hot_room_temp_threashold_f')
-
-    def setLowerHotRoomTempThreasholdF(self, thresholdTempF: int) -> None:
-        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threashold_f'] = thresholdTempF
-
-    def getUpperHotRoomTempThreasholdF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('upper_hot_room_temp_threashold_f')
-
-    def setUpperHotRoomTempThreasholdF(self, thresholdTempF: int) -> None:
-        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threashold_f'] = thresholdTempF
-
-    def getHeaterHealthWarmUpTime(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('heater_health_warmup_time')
-
-    def setLHeaterHealthWarmupTime(self, warmupTime: int) -> None:
-        self._configObj['hot_room_temp_control']['heater_health_warmup_time'] = warmupTime
-
-    def getHeaterHealthCooldownTime(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_int('heater_health_cooldown_time')
-
-    def setHeaterHealthCooldownTime(self, cooldownTime: int) -> None:
-        self._configObj['hot_room_temp_control']['heater_health_cooldown_time'] = cooldownTime
-
-    def getHotRoomMaxTempF(self) -> int:
-        return self._configObj['hot_room_temp_control'].as_bool('max_temp_f')
-
-    def setHotRoomMaxTempF(self, maxTempF: int) -> None:
-        self._configObj['hot_room_temp_control']['max_temp_f'] = maxTempF
-
-    def getFanSpeedPct(self) -> int:
-        return self._configObj['fan_control'].as_int('fan_speed_pct')
-
-    def setFanSpeedPct(self, fanSpeedPct: int) -> None:
-        self._configObj['fan_control']['fan_speed_pct'] = fanSpeedPct
-
-    def getNumberOfFans(self) -> int:
-        return self._configObj['fan_control'].as_int('number_of_fans')
-
-    def setNumberOfFans(self, numberOfFans: int) -> None:
-        self._configObj['fan_control']['number_of_fans'] = numberOfFans
-
-    def getRightFanOnStatus(self) -> bool:
-        return self._configObj['fan_control'].as_bool('right_fan_on_status')
-
-    def setRightFanOnStatus(self, status: bool) -> None:
-        self._configObj['fan_control']['right_fan_on_status'] = status
-
-    def getLeftFanOnStatus(self) -> bool:
-        return self._configObj['fan_control'].as_bool('left_fan_on_status')
-
-    def setLeftFanOnStatus(self, status: bool) -> None:
-        self._configObj['fan_control']['left_fan_on_status'] = status

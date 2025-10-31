@@ -1,36 +1,41 @@
-import time
-from SaunaContext import SaunaContext
-from SaunaDevices import SaunaDevices
-from HeaterController import HeaterController
+from kivy.config import Config
+from SaunaController import SaunaController
+from SaunaWebUIServer import SaunaWebUIServer
+import threading
 
+# Enable virtual keyboard - must be before other kivy imports
+Config.set('kivy', 'keyboard_mode', 'systemanddock')
+
+from SaunaContext import SaunaContext
+from ErrorManager import ErrorManager
+from SaunaUIMainScreen import SaunaControlApp
 
 if __name__ == '__main__':
+    _ctx = SaunaContext()
+    _errorMgr = ErrorManager()
 
-    # Initialize classes
-    ctx = SaunaContext()
-    sd = SaunaDevices(ctx)
-    hc = HeaterController(ctx, sd)
+    # Initialize Sauna Controller
+    _sc = SaunaController(_ctx, _errorMgr)
+    _sc.run()
+    """
+    # Start web server in background thread
+    web_thread = threading.Thread(
+        target=SaunaWebUIServer.start_web_ui,
+        args=(_ctx, _errorMgr),
+        daemon=True
+    )
+    web_thread.start()"""
 
-#    h = sd.getHotRoomHumidity()
-#    t = sd.getHotRoomTemperature()
-#    c = sd.getHotRoomTemperature('C')
-#    hs = sd.isHeaterOff()
-#    lf = sd.isLeftFanOn()
-#    rf = sd.isRightFanOn()
-#    sr = sd.isRightFanOk()
-    sd.turnRightFanOff()
-#    rf = sd.isRightFanOn()
-#    sd.turnLeftFanOn()
-#    lf = sd.isLeftFanOn()
-#    sl = sd.isLeftFanOk()
-#    sr = sd.isRightFanOk()
+    # Start web server in background thread
+    server = SaunaWebUIServer(_ctx, _errorMgr)
+    web_thread = threading.Thread(
+        target=server.run,
+        daemon=True
+    )
+    web_thread.start()
 
-
-    # Main Application Loop
-    while True:
-
-        hc.process()
-        time.sleep(1)
+    # Run the Kivy UI application (this blocks until app closes)
+    SaunaControlApp(ctx=_ctx, errorMgr=_errorMgr).run()
 
 
 
