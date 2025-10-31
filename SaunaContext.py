@@ -85,8 +85,8 @@ class SaunaContext:
         self._configObj['fan_control'] = {}
         self._configObj['fan_control']['fan_speed_pct'] = self._fanSpeedPct
         self._configObj['fan_control']['number_of_fans'] = self._numberOfFans
-        self._configObj['fan_control']['left_fan_on_status'] = self._leftFanOnStatus
-        self._configObj['fan_control']['right_fan_on_status'] = self._rightFanOnStatus
+        self._configObj['fan_control']['left_fan_enabled'] = self._leftFanOnStatus
+        self._configObj['fan_control']['right_fan_enabled'] = self._rightFanOnStatus
         self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = self._fanRunningTimeAfterSaunaOffHrs
         self._configObj['hot_room_control'] = {}
         self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
@@ -261,18 +261,17 @@ class SaunaContext:
     def setNumberOfFans(self, numberOfFans: int) -> None:
         self._set('fan_control', 'number_of_fans', numberOfFans)
 
-    # TODO remove work Status
-    def getRightFanOnStatus(self) -> bool:
-        return self._get('fan_control', 'right_fan_on_status', self._rightFanOnStatus)
+    def isRightFanEnabled(self) -> bool:
+        return self._get('fan_control', 'right_fan_enabled', self._rightFanOnStatus)
 
-    def setRightFanOnStatus(self, status: bool) -> None:
-        self._set('fan_control', 'right_fan_on_status', status)
+    def setRightFanEnabled(self, status: bool) -> None:
+        self._set('fan_control', 'right_fan_enabled', status)
 
-    def getLeftFanOnStatus(self) -> bool:
-        return self._get('fan_control', 'left_fan_on_status', self._leftFanOnStatus)
+    def isLeftFanEnabled(self) -> bool:
+        return self._get('fan_control', 'left_fan_enabled', self._leftFanOnStatus)
 
-    def setLeftFanOnStatus(self, status: bool) -> None:
-        self._set('fan_control', 'left_fan_on_status', status)
+    def setLeftFanEnabled(self, status: bool) -> None:
+        self._set('fan_control', 'left_fan_enabled', status)
 
     def getFanRunningTimeAfterSaunaOffHrs(self) -> float:
         return self._get('fan_control', 'running_time_after_sauna_off_hrs', self._fanRunningTimeAfterSaunaOffHrs)

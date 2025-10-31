@@ -322,11 +322,11 @@ class SaunaDevices:
 
     def isLeftFanOk(self) -> bool:
         # Fan controller reports fan staus failed if the fan is off managed by a relay
-        return not self._ctx.getLeftFanOnStatus() or not self._checkFanFaultStatus(self._leftFanId)
+        return not self._ctx.isLeftFanEnabled() or not self._checkFanFaultStatus(self._leftFanId)
 
     def isRightFanOk(self) -> bool:
         # Fan controller reports fan staus failed if the fan is off managed by a relay
-        return not self._ctx.getRightFanOnStatus() or not self._checkFanFaultStatus(self._rightFanId)
+        return not self._ctx.isRightFanEnabled() or not self._checkFanFaultStatus(self._rightFanId)
 
     def _resetFanModuleGovernor(self) -> None:
         response = self._modbus_write_register(self._resetFanModuleGovernorAddress, 
@@ -340,7 +340,6 @@ class SaunaDevices:
 
 # ----------------------------------- RS485 Modbus Helpers -------------------------------------
 
-#TODO add configuration routines for thermometer and fan module
     _client: AsyncModbusSerialClient = None
 
     def _modbus_read_holding_registers(self, address: int, slave: int, count: int=1):

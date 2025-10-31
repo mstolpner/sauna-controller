@@ -44,7 +44,7 @@ class SaunaUIFanScreen(Screen):
         )
 
         # Load initial state from context
-        self.left_fan_btn.active = self._ctx.getLeftFanOnStatus()
+        self.left_fan_btn.active = self._ctx.isLeftFanEnabled()
         if self.left_fan_btn.active:
             self.left_fan_btn.background_normal = 'icons/checkbox-checked.png'
             self.left_fan_btn.background_down = 'icons/checkbox-checked.png'
@@ -67,7 +67,7 @@ class SaunaUIFanScreen(Screen):
         )
 
         # Load initial state from context
-        self.right_fan_btn.active = self._ctx.getRightFanOnStatus()
+        self.right_fan_btn.active = self._ctx.isRightFanEnabled()
         if self.right_fan_btn.active:
             self.right_fan_btn.background_normal = 'icons/checkbox-checked.png'
             self.right_fan_btn.background_down = 'icons/checkbox-checked.png'
@@ -241,8 +241,8 @@ class SaunaUIFanScreen(Screen):
             self.right_rpm_value.text = f'{right_rpm} RPM'
 
     def on_ok(self, instance):
-        self._ctx.setRightFanOnStatus(self.right_fan_btn.active)
-        self._ctx.setLeftFanOnStatus(self.left_fan_btn.active)
+        self._ctx.setRightFanEnabled(self.right_fan_btn.active)
+        self._ctx.setLeftFanEnabled(self.left_fan_btn.active)
         self._ctx.setFanSpeedPct(self.speed_slider.value)
         self._ctx.setFanRunningTimeAfterSaunaOffHrs(self.runtime_slider.value)
         self.manager.current = 'main'

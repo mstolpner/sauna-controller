@@ -77,8 +77,8 @@ class SaunaWebUIServer:
         def api_fan_status():
             """Get fan configuration"""
             return jsonify({
-                'left_fan_on': self._ctx.getLeftFanOnStatus(),
-                'right_fan_on': self._ctx.getRightFanOnStatus(),
+                'left_fan_on': self._ctx.isLeftFanEnabled(),
+                'right_fan_on': self._ctx.isRightFanEnabled(),
                 'fan_speed_pct': self._ctx.getFanSpeedPct(),
                 'left_fan_rpm': self._ctx.getLeftFanRpm(),
                 'right_fan_rpm': self._ctx.getRightFanRpm(),
@@ -90,9 +90,9 @@ class SaunaWebUIServer:
             """Update fan configuration"""
             data = request.json
             if 'left_fan_on' in data:
-                self._ctx.setLeftFanOnStatus(data['left_fan_on'])
+                self._ctx.setLeftFanEnabled(data['left_fan_on'])
             if 'right_fan_on' in data:
-                self._ctx.setRightFanOnStatus(data['right_fan_on'])
+                self._ctx.setRightFanEnabled(data['right_fan_on'])
             if 'fan_speed_pct' in data:
                 self._ctx.setFanSpeedPct(int(data['fan_speed_pct']))
             if 'running_time_after_sauna_off_hrs' in data:
