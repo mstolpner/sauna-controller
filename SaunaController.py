@@ -71,10 +71,10 @@ class SaunaController:
     def _processFanControl(self):
         # Process fans
         # Process SaunaOFF situation with a delayed fan turn off
-        self._sd.turnRightFanOnOff((self._ctx.getRightFanOnStatus() and self._ctx._isSaunaOn) or
-                                   self._ctx.isFanAfterSaunaOffTimerRunning())
-        self._sd.turnLeftFanOnOff((self._ctx.getLeftFanOnStatus() and self._ctx._isSaunaOn) or
-                                  self._ctx.isFanAfterSaunaOffTimerRunning())
+        self._sd.turnRightFanOnOff(self._ctx.getRightFanOnStatus() and (self._ctx._isSaunaOn or
+                                   self._ctx.isFanAfterSaunaOffTimerRunning()))
+        self._sd.turnLeftFanOnOff(self._ctx.getLeftFanOnStatus() and (self._ctx._isSaunaOn or
+                                  self._ctx.isFanAfterSaunaOffTimerRunning()))
         self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
         self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
         self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
