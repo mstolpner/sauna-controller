@@ -1,5 +1,4 @@
 from typing import Any, Optional
-
 from configobj import ConfigObj
 import os
 
@@ -37,7 +36,7 @@ class SaunaContext:
     # Appearance Default Settings
     _screenWidth: int = 800
     _screenHeight: int = 1280
-    _screenRotation: int = 270
+    _screenRotation: int = 90
     # Web Server Default Settings
     _httpHost = '0.0.0.0'
     _httpPort: int = 8080
@@ -61,7 +60,7 @@ class SaunaContext:
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
             self.setDefaultSettings()
-        # Init suna timer
+        # Initialize suna off timer
         self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
 
 

@@ -5,6 +5,7 @@ from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.exceptions import ModbusException
 from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
+from Timer import Timer
 
 
 class DummyErrorResponse():
@@ -59,6 +60,14 @@ class SaunaDevices:
     _lastTimeHeaterOn = time.time()
     _lastHeaterOnStatus = False
 
+    # Fan Timer
+    _fanAccelerationTimer = None
+
+    # Prior Fan states
+    _leftFanPriorState = False
+    _rightFanPriorState = False
+
+
     def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
         # Set modbus Logging Level
         pymodbus_logger = logging.getLogger('pymodbus')
@@ -97,6 +106,8 @@ class SaunaDevices:
         self.turnHeaterOff()
         # Initialize hot room light
         self.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        # Initialize fan timer to prevent false errors during fan acceleration
+        self._fanAccelerationTimer = Timer(10)
         # Release resources on exit
         import atexit
         atexit.register(self._onExit)
@@ -246,12 +257,6 @@ class SaunaDevices:
             self._lastFanSpeed[fanId - 1] = response.registers[0]
         return self._lastFanSpeed[fanId - 1]
 
-    def getLeftFanSpeedRpm(self) -> int:
-        return self._getFanSpeedRpm(self._leftFanId)
-
-    def getRightFanSpeedRpm(self) -> int:
-        return self._getFanSpeedRpm(self._rightFanId)
-
     # Sets speed for all fans. 0% ... 100%. Most fans will start running at 10% or more
     def setFanSpeed(self, speedPct: int) -> None:
         response = self._modbus_write_register(self._fanSpeedAddress, speedPct, self._fanControlModuleRs485SlaveId)
@@ -260,18 +265,20 @@ class SaunaDevices:
         else:
             self._errorMgr.eraseFanModuleError()
 
+    def getLeftFanSpeedRpm(self) -> int:
+        return self._getFanSpeedRpm(self._leftFanId)
+
+    def getRightFanSpeedRpm(self) -> int:
+        return self._getFanSpeedRpm(self._rightFanId)
+
     def isRightFanOn(self) -> bool: 
-        return self._getFanRelayStatus(self._rightFanCoilId) and \
-               self._getFanStatus(self._rightFanId) and \
-               self._getFanSpeedRpm(self._rightFanId) > 0
+        return self._getFanRelayStatus(self._rightFanCoilId)
 
     def isRightFanOff(self) -> bool:
         return not self.isRightFanOn()
 
     def isLeftFanOn(self) -> bool:
-        return self._getFanRelayStatus(self._leftFanCoilId) and \
-               self._getFanStatus(self._leftFanId) and \
-               self._getFanSpeedRpm(self._leftFanId) > 0
+        return self._getFanRelayStatus(self._leftFanCoilId)
 
     def isLeftFanOff(self) -> bool:
         return not self.isLeftFanOn()
@@ -284,6 +291,9 @@ class SaunaDevices:
 
     def turnLeftFanOnOff(self, state: bool) -> None:
         self._setFanRelayStatus(self._leftFanCoilId, state)
+        if state and not self._leftFanPriorState:
+            self._fanAccelerationTimer.start()
+        self._leftFanPriorState = state
 
     def turnRightFanOn(self) -> None:
         self.turnRightFanOnOff(True)
@@ -293,6 +303,9 @@ class SaunaDevices:
 
     def turnRightFanOnOff(self, state: bool) -> None:
         self._setFanRelayStatus(self._rightFanCoilId, state)
+        if state and not self._rightFanPriorState:
+            self._fanAccelerationTimer.start()
+        self._rightFanPriorState = state
 
     def getNumberOfFans(self) -> int:
         response = self._modbus_read_holding_registers(self._numberOfFansAddress, self._fanControlModuleRs485SlaveId)
@@ -311,6 +324,9 @@ class SaunaDevices:
             self._errorMgr.eraseFanModuleError()
 
     def _checkFanFaultStatus(self, fanId: int) -> bool:
+        # Give fan a chance to gain speed
+        if self._fanAccelerationTimer.isRunning():
+            return False
         response = self._modbus_read_holding_registers(self._fanFaultStatusAddress, self._fanControlModuleRs485SlaveId)
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Read Fan Status.')
@@ -322,6 +338,7 @@ class SaunaDevices:
 
     def isLeftFanOk(self) -> bool:
         # Fan controller reports fan staus failed if the fan is off managed by a relay
+        a = self._checkFanFaultStatus(self._leftFanId)
         return not self._ctx.isLeftFanEnabled() or not self._checkFanFaultStatus(self._leftFanId)
 
     def isRightFanOk(self) -> bool:

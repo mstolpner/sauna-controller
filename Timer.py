@@ -10,10 +10,7 @@ class Timer:
     def __init__(self, timeIntervalSec: int =0):
         self._timeInterval = timeIntervalSec
 
-    def isFinished(self) -> bool:
-        pass
-
-    def isUp(self) -> bool:
+    def isCompleted(self) -> bool:
         if self._active and time.time() - self._startTime >= self._timeInterval:
             return True
         return False
@@ -21,12 +18,8 @@ class Timer:
     def isRunning(self) -> bool:
         return self._active and time.time() - self._startTime <= self._timeInterval
 
-
     def setTimeInterval(self, interval):
         self._timeInterval = interval
-
-    def restart(self) -> None:
-        self.start()
 
     def restart(self, timeInterval: int) -> None:
         self._startTime = time.time()

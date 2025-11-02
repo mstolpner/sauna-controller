@@ -69,17 +69,10 @@ class SaunaController:
     # ----------------------- Fan Control Methods --------------------------
 
     def _processFanControl(self):
-        # Process fans
-        # Process SaunaOFF situation with a delayed fan turn off
-        self._sd.turnRightFanOnOff(self._ctx.isRightFanEnabled() and (self._ctx._isSaunaOn or
-                                                                      self._ctx.isFanAfterSaunaOffTimerRunning()))
-        self._sd.turnLeftFanOnOff(self._ctx.isLeftFanEnabled() and (self._ctx._isSaunaOn or
-                                                                    self._ctx.isFanAfterSaunaOffTimerRunning()))
-        self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
-        self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
-        self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
         # Check fan health only when fan(s) are supposed to be running
-        if ((self._ctx.isRightFanEnabled() and self._ctx._isSaunaOn) or self._ctx.isFanAfterSaunaOffTimerRunning()):
+        if self._sd.isLeftFanOn() or self._sd.isRightFanOn():
+#        if (((self._ctx.isRightFanEnabled() or self._ctx.isLeftFanEnabled()) and self._ctx._isSaunaOn) or
+#                self._ctx.isFanAfterSaunaOffTimerRunning()):
             leftFanOk = self._sd.isLeftFanOk()
             rightFanOk = self._sd.isRightFanOk()
             errMsg = ''
@@ -93,6 +86,29 @@ class SaunaController:
                 self._errorMgr.raiseFanError(errMsg)
         else:
             self._errorMgr.eraseFanError()
+        # Process SaunaOFF situation with a delayed fan turn off
+        if self._sd.isRightFanOn() \
+            and (not self._ctx.isRightFanEnabled() or (not self._ctx.isSaunaOn()
+                 and not self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnRightFanOff()
+        elif self._sd.isRightFanOff() \
+            and (self._ctx.isRightFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnRightFanOn()
+        if self._sd.isLeftFanOn() \
+            and (not self._ctx.isLeftFanEnabled() or (not self._ctx.isSaunaOn()
+                 and not self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnLeftFanOff()
+        elif self._sd.isLeftFanOff() \
+            and (self._ctx.isLeftFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnLeftFanOn()
+
+#        self._sd.turnRightFanOnOff(self._ctx.isRightFanEnabled() and (self._ctx._isSaunaOn() or
+#                                                                      self._ctx.isFanAfterSaunaOffTimerRunning()))
+#        self._sd.turnLeftFanOnOff(self._ctx.isLeftFanEnabled() and (self._ctx._isSaunaOn() or
+#                                                                    self._ctx.isFanAfterSaunaOffTimerRunning()))
+        self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
+        self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
+        self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
 
     # ----------------------- Room Light Control Methods ---------------------
 
@@ -111,7 +127,7 @@ class SaunaController:
         self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
 
         # Ensure the heater does not run longer than allowed max time
-        if self._heaterMaxSafeRuntimeTimer.isUp():
+        if self._heaterMaxSafeRuntimeTimer.isCompleted():
             self._ctx.turnSaunaOff()
             self._errorMgr.raiseCriticalError(f"Heater has been continuously on for over {self._ctx.getHeaterMaxSafeRuntimeMin()} minutes.")
 
@@ -141,7 +157,7 @@ class SaunaController:
             self._turnHeaterOn()
 
         # Ensure contactor works properly - temperature is rising as expected
-        if self._isHeaterOn and self._heaterHealthWarmUpTimer.isUp():
+        if self._isHeaterOn and self._heaterHealthWarmUpTimer.isCompleted():
             if self._ctx.getHotRoomTempF() <= self._heaterHealthLastRefPointTemp:
                 self._errorMgr.raiseHeaterError('Hot room temperature is not rising.')
             else:
@@ -151,7 +167,7 @@ class SaunaController:
         # Ensure contactor works properly - temperature is falling as expected
         if not self._isHeaterOn and \
            self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF() and \
-           self._heaterHealthCoolDownTimer.isUp():
+           self._heaterHealthCoolDownTimer.isCompleted():
             if self._ctx.getHotRoomTempF() >= self._heaterHealthLastRefPointTemp:
                 self._errorMgr.raiseHeaterError('Hot room temperature is not falling.')
             else:
