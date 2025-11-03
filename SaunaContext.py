@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from configobj import ConfigObj
 import os
-import logging
+import subprocess
 
 from ErrorManager import ErrorManager
 from Timer import Timer
@@ -37,9 +37,11 @@ class SaunaContext:
     _hotRoomLightAlwaysOn: bool = False
     _hotRoomLightOn: bool = False
     # Appearance Default Settings
-    _screenWidth: int = 800
-    _screenHeight: int = 1280
-    _screenRotation: int = 270
+    _displayWidth: int = 800
+    _displayHeight: int = 1280
+    _displayRotation: int = 270
+    _displayDevicePath = "/sys/class/backlight/11-0045"
+    _displayBrightness: int = 255
     # Web Server Default Settings
     _httpHost = '0.0.0.0'
     _httpPort: int = 8080
@@ -100,10 +102,12 @@ class SaunaContext:
         self._configObj['heater_control']['heater_health_warmup_time_min'] = self._heaterHealthWarmUpTimeMin
         self._configObj['heater_control']['heater_health_cooldown_time_min'] = self._heaterHealthCoolDownTimeMin
         self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
-        self._configObj['appearance'] = {}
-        self._configObj['appearance']['screen_width'] = self._screenWidth
-        self._configObj['appearance']['screen_height'] = self._screenHeight
-        self._configObj['appearance']['screen_rotation'] = self._screenRotation
+        self._configObj['display'] = {}
+        self._configObj['display']['display_width'] = self._displayWidth
+        self._configObj['display']['display_height'] = self._displayHeight
+        self._configObj['display']['display_rotation'] = self._displayRotation
+        self._configObj['display']['display_device_path'] = self._displayDevicePath
+        self._configObj['display']['display_brightness'] = self._displayBrightness
         self._configObj['webui'] = {}
         self._configObj['webui']['http_host'] = self._httpHost
         self._configObj['webui']['http_port'] = self._httpPort
@@ -286,25 +290,45 @@ class SaunaContext:
         self._set('fan_control', 'running_time_after_sauna_off_hrs', hours)
         self._fanAfterSaunaOffTimer.setTimeInterval(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60)
 
-    # ----------------------- Appearance attributes --------------------------
+    # ----------------------- Display attributes --------------------------
 
     def getScreenWidth(self) -> int:
-        return self._get('appearance', 'screen_width', self._screenWidth)
+        return self._get('display', 'display_width', self._displayWidth)
 
     def setScreenWidth(self, width: int) -> None:
-        self._set('appearance', 'screen_width', width)
+        self._set('display', 'display_width', width)
 
     def getScreenHeight(self) -> int:
-        return self._get('appearance', 'screen_height', self._screenHeight)
+        return self._get('display', 'display_height', self._displayHeight)
 
     def setScreenHeight(self, height: int) -> None:
-        self._set('appearance', 'screen_height', height)
+        self._set('display', 'display_height', height)
 
     def getScreenRotation(self) -> int:
-        return self._get('appearance', 'screen_rotation', self._screenRotation)
+        return self._get('display', 'display_rotation', self._displayRotation)
 
     def setScreenRotation(self, rotation: int) -> None:
-        self._set('appearance', 'screen_rotation', rotation)
+        self._set('display', 'display_rotation', rotation)
+
+    def getDisplayDevicePath(self) -> str:
+        return self._get('display', 'display_device_path', self._displayDevicePath)
+
+    def getDisplayDeviceBrightnessPath(self):
+        path = self.getDisplayDevicePath()
+        if path[-1] == '/':
+            path = path[:-1]
+        return path + '/brightness'
+
+    def setDisplayDevicePath(self, path: str) -> None:
+        self._set('display', 'display_device_path', path)
+
+    def getDisplayBrightness(self) -> int:
+        return self._get('display', 'display_brightness', self._displayBrightness)
+
+    def setDisplayBrightness(self, brightness: int) -> None:
+        self._set('display', 'display_brightness', brightness)
+        subprocess.getstatusoutput(f'echo {brightness} > {self.getDisplayDeviceBrightnessPath()}')
+
 
     # -------------------------- Web UI --------------------------------
 
