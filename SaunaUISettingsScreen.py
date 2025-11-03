@@ -7,6 +7,10 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from SaunaContext import SaunaContext
 
+# TODO add brightness control
+# ls -la /sys/class/backlight/
+# cat /sys/class/backlight/11-0045/brightness (255)
+
 class SaunaUISettingsScreen(Screen):
     """Settings configuration screen"""
 

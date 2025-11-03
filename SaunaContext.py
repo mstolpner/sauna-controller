@@ -1,11 +1,14 @@
 from typing import Any, Optional
 from configobj import ConfigObj
 import os
+import logging
 
+from ErrorManager import ErrorManager
 from Timer import Timer
 
 
 class SaunaContext:
+    _errorMgr: ErrorManager = None
     # RS485 Serial Port Default Settings
     _rs485SerialPort = '/dev/ttyAMA0'
     _rs485SerialBaudRate: int = 9600
@@ -56,11 +59,14 @@ class SaunaContext:
     # Fan control timer
     _fanAfterSaunaOffTimer = None
 
-    def __init__(self):
+    def __init__(self, errorMgr: ErrorManager):
+        self._errorMgr = errorMgr
         iniFileExists = os.path.exists(self._configFileName)
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
+            self._errorMgr.logWarn('File sauna.ini not found. Creating a new file with default configuration.')
             self.setDefaultSettings()
+            self.persist()
         # Initialize suna off timer
         self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
 
