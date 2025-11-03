@@ -1,5 +1,6 @@
 import atexit
 import threading
+import re, subprocess
 
 from ErrorManager import ErrorManager
 from SaunaContext import SaunaContext
@@ -65,6 +66,7 @@ class SaunaController:
                 self._processHeaterControl()
                 self._processFanControl()
                 self._processHotRoomLight()
+                self._processSystemHealth()
 
     # ----------------------- Fan Control Methods --------------------------
 
@@ -195,3 +197,17 @@ class SaunaController:
         self._heaterMaxSafeRuntimeTimer.start()
         # Set up grace period timer
         self._coolingGracePeriodTimer.start()
+
+    # ---------------------------- System Health ---------------------------
+    def _processSystemHealth(self):
+        err, msg = subprocess.getstatusoutput('vcgencmd measure_temp')
+        if not err:
+            m = re.search(r'-?\d\.?\d*', msg)
+            try:
+                self._ctx.setCpuTemp(float(m.group()))
+                if self._ctx.getCpuTemp() > 90:
+                    self._errorMgr.raiseSystemHealthError(f"CPU Temperature is {self._ctx.getCpuTemp()}°C")
+                else:
+                    self._errorMgr.eraseSystemHealthError()
+            except ValueError:  # catch only error needed
+                pass

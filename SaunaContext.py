@@ -36,7 +36,7 @@ class SaunaContext:
     # Appearance Default Settings
     _screenWidth: int = 800
     _screenHeight: int = 1280
-    _screenRotation: int = 90
+    _screenRotation: int = 270
     # Web Server Default Settings
     _httpHost = '0.0.0.0'
     _httpPort: int = 8080
@@ -52,6 +52,7 @@ class SaunaContext:
     _rightFanRpm = 0
     _leftFanOnStatus = False
     _rightFanOnStatus = True
+    _cpuTemp = 0
     # Fan control timer
     _fanAfterSaunaOffTimer = None
 
@@ -377,4 +378,11 @@ class SaunaContext:
 
     def setRightFanRpm(self, rpm: int) -> None:
         self._rightFanRpm = rpm
+
+    def getCpuTemp(self) -> float:
+        return self._cpuTemp
+
+    def setCpuTemp(self, temp: float) -> None:
+        self._cpuTemp = temp
+
 

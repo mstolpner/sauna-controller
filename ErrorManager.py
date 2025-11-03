@@ -8,6 +8,7 @@ class ErrorManager:
     _modbusException = None
     _heaterErrorMessage = None
     _fanErrorMessage = None
+    _systemHealthErrorMessage = None
 
     def __init__(self):
         pass
@@ -53,6 +54,13 @@ class ErrorManager:
 
     def eraseFanError(self) -> None:
         self._fanErrorMessage = None
+
+    def raiseSystemHealthError(self, errorMessage: str) -> None:
+        self._systemHealthErrorMessage = errorMessage
+
+    def eraseSystemHealthError(self) -> None:
+        self._systemHealthErrorMessage = None
+
 
     def hasAnyError(self) -> bool:
         """Check if there are any active errors"""
