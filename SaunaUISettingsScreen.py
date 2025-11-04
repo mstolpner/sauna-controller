@@ -5,11 +5,9 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.slider import Slider
 from SaunaContext import SaunaContext
 
-# TODO add brightness control
-# ls -la /sys/class/backlight/
-# cat /sys/class/backlight/11-0045/brightness (255)
 
 class SaunaUISettingsScreen(Screen):
     """Settings configuration screen"""
@@ -134,6 +132,38 @@ class SaunaUISettingsScreen(Screen):
 
         current_section.add_widget(self.light_checkbox)
 
+        # Display Settings
+        add_section_header('Display Settings')
+        brightness_label = Label(
+            text='Display Brightness',
+            font_size='20sp',
+            size_hint_y=None,
+            height=50,
+            halign='left',
+            valign='middle'
+        )
+        brightness_label.bind(size=brightness_label.setter('text_size'))
+        current_section.add_widget(brightness_label)
+
+        # Brightness slider with value label
+        brightness_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, spacing=10)
+        self.brightness_slider = Slider(
+            min=0,
+            max=255,
+            value=self._ctx.getDisplayBrightness(),
+            step=1,
+            size_hint_x=0.7
+        )
+        self.brightness_value_label = Label(
+            text=str(int(self.brightness_slider.value)),
+            font_size='20sp',
+            size_hint_x=0.3
+        )
+        self.brightness_slider.bind(value=self.update_brightness_label)
+        brightness_container.add_widget(self.brightness_slider)
+        brightness_container.add_widget(self.brightness_value_label)
+        current_section.add_widget(brightness_container)
+
         scroll_view.add_widget(settings_layout)
         layout.add_widget(scroll_view)
 
@@ -161,6 +191,10 @@ class SaunaUISettingsScreen(Screen):
             self.light_checkbox.background_normal = 'icons/checkbox-unchecked.png'
             self.light_checkbox.background_down = 'icons/checkbox-unchecked.png'
 
+    def update_brightness_label(self, instance, value):
+        """Update brightness value label when slider changes"""
+        self.brightness_value_label.text = str(int(value))
+
     def save_settings(self, instance):
         # Save temperature settings
         self._ctx.setHotRoomMaxTempF(int(self.setting_inputs['Max Hot Room Temperature, °F'].text))
@@ -178,5 +212,7 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
         self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout, seconds'].text))
         self._ctx.setRs485SerialRetries(int(self.setting_inputs['RS485 Retries'].text))
+        # Save display brightness
+        self._ctx.setDisplayBrightness(int(self.brightness_slider.value))
 
         self.manager.current = 'main'
