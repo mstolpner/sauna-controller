@@ -6,7 +6,9 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.slider import Slider
+from kivy.uix.spinner import Spinner
 from SaunaContext import SaunaContext
+import logging
 
 
 class SaunaUISettingsScreen(Screen):
@@ -169,6 +171,44 @@ class SaunaUISettingsScreen(Screen):
         brightness_container.add_widget(self.brightness_value_label)
         current_section.add_widget(brightness_container)
 
+        # System Settings
+        add_section_header('System Settings')
+        add_setting('CPU Temperature Warning Threshold, °C', str(self._ctx.getCpuWarnTempC()))
+
+        # Log Level Spinner
+        log_level_label = Label(
+            text='Logging Level',
+            font_size='20sp',
+            size_hint_x=0.6,
+            size_hint_y=None,
+            height=50,
+            halign='left',
+            valign='middle'
+        )
+        log_level_label.bind(size=log_level_label.setter('text_size'))
+        current_section.add_widget(log_level_label)
+
+        # Map log level int to string
+        log_level_map = {
+            logging.DEBUG: 'DEBUG',
+            logging.INFO: 'INFO',
+            logging.WARNING: 'WARNING',
+            logging.ERROR: 'ERROR',
+            logging.CRITICAL: 'CRITICAL'
+        }
+        current_log_level = self._ctx.getLogLevel()
+        current_log_level_text = log_level_map.get(current_log_level, 'WARNING')
+
+        self.log_level_spinner = Spinner(
+            text=current_log_level_text,
+            values=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+            font_size='20sp',
+            size_hint_x=0.4,
+            size_hint_y=None,
+            height=50
+        )
+        current_section.add_widget(self.log_level_spinner)
+
         scroll_view.add_widget(settings_layout)
         layout.add_widget(scroll_view)
 
@@ -221,5 +261,18 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setRs485SerialRetries(int(self.setting_inputs['RS485 Retries'].text))
         # Save display brightness
         self._ctx.setDisplayBrightness(int(self.brightness_slider.value))
+        # Save system settings
+        self._ctx.setCpuWarnTempC(int(self.setting_inputs['CPU Temperature Warning Threshold, °C'].text))
+        # Save log level
+        log_level_str_to_int = {
+            'DEBUG': logging.DEBUG,
+            'INFO': logging.INFO,
+            'WARNING': logging.WARNING,
+            'ERROR': logging.ERROR,
+            'CRITICAL': logging.CRITICAL
+        }
+        selected_log_level = log_level_str_to_int.get(self.log_level_spinner.text, logging.WARNING)
+        self._ctx.setLogLevel(selected_log_level)
+        self._ctx.persist()
 
         self.manager.current = 'main'

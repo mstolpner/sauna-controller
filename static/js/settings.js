@@ -28,6 +28,10 @@ function loadSettings() {
 
             // Light settings
             document.getElementById('light-off-when-sauna-off').checked = data.light_off_when_sauna_off;
+
+            // System settings
+            document.getElementById('cpu-temp-warn').value = data.cpu_temp_warn;
+            document.getElementById('log-level').value = data.log_level;
         })
         .catch(error => console.error('Error loading settings:', error));
 }
@@ -50,7 +54,9 @@ function saveSettings() {
         baud_rate: parseInt(document.getElementById('baud-rate').value),
         rs485_timeout: parseFloat(document.getElementById('rs485-timeout').value),
         rs485_retries: parseInt(document.getElementById('rs485-retries').value),
-        light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked
+        light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked,
+        cpu_temp_warn: parseInt(document.getElementById('cpu-temp-warn').value),
+        log_level: parseInt(document.getElementById('log-level').value)
     };
 
     fetch('/api/settings/update', {

@@ -88,6 +88,22 @@
                 <label>Turn Hot Room Light Off When Sauna is Off:</label>
                 <input type="checkbox" id="light-off-when-sauna-off" class="setting-checkbox">
             </div>
+
+            <h3 class="section-title">System Settings</h3>
+            <div class="setting-item">
+                <label>CPU Temperature Warning Threshold, °C:</label>
+                <input type="number" id="cpu-temp-warn" min="50" max="100" value="90">
+            </div>
+            <div class="setting-item">
+                <label>Logging Level:</label>
+                <select id="log-level" class="setting-select">
+                    <option value="10">DEBUG</option>
+                    <option value="20">INFO</option>
+                    <option value="30" selected>WARNING</option>
+                    <option value="40">ERROR</option>
+                    <option value="50">CRITICAL</option>
+                </select>
+            </div>
         </div>
 
         <!-- Save and Back Buttons -->

@@ -244,7 +244,7 @@ class SaunaController:
             m = re.search(r'-?\d\.?\d*', msg)
             try:
                 self._ctx.setCpuTemp(float(m.group()))
-                if self._ctx.getCpuTemp() > 90:
+                if self._ctx.getCpuTemp() > self._ctx.getCpuWarnTempC():
                     self._errorMgr.raiseSystemHealthError(f"CPU Temperature is {self._ctx.getCpuTemp()}°C")
                 else:
                     self._errorMgr.eraseSystemHealthError()

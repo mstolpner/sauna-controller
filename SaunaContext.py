@@ -44,9 +44,11 @@ class SaunaContext:
     _displayRotation: int = 270
     _displayDevicePath = "/sys/class/backlight/11-0045"
     _displayBrightness: int = 255
-    # Web Server Default Settings
+    # System Settings (Web Server, CPU, etc.)
     _httpHost = '0.0.0.0'
     _httpPort: int = 8080
+    _cpuWarnTempC: int = 90
+    _logLevel: int = logging.WARNING
     # Dependencies
     _configObj = None
     _configFileName = 'sauna.ini'
@@ -59,22 +61,21 @@ class SaunaContext:
     _rightFanRpm = 0
     _leftFanOnStatus = False
     _rightFanOnStatus = True
-    _cpuTemp = 0
+    _cpuTempC = 0
     # Fan control timer
     _fanAfterSaunaOffTimer = None
 
     # TODO Split settings screen.
     # TODO Add errors to fan settings.
-    # TODO Reduce icon size
     def __init__(self):
-        # TODO parametrize logging level
-        self._logger.setLevel(logging.WARNING)
         iniFileExists = os.path.exists(self._configFileName)
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
             self._logger.warning('File sauna.ini not found. Creating a new file with default configuration.')
             self.setDefaultSettings()
             self.persist()
+        # Set log level from config
+        self._logger.setLevel(self.getLogLevel())
         # Initialize suna off timer
         self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
 
@@ -118,12 +119,15 @@ class SaunaContext:
         self._configObj['display']['display_rotation'] = self._displayRotation
         self._configObj['display']['display_device_path'] = self._displayDevicePath
         self._configObj['display']['display_brightness'] = self._displayBrightness
-        self._configObj['webui'] = {}
-        self._configObj['webui']['http_host'] = self._httpHost
-        self._configObj['webui']['http_port'] = self._httpPort
+        self._configObj['system'] = {}
+        self._configObj['system']['http_host'] = self._httpHost
+        self._configObj['system']['http_port'] = self._httpPort
+        self._configObj['system']['cpu_warn_temp_c'] = self._cpuWarnTempC
+        self._configObj['system']['log_level'] = self._logLevel
 
     def persist(self):
         self._configObj.write()
+        self._logger.setLevel(self.getLogLevel())
 
     # ----------------------- RS485 configuration attributes --------------------------
 
@@ -352,19 +356,32 @@ class SaunaContext:
         subprocess.getstatusoutput(f'echo {brightness} > {self.getDisplayDeviceBrightnessPath()}')
 
 
-    # -------------------------- Web UI --------------------------------
+    # -------------------------- System Settings --------------------------------
 
     def getHttpHost(self) -> str:
-        return self._get('webui', 'http_host', self._httpHost)
+        return self._get('system', 'http_host', self._httpHost)
 
     def setHttpHost(self, host: str) -> None:
-        self._set('webui', 'http_host', host)
+        self._set('system', 'http_host', host)
 
     def getHttpPort(self) -> int:
-        return self._get('webui', 'http_port', self._httpPort)
+        return self._get('system', 'http_port', self._httpPort)
 
     def setHttpPort(self, port: int) -> None:
-        self._set('webui', 'http_port', port)
+        self._set('system', 'http_port', port)
+
+    def getCpuWarnTempC(self) -> int:
+        return self._get('system', 'cpu_warn_temp_c', self._cpuWarnTempC)
+
+    def setCpuWarnTempC(self, temp: int) -> None:
+        self._set('system', 'cpu_warn_temp_c', temp)
+
+    def getLogLevel(self) -> int:
+        return self._get('system', 'log_level', self._logLevel)
+
+    def setLogLevel(self, level: int) -> None:
+        self._set('system', 'log_level', level)
+        self._logger.setLevel(level)
 
     # ----------------------- Not persisted attributes --------------------------
 
@@ -432,9 +449,9 @@ class SaunaContext:
         self._rightFanRpm = rpm
 
     def getCpuTemp(self) -> float:
-        return self._cpuTemp
+        return self._cpuTempC
 
     def setCpuTemp(self, temp: float) -> None:
-        self._cpuTemp = temp
+        self._cpuTempC = temp
 
 

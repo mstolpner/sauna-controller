@@ -147,7 +147,9 @@ class SaunaWebUIServer:
                 'light_off_when_sauna_off': not self._ctx.getHotRoomLightAlwaysOn(),
                 'screen_width': self._ctx.getScreenWidth(),
                 'screen_height': self._ctx.getScreenHeight(),
-                'screen_rotation': self._ctx.getScreenRotation()
+                'screen_rotation': self._ctx.getScreenRotation(),
+                'cpu_temp_warn': self._ctx.getCpuWarnTempC(),
+                'log_level': self._ctx.getLogLevel()
             })
 
         @self._app.route('/api/settings/update', methods=['POST'])
@@ -186,6 +188,10 @@ class SaunaWebUIServer:
                 self._ctx.setRs485SerialRetries(int(data['rs485_retries']))
             if 'light_off_when_sauna_off' in data:
                 self._ctx.setHotRoomLightAlwaysOn(not data['light_off_when_sauna_off'])
+            if 'cpu_temp_warn' in data:
+                self._ctx.setCpuWarnTempC(int(data['cpu_temp_warn']))
+            if 'log_level' in data:
+                self._ctx.setLogLevel(int(data['log_level']))
             return jsonify({'success': True})
 
         @self._app.route('/api/errors/get')

@@ -22,6 +22,7 @@ class SaunaDevices:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     # Sensor Module Configuration
+    #TODO parametrize all addresses in settings
     _temperatureAddress = 1
     _humidityAddress = 0
     _lastHotRoomTemperatureC = 0
