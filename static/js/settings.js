@@ -20,11 +20,11 @@ function loadSettings() {
             document.getElementById('cycle-on-period').value = data.cycle_on_period;
             document.getElementById('cycle-off-period').value = data.cycle_off_period;
 
-            // RS485 settings
+            // Modbus settings
             document.getElementById('serial-port').value = data.serial_port;
             document.getElementById('baud-rate').value = data.baud_rate;
-            document.getElementById('rs485-timeout').value = data.rs485_timeout;
-            document.getElementById('rs485-retries').value = data.rs485_retries;
+            document.getElementById('modbus-timeout').value = data.modbus_timeout;
+            document.getElementById('modbus-retries').value = data.modbus_retries;
 
             // Light settings
             document.getElementById('light-off-when-sauna-off').checked = data.light_off_when_sauna_off;
@@ -53,8 +53,8 @@ function saveSettings() {
         cycle_off_period: parseInt(document.getElementById('cycle-off-period').value),
         serial_port: document.getElementById('serial-port').value,
         baud_rate: parseInt(document.getElementById('baud-rate').value),
-        rs485_timeout: parseFloat(document.getElementById('rs485-timeout').value),
-        rs485_retries: parseInt(document.getElementById('rs485-retries').value),
+        modbus_timeout: parseFloat(document.getElementById('modbus-timeout').value),
+        modbus_retries: parseInt(document.getElementById('modbus-retries').value),
         light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked,
         cpu_temp_warn: parseInt(document.getElementById('cpu-temp-warn').value),
         max_sauna_on_time_hrs: parseInt(document.getElementById('max-sauna-on-time').value),

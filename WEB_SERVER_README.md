@@ -79,8 +79,8 @@ http://<raspberry-pi-ip>:8080
     "cooldown_time": 1200,
     "serial_port": "/dev/ttyAMA0",
     "baud_rate": 9600,
-    "rs485_timeout": 0.3,
-    "rs485_retries": 3,
+    "modbus_timeout": 0.3,
+    "modbus_retries": 3,
     "light_off_when_sauna_off": true
   }
   ```
@@ -106,7 +106,7 @@ http://<raspberry-pi-ip>:8080
 ### Settings Screen
 - **Temperature Settings**: Max temperature, presets, heater thresholds, cooling grace period
 - **Heater Health Check Settings**: Warmup and cooldown times
-- **RS485 Communication Settings**: Serial port, baud rate, timeout, retries
+- **Modbus Communication Settings**: Serial port, baud rate, timeout, retries
 - **Hot Room Light Settings**: Control light behavior when sauna is off
 - Click "Save" to apply changes or "Cancel" to return without saving
 

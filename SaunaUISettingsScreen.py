@@ -102,12 +102,12 @@ class SaunaUISettingsScreen(Screen):
         add_setting('Heater Cycle On Period, minutes', str(self._ctx.getHeaterCycleOnPeriodMin()))
         add_setting('Heater Cycle Off Period, minutes', str(self._ctx.getHeaterCycleOffPeriodMin()))
 
-        # RS485 Communication Settings
-        add_section_header('RS485 Communication Settings')
-        add_setting('RS485 Serial Port', self._ctx.getRs485SerialPort())
-        add_setting('RS485 Baud Rate', str(self._ctx.getRs485SerialBaudRate()))
-        add_setting('RS485 Timeout, seconds', str(self._ctx.getRs485SerialTimeout()))
-        add_setting('RS485 Retries', str(self._ctx.getRs485SerialRetries()))
+        # Modbus Communication Settings
+        add_section_header('Modbus Communication Settings')
+        add_setting('Modbus Serial Port', self._ctx.getModbusSerialPort())
+        add_setting('Modbus Baud Rate', str(self._ctx.getModbusSerialBaudRate()))
+        add_setting('Modbus Timeout, seconds', str(self._ctx.getModbusSerialTimeout()))
+        add_setting('Modbus Retries', str(self._ctx.getModbusSerialRetries()))
 
         # Hot Room Light Settings
         add_section_header('Hot Room Light Settings')
@@ -256,10 +256,10 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setHeaterCycleOffPeriodMin(int(self.setting_inputs['Heater Cycle Off Period, minutes'].text))
         # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)
         self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
-        self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)
-        self._ctx.setRs485SerialBaudRate(int(self.setting_inputs['RS485 Baud Rate'].text))
-        self._ctx.setRs485SerialTimeout(float(self.setting_inputs['RS485 Timeout, seconds'].text))
-        self._ctx.setRs485SerialRetries(int(self.setting_inputs['RS485 Retries'].text))
+        self._ctx.setModbusSerialPort(self.setting_inputs['Modbus Serial Port'].text)
+        self._ctx.setModbusSerialBaudRate(int(self.setting_inputs['Modbus Baud Rate'].text))
+        self._ctx.setModbusSerialTimeout(float(self.setting_inputs['Modbus Timeout, seconds'].text))
+        self._ctx.setModbusSerialRetries(int(self.setting_inputs['Modbus Retries'].text))
         # Save display brightness
         self._ctx.setDisplayBrightness(int(self.brightness_slider.value))
         # Save system settings

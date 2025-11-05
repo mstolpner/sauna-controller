@@ -51,7 +51,7 @@ This sauna controller interfaces with mains voltage electrical systems (120V/240
 - Raspberry Pi 5 (or compatible)
 - Touch Display compatible with Raspberry Pi, similar to: https://www.amazon.com/dp/B0DP7BXFD3?ref=ppx_yo2ov_dt_b_fed_asin_title
 - TTL to RS485 module compatible with 3V3 Raspberry Pi, for example https://www.aliexpress.us/item/3256809402393027.html?spm=a2g0o.order_list.order_list_main.61.7f2318029pp49C&gatewayAdapt=glo2usa
-- RS485 Temperature sensors (https://store.comwintop.com/products/rs485-modbus-water-proof-temperature-humidity-sensor-probe or similar)
+- Modbus RTU Temperature sensors via RS485 (https://store.comwintop.com/products/rs485-modbus-water-proof-temperature-humidity-sensor-probe or similar)
 - JPF4816 Relay for light, fans, and low power heater control
 - Contactor for Heater control
 - Sauna heating elements

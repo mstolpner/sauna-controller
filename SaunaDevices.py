@@ -353,7 +353,7 @@ class SaunaDevices:
             self._errorMgr.eraseFanModuleError()
 
 
-    # ----------------------------------- RS485 Modbus Client Functions -------------------------------------
+    # ----------------------------------- Modbus Client Functions -------------------------------------
 
     _client: AsyncModbusSerialClient = None
 
@@ -361,11 +361,11 @@ class SaunaDevices:
         async def _read():
             try:
                 if self._client is None:
-                    self._client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
-                                                           baudrate=self._ctx.getRs485SerialBaudRate(),
+                    self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
+                                                           baudrate=self._ctx.getModbusSerialBaudRate(),
                                                            # Timeout is optimized for devices.
-                                                           timeout=self._ctx.getRs485SerialTimeout(),
-                                                           retries=self._ctx.getRs485SerialRetries())
+                                                           timeout=self._ctx.getModbusSerialTimeout(),
+                                                           retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
                 response = await self._client.read_holding_registers(address, count=1, slave=slave)
                 return response
@@ -378,11 +378,11 @@ class SaunaDevices:
         async def _read():
             try:
                 if self._client is None:
-                    self._client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
-                                                    baudrate=self._ctx.getRs485SerialBaudRate(),
+                    self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
+                                                    baudrate=self._ctx.getModbusSerialBaudRate(),
                                                     # Timeout is optimized for devices.
-                                                    timeout=self._ctx.getRs485SerialTimeout(),
-                                                    retries=self._ctx.getRs485SerialRetries())
+                                                    timeout=self._ctx.getModbusSerialTimeout(),
+                                                    retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
                 response = await self._client.write_register(address=address, value=value, slave=slave)
                 return response
@@ -395,11 +395,11 @@ class SaunaDevices:
         async def _read():
             try:
                 if self._client is None:
-                    self._client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
-                                                    baudrate=self._ctx.getRs485SerialBaudRate(),
+                    self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
+                                                    baudrate=self._ctx.getModbusSerialBaudRate(),
                                                     # Timeout is optimized for devices.
-                                                    timeout=self._ctx.getRs485SerialTimeout(),
-                                                    retries=self._ctx.getRs485SerialRetries())
+                                                    timeout=self._ctx.getModbusSerialTimeout(),
+                                                    retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
                 response = await self._client.read_coils(address=address, count=count, slave=slave)
                 return response
@@ -413,11 +413,11 @@ class SaunaDevices:
         async def _read():
             try:
                 if self._client is None:
-                    self._client = AsyncModbusSerialClient(port=self._ctx.getRs485SerialPort(),
-                                                    baudrate=self._ctx.getRs485SerialBaudRate(),
+                    self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
+                                                    baudrate=self._ctx.getModbusSerialBaudRate(),
                                                     # Timeout is optimized for devices.
-                                                    timeout=self._ctx.getRs485SerialTimeout(),
-                                                    retries=self._ctx.getRs485SerialRetries())
+                                                    timeout=self._ctx.getModbusSerialTimeout(),
+                                                    retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
                 response = await self._client.write_coil(address=address, value=value, slave=slave)
                 return response

@@ -9,11 +9,11 @@ from Timer import Timer
 class SaunaContext:
     _logger: logging.Logger = logging.getLogger('sauna-controller')
     _saunaSensorsDeviceId: int = 1
-    # RS485 Serial Port Default Settings
-    _rs485SerialPort = '/dev/ttyAMA0'
-    _rs485SerialBaudRate: int = 9600
-    _rs485SerialTimeout: float = 0.3
-    _rs485SerialRetries: int = 3
+    # Modbus Serial Port Default Settings
+    _modbusSerialPort = '/dev/ttyAMA0'
+    _modbusSerialBaudRate: int = 9600
+    _modbusSerialTimeout: float = 0.3
+    _modbusSerialRetries: int = 3
     # Modbus Default Settings
     _saunaSensorsDeviceId: int = 1
     _relayModuleDeviceId: int = 2
@@ -86,14 +86,14 @@ class SaunaContext:
         return self._logger
 
     def setDefaultSettings(self):
-        self._configObj['rs485'] = {}
-        self._configObj['rs485']['sensors_module_device_id'] = self._saunaSensorsDeviceId
-        self._configObj['rs485']['relay_module_device_id'] = self._relayModuleDeviceId
-        self._configObj['rs485']['fan_module_device_id'] = self._fanControlModuleDeviceId
-        self._configObj['rs485']['serial_port_name'] = self._rs485SerialPort
-        self._configObj['rs485']['serial_baud_rate'] = self._rs485SerialBaudRate
-        self._configObj['rs485']['serial_timeout'] = self._rs485SerialTimeout
-        self._configObj['rs485']['serial_retries'] = self._rs485SerialRetries
+        self._configObj['modbus'] = {}
+        self._configObj['modbus']['sensors_module_device_id'] = self._saunaSensorsDeviceId
+        self._configObj['modbus']['relay_module_device_id'] = self._relayModuleDeviceId
+        self._configObj['modbus']['fan_module_device_id'] = self._fanControlModuleDeviceId
+        self._configObj['modbus']['serial_port_name'] = self._modbusSerialPort
+        self._configObj['modbus']['serial_baud_rate'] = self._modbusSerialBaudRate
+        self._configObj['modbus']['serial_timeout'] = self._modbusSerialTimeout
+        self._configObj['modbus']['serial_retries'] = self._modbusSerialRetries
         self._configObj['hot_room_temp_control'] = {}
         self._configObj['hot_room_temp_control']['target_temp_f'] = self._hotRoomTargetTempF
         self._configObj['hot_room_temp_control']['cooling_grace_period_min'] = self._coolingGracePeriodMin
@@ -133,7 +133,7 @@ class SaunaContext:
         self._configObj.write()
         self._logger.setLevel(self.getLogLevel())
 
-    # ----------------------- RS485 configuration attributes --------------------------
+    # ----------------------- Modbus configuration attributes --------------------------
 
     def _initSection(self, section: str):
         if section not in self._configObj:
@@ -159,49 +159,49 @@ class SaunaContext:
         self._configObj[section][key] = value
         self.persist()
 
-    # ------------------------ RS485 Modbus Configuration -----------------------
+    # ------------------------ Modbus Configuration -----------------------
 
     def getSaunaSensorsDeviceId(self) -> int:
-        return self._get('rs485', 'sensors_module_device_id', self._saunaSensorsDeviceId)
+        return self._get('modbus', 'sensors_module_device_id', self._saunaSensorsDeviceId)
 
     def setSaunaSensorsDeviceId(self, saunaSensorsDeviceId: int) -> None:
-        self._set('rs485', 'sensors_module_device_id', saunaSensorsDeviceId)
+        self._set('modbus', 'sensors_module_device_id', saunaSensorsDeviceId)
 
     def getRelayModuleDeviceId(self) -> int:
-        return self._get('rs485', 'relay_module_device_id', self._relayModuleDeviceId)
+        return self._get('modbus', 'relay_module_device_id', self._relayModuleDeviceId)
 
     def setRelayModuleDeviceId(self, relayModuleDeviceId: int) -> None:
-        self._set('rs485', 'relay_module_device_id', relayModuleDeviceId)
+        self._set('modbus', 'relay_module_device_id', relayModuleDeviceId)
 
     def getFanControlModuleDeviceId(self) -> int:
-        return self._get('rs485', 'fan_module_device_id', self._fanControlModuleDeviceId)
+        return self._get('modbus', 'fan_module_device_id', self._fanControlModuleDeviceId)
 
     def setFanControlModuleDeviceId(self, fanControlModuleDeviceId: int) -> None:
-        self._set('rs485', 'fan_module_device_id', fanControlModuleDeviceId)
+        self._set('modbus', 'fan_module_device_id', fanControlModuleDeviceId)
 
-    def getRs485SerialPort(self) -> str:
-        return self._get('rs485', 'serial_port_name', self._rs485SerialPort)
+    def getModbusSerialPort(self) -> str:
+        return self._get('modbus', 'serial_port_name', self._modbusSerialPort)
 
-    def setRs485SerialPort(self, rs485SerialPort: str) -> None:
-        self._set('rs485', 'serial_port_name', rs485SerialPort)
+    def setModbusSerialPort(self, modbus_serial_port: str) -> None:
+        self._set('modbus', 'serial_port_name', modbus_serial_port)
 
-    def getRs485SerialBaudRate(self) -> int:
-        return self._get('rs485', 'serial_baud_rate', self._rs485SerialBaudRate)
+    def getModbusSerialBaudRate(self) -> int:
+        return self._get('modbus', 'serial_baud_rate', self._modbusSerialBaudRate)
 
-    def setRs485SerialBaudRate(self, rs485SerialBaudRate: int) -> None:
-        self._set('rs485', 'serial_baud_rate', rs485SerialBaudRate)
+    def setModbusSerialBaudRate(self, modbus_serial_baud_rate: int) -> None:
+        self._set('modbus', 'serial_baud_rate', modbus_serial_baud_rate)
 
-    def getRs485SerialTimeout(self) -> float:
-        return self._get('rs485', 'serial_timeout', self._rs485SerialTimeout)
+    def getModbusSerialTimeout(self) -> float:
+        return self._get('modbus', 'serial_timeout', self._modbusSerialTimeout)
 
-    def setRs485SerialTimeout(self, rs485SerialTimeout: float) -> None:
-        self._set('rs485', 'serial_timeout', rs485SerialTimeout)
+    def setModbusSerialTimeout(self, modbus_serial_timeout: float) -> None:
+        self._set('modbus', 'serial_timeout', modbus_serial_timeout)
 
-    def getRs485SerialRetries(self) -> int:
-        return self._get('rs485', 'serial_retries', self._rs485SerialRetries)
+    def getModbusSerialRetries(self) -> int:
+        return self._get('modbus', 'serial_retries', self._modbusSerialRetries)
 
-    def setRs485SerialRetries(self, rs485SerialRetries: int) -> None:
-        self._set('rs485', 'serial_retries', rs485SerialRetries)
+    def setModbusSerialRetries(self, modbus_serial_retries: int) -> None:
+        self._set('modbus', 'serial_retries', modbus_serial_retries)
 
     # ----------------------- Hot Room Temp Control attributes --------------------------
 

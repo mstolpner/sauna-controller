@@ -140,10 +140,10 @@ class SaunaWebUIServer:
                 'max_safe_runtime_min': self._ctx.getHeaterMaxSafeRuntimeMin(),
                 'cycle_on_period': self._ctx.getHeaterCycleOnPeriodMin(),
                 'cycle_off_period': self._ctx.getHeaterCycleOffPeriodMin(),
-                'serial_port': self._ctx.getRs485SerialPort(),
-                'baud_rate': self._ctx.getRs485SerialBaudRate(),
-                'rs485_timeout': self._ctx.getRs485SerialTimeout(),
-                'rs485_retries': self._ctx.getRs485SerialRetries(),
+                'serial_port': self._ctx.getModbusSerialPort(),
+                'baud_rate': self._ctx.getModbusSerialBaudRate(),
+                'modbus_timeout': self._ctx.getModbusSerialTimeout(),
+                'modbus_retries': self._ctx.getModbusSerialRetries(),
                 'light_off_when_sauna_off': not self._ctx.getHotRoomLightAlwaysOn(),
                 'screen_width': self._ctx.getScreenWidth(),
                 'screen_height': self._ctx.getScreenHeight(),
@@ -180,13 +180,13 @@ class SaunaWebUIServer:
             if 'cycle_off_period' in data:
                 self._ctx.setHeaterCycleOffPeriodMin(int(data['cycle_off_period']))
             if 'serial_port' in data:
-                self._ctx.setRs485SerialPort(data['serial_port'])
+                self._ctx.setModbusSerialPort(data['serial_port'])
             if 'baud_rate' in data:
-                self._ctx.setRs485SerialBaudRate(int(data['baud_rate']))
-            if 'rs485_timeout' in data:
-                self._ctx.setRs485SerialTimeout(float(data['rs485_timeout']))
-            if 'rs485_retries' in data:
-                self._ctx.setRs485SerialRetries(int(data['rs485_retries']))
+                self._ctx.setModbusSerialBaudRate(int(data['baud_rate']))
+            if 'modbus_timeout' in data:
+                self._ctx.setModbusSerialTimeout(float(data['modbus_timeout']))
+            if 'modbus_retries' in data:
+                self._ctx.setModbusSerialRetries(int(data['modbus_retries']))
             if 'light_off_when_sauna_off' in data:
                 self._ctx.setHotRoomLightAlwaysOn(not data['light_off_when_sauna_off'])
             if 'cpu_temp_warn' in data:
