@@ -11,8 +11,8 @@ from ErrorManager import ErrorManager
 from SaunaUIMainScreen import SaunaControlApp
 
 if __name__ == '__main__':
-    _errorMgr = ErrorManager()
-    _ctx = SaunaContext(_errorMgr)
+    _ctx = SaunaContext()
+    _errorMgr = ErrorManager(_ctx)
 
     # Initialize Sauna Controller
     _sc = SaunaController(_ctx, _errorMgr)

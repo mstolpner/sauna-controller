@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 from configobj import ConfigObj
 import os
@@ -9,6 +10,8 @@ from Timer import Timer
 
 class SaunaContext:
     _errorMgr: ErrorManager = None
+    _logger: logging.Logger = logging.getLogger('sauna-controller')
+    _saunaSensorsDeviceId: int = 1
     # RS485 Serial Port Default Settings
     _rs485SerialPort = '/dev/ttyAMA0'
     _rs485SerialBaudRate: int = 9600
@@ -63,12 +66,13 @@ class SaunaContext:
 
 #TODO add parameters for cycling heater, all parameters to settings scree. Split settings screen. add errors to fan settings.
     #TODO reduce icon size
-    def __init__(self, errorMgr: ErrorManager):
-        self._errorMgr = errorMgr
+    def __init__(self):
+        # TODO parametrize logging level
+        self._logger.setLevel(logging.WARNING)
         iniFileExists = os.path.exists(self._configFileName)
         self._configObj = ConfigObj(self._configFileName)
         if not iniFileExists:
-            self._errorMgr.logWarn('File sauna.ini not found. Creating a new file with default configuration.')
+            self._logger.warning('File sauna.ini not found. Creating a new file with default configuration.')
             self.setDefaultSettings()
             self.persist()
         # Initialize suna off timer
