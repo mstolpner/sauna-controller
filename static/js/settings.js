@@ -31,6 +31,7 @@ function loadSettings() {
 
             // System settings
             document.getElementById('cpu-temp-warn').value = data.cpu_temp_warn;
+            document.getElementById('max-sauna-on-time').value = data.max_sauna_on_time_hrs;
             document.getElementById('log-level').value = data.log_level;
         })
         .catch(error => console.error('Error loading settings:', error));
@@ -56,6 +57,7 @@ function saveSettings() {
         rs485_retries: parseInt(document.getElementById('rs485-retries').value),
         light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked,
         cpu_temp_warn: parseInt(document.getElementById('cpu-temp-warn').value),
+        max_sauna_on_time_hrs: parseInt(document.getElementById('max-sauna-on-time').value),
         log_level: parseInt(document.getElementById('log-level').value)
     };
 

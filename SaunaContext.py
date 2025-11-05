@@ -49,6 +49,7 @@ class SaunaContext:
     _httpPort: int = 8080
     _cpuWarnTempC: int = 90
     _logLevel: int = logging.WARNING
+    _maxSaunaOnTimeHrs: int = 6
     # Dependencies
     _configObj = None
     _configFileName = 'sauna.ini'
@@ -62,8 +63,9 @@ class SaunaContext:
     _leftFanOnStatus = False
     _rightFanOnStatus = True
     _cpuTempC = 0
-    # Fan control timer
-    _fanAfterSaunaOffTimer = None
+    # Timers
+    _fanAfterSaunaOffTimer: Timer = None
+    _saunaOnTimer: Timer = None
 
     # TODO Split settings screen.
     # TODO Add errors to fan settings.
@@ -76,8 +78,9 @@ class SaunaContext:
             self.persist()
         # Set log level from config
         self._logger.setLevel(self.getLogLevel())
-        # Initialize suna off timer
+        # Initialize timers
         self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
+        self._saunaOnTimer = Timer(round(self.getMaxSaunaOnTimeHrs() * 60 * 60))
 
     def getLogger(self) -> logging.Logger:
         return self._logger
@@ -124,6 +127,7 @@ class SaunaContext:
         self._configObj['system']['http_port'] = self._httpPort
         self._configObj['system']['cpu_warn_temp_c'] = self._cpuWarnTempC
         self._configObj['system']['log_level'] = self._logLevel
+        self._configObj['system']['max_sauna_on_time_hrs'] = self._maxSaunaOnTimeHrs
 
     def persist(self):
         self._configObj.write()
@@ -383,6 +387,13 @@ class SaunaContext:
         self._set('system', 'log_level', level)
         self._logger.setLevel(level)
 
+    def getMaxSaunaOnTimeHrs(self) -> int:
+        return self._get('system', 'max_sauna_on_time_hrs', self._maxSaunaOnTimeHrs)
+
+    def setMaxSaunaOnTimeHrs(self, time: int) -> None:
+        self._set('system', 'max_sauna_on_time_hrs', time)
+        self._saunaOnTimer.setTimeInterval(round(self.getMaxSaunaOnTimeHrs() * 60 * 60))
+
     # ----------------------- Not persisted attributes --------------------------
 
     def isSaunaOn(self) -> bool:
@@ -392,19 +403,21 @@ class SaunaContext:
         return not self._isSaunaOn
 
     def turnSaunaOn(self) -> None:
-        self._isSaunaOn = True
-        self._fanAfterSaunaOffTimer.stop()
+        self.turnSaunaOnOff(True)
 
     def turnSaunaOff(self) -> None:
-        self._isSaunaOn = False
-        self._fanAfterSaunaOffTimer.start()
+        self.turnSaunaOnOff(False)
 
     def turnSaunaOnOff(self, state: bool) -> None:
         self._isSaunaOn = state
         if  self._isSaunaOn:
             self._fanAfterSaunaOffTimer.stop()
+            self._saunaOnTimer.start()
         else:
             self._fanAfterSaunaOffTimer.start()
+
+    def getSaunaOnTimer(self) -> Timer:
+        return self._saunaOnTimer
 
     def isFanAfterSaunaOffTimerRunning(self):
         return self._fanAfterSaunaOffTimer.isRunning()

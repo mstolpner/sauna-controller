@@ -149,7 +149,8 @@ class SaunaWebUIServer:
                 'screen_height': self._ctx.getScreenHeight(),
                 'screen_rotation': self._ctx.getScreenRotation(),
                 'cpu_temp_warn': self._ctx.getCpuWarnTempC(),
-                'log_level': self._ctx.getLogLevel()
+                'log_level': self._ctx.getLogLevel(),
+                'max_sauna_on_time_hrs': self._ctx.getMaxSaunaOnTimeHrs()
             })
 
         @self._app.route('/api/settings/update', methods=['POST'])
@@ -192,6 +193,8 @@ class SaunaWebUIServer:
                 self._ctx.setCpuWarnTempC(int(data['cpu_temp_warn']))
             if 'log_level' in data:
                 self._ctx.setLogLevel(int(data['log_level']))
+            if 'max_sauna_on_time_hrs' in data:
+                self._ctx.setMaxSaunaOnTimeHrs(int(data['max_sauna_on_time_hrs']))
             return jsonify({'success': True})
 
         @self._app.route('/api/errors/get')

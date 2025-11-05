@@ -132,7 +132,7 @@ class SaunaController:
     #   2) temperature raises when the heater is on,
     #   3) proper current flows through the heater when the heater is on if a current sensor is present, - TODO
     #   4) heater only runs for max period of time,
-    #   5) sauna is on only for certain max period of time. - TODO
+    #   5) sauna is on only for certain max period of time.
     def _processHeaterControl(self) -> None:
         priorHeaterOnStatus = self._isHeaterOn
         priorHotRoomTempF = self._ctx.getHotRoomTempF()
@@ -151,6 +151,9 @@ class SaunaController:
             # Stop all timers
             self._heaterCycleTimer.stop()
             self._coolingGracePeriodTimer.stop()
+        # Make sure sauna is not on longer than configured
+        elif self._ctx.isSaunaOn() and not self._ctx.getSaunaOnTimer().isCompleted():
+            self._ctx.turnSaunaOff()
         # If temperature started falling while the heater was off, start cooling grace period timer
         # as a door might be open for a short period of time causing temperature to drop temporarily.
         elif (not self._isHeaterOn

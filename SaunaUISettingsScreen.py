@@ -174,6 +174,7 @@ class SaunaUISettingsScreen(Screen):
         # System Settings
         add_section_header('System Settings')
         add_setting('CPU Temperature Warning Threshold, °C', str(self._ctx.getCpuWarnTempC()))
+        add_setting('Max Sauna On Time, hours', str(self._ctx.getMaxSaunaOnTimeHrs()))
 
         # Log Level Spinner
         log_level_label = Label(
@@ -263,6 +264,7 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setDisplayBrightness(int(self.brightness_slider.value))
         # Save system settings
         self._ctx.setCpuWarnTempC(int(self.setting_inputs['CPU Temperature Warning Threshold, °C'].text))
+        self._ctx.setMaxSaunaOnTimeHrs(int(self.setting_inputs['Max Sauna On Time, hours'].text))
         # Save log level
         log_level_str_to_int = {
             'DEBUG': logging.DEBUG,
