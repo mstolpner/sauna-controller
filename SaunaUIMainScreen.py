@@ -318,7 +318,10 @@ class SaunaUIMainScreen(Screen):
             self.light_icon.background_normal = 'icons/light_off.png'
             self.light_icon.background_down = 'icons/light_off.png'
         # Initialize heater icon state
-        if self.ctx.isHeaterOn():
+        if self.errorMgr and self.errorMgr._heaterErrorMessage:
+            self.heater_icon.background_normal = 'icons/heater_error.png'
+            self.heater_icon.background_down = 'icons/heater_error.png'
+        elif self.ctx.isHeaterOn():
             self.heater_icon.background_normal = 'icons/heater_on.png'
             self.heater_icon.background_down = 'icons/heater_on.png'
         else:
@@ -374,8 +377,12 @@ class SaunaUIMainScreen(Screen):
             self.light_icon.background_normal = 'icons/light_off.png'
             self.light_icon.background_down = 'icons/light_off.png'
 
-        # Update heater icon - switch between heater_on and heater_off
-        if self.ctx.isHeaterOn():
+        # Update heater icon - check for errors first, then switch between heater_on and heater_off
+        if self.errorMgr and self.errorMgr._heaterErrorMessage:
+            # Heater has an error - show heater_error icon
+            self.heater_icon.background_normal = 'icons/heater_error.png'
+            self.heater_icon.background_down = 'icons/heater_error.png'
+        elif self.ctx.isHeaterOn():
             # Heater is on - show heater_on icon
             self.heater_icon.background_normal = 'icons/heater_on.png'
             self.heater_icon.background_down = 'icons/heater_on.png'

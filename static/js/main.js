@@ -115,9 +115,11 @@ function updateStatus() {
                 lightIcon.src = '/icons/light_off.png';
             }
 
-            // Update heater icon
+            // Update heater icon - check for error first, then switch between on/off
             const heaterIcon = document.getElementById('heater-icon');
-            if (data.heater_on) {
+            if (data.heater_error) {
+                heaterIcon.src = '/icons/heater_error.png';
+            } else if (data.heater_on) {
                 heaterIcon.src = '/icons/heater_on.png';
             } else {
                 heaterIcon.src = '/icons/heater_off.png';

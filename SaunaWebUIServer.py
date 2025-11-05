@@ -70,7 +70,8 @@ class SaunaWebUIServer:
                 'hot_room_humidity': self._ctx.getHotRoomHumidity(),
                 'target_temp_f': self._ctx.getHotRoomTargetTempF(),
                 'wifi_connected': self._is_wifi_connected(),
-                'has_errors': self._errorMgr.hasAnyError() if self._errorMgr else False
+                'has_errors': self._errorMgr.hasAnyError() if self._errorMgr else False,
+                'heater_error': self._errorMgr._heaterErrorMessage if self._errorMgr else None
             })
 
         @self._app.route('/api/fan/status')

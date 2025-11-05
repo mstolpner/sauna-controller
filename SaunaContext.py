@@ -63,8 +63,9 @@ class SaunaContext:
     # Fan control timer
     _fanAfterSaunaOffTimer = None
 
-#TODO Split settings screen. add errors to fan settings.
-    #TODO reduce icon size
+    # TODO Split settings screen.
+    # TODO Add errors to fan settings.
+    # TODO Reduce icon size
     def __init__(self):
         # TODO parametrize logging level
         self._logger.setLevel(logging.WARNING)

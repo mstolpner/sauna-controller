@@ -97,8 +97,8 @@ class SaunaUISettingsScreen(Screen):
 
         # Heater Cycle Control Settings
         add_section_header('Heater Cycle Control Settings')
-        add_setting('Heater Cycle On Period, minutes', str(self._ctx.getHeaterCycleOnPeriod()))
-        add_setting('Heater Cycle Off Period, minutes', str(self._ctx.getHeaterCycleOffPeriod()))
+        add_setting('Heater Cycle On Period, minutes', str(self._ctx.getHeaterCycleOnPeriodMin()))
+        add_setting('Heater Cycle Off Period, minutes', str(self._ctx.getHeaterCycleOffPeriodMin()))
 
         # RS485 Communication Settings
         add_section_header('RS485 Communication Settings')
