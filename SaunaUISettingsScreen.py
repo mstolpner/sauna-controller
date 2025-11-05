@@ -95,6 +95,11 @@ class SaunaUISettingsScreen(Screen):
         add_setting('Heater Health Check Cooldown Time, minutes', str(self._ctx.getHeaterHealthCooldownTimeMin()))
         add_setting('Heater Max Safe Runtime, minutes', str(self._ctx.getHeaterMaxSafeRuntimeMin()))
 
+        # Heater Cycle Control Settings
+        add_section_header('Heater Cycle Control Settings')
+        add_setting('Heater Cycle On Period, minutes', str(self._ctx.getHeaterCycleOnPeriod()))
+        add_setting('Heater Cycle Off Period, minutes', str(self._ctx.getHeaterCycleOffPeriod()))
+
         # RS485 Communication Settings
         add_section_header('RS485 Communication Settings')
         add_setting('RS485 Serial Port', self._ctx.getRs485SerialPort())
@@ -206,6 +211,8 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setHeaterHealthWarmupTimeMin(int(self.setting_inputs['Heater Health Check Warmup Time, minutes'].text))
         self._ctx.setHeaterHealthCooldownTimeMin(int(self.setting_inputs['Heater Health Check Cooldown Time, minutes'].text))
         self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime, minutes'].text))
+        self._ctx.setHeaterCycleOnPeriodMin(int(self.setting_inputs['Heater Cycle On Period, minutes'].text))
+        self._ctx.setHeaterCycleOffPeriodMin(int(self.setting_inputs['Heater Cycle Off Period, minutes'].text))
         # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)
         self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
         self._ctx.setRs485SerialPort(self.setting_inputs['RS485 Serial Port'].text)

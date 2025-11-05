@@ -3,13 +3,10 @@ from typing import Any, Optional
 from configobj import ConfigObj
 import os
 import subprocess
-
-from ErrorManager import ErrorManager
 from Timer import Timer
 
 
 class SaunaContext:
-    _errorMgr: ErrorManager = None
     _logger: logging.Logger = logging.getLogger('sauna-controller')
     _saunaSensorsDeviceId: int = 1
     # RS485 Serial Port Default Settings
@@ -32,6 +29,8 @@ class SaunaContext:
     _maxHotRoomTempF: int = 240
     _targetTempPresetMedium: int = 180
     _targetTempPresetHigh: int = 200
+    _heaterCycleOnPeriod: int = 30 * 60
+    _heaterCycleOffPeriod: int = 15 * 60
     # Fan Default Settings
     _fanSpeedPct: int = 100
     _numberOfFans: int = 2
@@ -64,7 +63,7 @@ class SaunaContext:
     # Fan control timer
     _fanAfterSaunaOffTimer = None
 
-#TODO add parameters for cycling heater, all parameters to settings scree. Split settings screen. add errors to fan settings.
+#TODO Split settings screen. add errors to fan settings.
     #TODO reduce icon size
     def __init__(self):
         # TODO parametrize logging level
@@ -78,6 +77,8 @@ class SaunaContext:
         # Initialize suna off timer
         self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
 
+    def getLogger(self) -> logging.Logger:
+        return self._logger
 
     def setDefaultSettings(self):
         self._configObj['rs485'] = {}
@@ -99,8 +100,8 @@ class SaunaContext:
         self._configObj['fan_control'] = {}
         self._configObj['fan_control']['fan_speed_pct'] = self._fanSpeedPct
         self._configObj['fan_control']['number_of_fans'] = self._numberOfFans
-        self._configObj['fan_control']['left_fan_enabled'] = self._leftFanOnStatus
-        self._configObj['fan_control']['right_fan_enabled'] = self._rightFanOnStatus
+        self._configObj['fan_control']['left_fan_enabled_min'] = self._leftFanOnStatus
+        self._configObj['fan_control']['right_fan_enabled_min'] = self._rightFanOnStatus
         self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = self._fanRunningTimeAfterSaunaOffHrs
         self._configObj['hot_room_control'] = {}
         self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
@@ -108,6 +109,8 @@ class SaunaContext:
         self._configObj['heater_control']['heater_health_warmup_time_min'] = self._heaterHealthWarmUpTimeMin
         self._configObj['heater_control']['heater_health_cooldown_time_min'] = self._heaterHealthCoolDownTimeMin
         self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
+        self._configObj['heater_control']['cycle_on_period'] = self._heaterCycleOnPeriod
+        self._configObj['heater_control']['cycle_off_period'] = self._heaterCycleOffPeriod
         self._configObj['display'] = {}
         self._configObj['display']['display_width'] = self._displayWidth
         self._configObj['display']['display_height'] = self._displayHeight
@@ -254,6 +257,18 @@ class SaunaContext:
 
     def setHeaterMaxSafeRuntimeMin(self, value: int) -> None:
         self._set('heater_control', 'heater_max_safe_runtime_min', value)
+
+    def getHeaterCycleOnPeriodMin(self) -> int:
+        return self._get('heater_control', 'cycle_on_period', self._heaterCycleOnPeriod)
+
+    def setHeaterCycleOnPeriodMin(self, value: int) -> None:
+        self._set('heater_control', 'cycle_on_period', value)
+
+    def getHeaterCycleOffPeriodMin(self) -> int:
+        return self._get('heater_control', 'cycle_off_period', self._heaterCycleOffPeriod)
+
+    def setHeaterCycleOffPeriodMin(self, value: int) -> None:
+        self._set('heater_control', 'cycle_off_period', value)
 
     # ----------------------- Hot Room Control attributes --------------------------
 

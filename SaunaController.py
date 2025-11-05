@@ -212,7 +212,7 @@ class SaunaController:
 
     def _turnHeaterOff(self):
         if self._isHeaterOn:
-            self._errorMgr._logger.info(f'{datetime.now()} turn heat off')
+            self._ctx.getLogger().info(f'{datetime.now()} turn heat off')
             self._isHeaterOn = False
             self._sd.turnHeaterOff()
             self._isHeaterOn = False
@@ -222,11 +222,11 @@ class SaunaController:
             self._heaterHealthCoolDownTimer.start()
             self._heaterMaxSafeRuntimeTimer.start()
             # Set Heater Control Timer
-            self._heaterCycleTimer.restart(15 * 60)
+            self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOffPeriodMin() * 60)
 
     def _turnHeaterOn(self):
         if not self._isHeaterOn:
-            self._errorMgr._logger.info(f'{datetime.now()} turn heat on')
+            self._ctx.getLogger().info(f'{datetime.now()} turn heat on')
             self._sd.turnHeaterOn()
             self._isHeaterOn = True
             self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
@@ -236,7 +236,7 @@ class SaunaController:
             # Set up max heater runtime timer
             self._heaterMaxSafeRuntimeTimer.start()
             # Set Heater Control Timer
-            self._heaterCycleTimer.restart(30 * 60)
+            self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOnPeriodMin() * 60)
 
     # ---------------------------- System Health ---------------------------
     def _processSystemHealth(self):
