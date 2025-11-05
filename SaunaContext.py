@@ -61,6 +61,8 @@ class SaunaContext:
     # Fan control timer
     _fanAfterSaunaOffTimer = None
 
+#TODO add parameters for cycling heater, all parameters to settings scree. Split settings screen. add errors to fan settings.
+    #TODO reduce icon size
     def __init__(self, errorMgr: ErrorManager):
         self._errorMgr = errorMgr
         iniFileExists = os.path.exists(self._configFileName)

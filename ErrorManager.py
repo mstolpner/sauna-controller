@@ -1,7 +1,7 @@
 from pymodbus.exceptions import ModbusException
 import logging
 
-
+#TODO move logger to ctx
 class ErrorManager:
     _criticalErrorMessage = None
     _relayModuleErrorMessage = None

@@ -7,7 +7,6 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.clock import Clock
 from SaunaContext import SaunaContext
 
-# TODO save ctx after closing this dialog
 class SaunaUIFanScreen(Screen):
 
     _ctx: SaunaContext = None
@@ -245,4 +244,5 @@ class SaunaUIFanScreen(Screen):
         self._ctx.setLeftFanEnabled(self.left_fan_btn.active)
         self._ctx.setFanSpeedPct(self.speed_slider.value)
         self._ctx.setFanRunningTimeAfterSaunaOffHrs(self.runtime_slider.value)
+        self._ctx.persist()
         self.manager.current = 'main'
