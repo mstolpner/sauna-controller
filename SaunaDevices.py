@@ -8,7 +8,7 @@ from SaunaContext import SaunaContext
 from Timer import Timer
 
 
-class DummyErrorResponse():
+class ModbusResponseError():
     def isError(self):
         return True
 
@@ -363,7 +363,6 @@ class SaunaDevices:
                 if self._client is None:
                     self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
                                                            baudrate=self._ctx.getModbusSerialBaudRate(),
-                                                           # Timeout is optimized for devices.
                                                            timeout=self._ctx.getModbusSerialTimeout(),
                                                            retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
@@ -371,7 +370,7 @@ class SaunaDevices:
                 return response
             except ModbusException as e:
                 self._errorMgr.raiseModbusError(e)
-                return DummyErrorResponse()
+                return ModbusResponseError()
         return self._loop.run_until_complete(_read())
 
     def _modbus_write_register(self, address: int, value: int, slave: int):
@@ -380,7 +379,6 @@ class SaunaDevices:
                 if self._client is None:
                     self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
                                                     baudrate=self._ctx.getModbusSerialBaudRate(),
-                                                    # Timeout is optimized for devices.
                                                     timeout=self._ctx.getModbusSerialTimeout(),
                                                     retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
@@ -388,7 +386,7 @@ class SaunaDevices:
                 return response
             except ModbusException as e:
                 self._errorMgr.raiseModbusError(e)
-                return DummyErrorResponse()
+                return ModbusResponseError()
         return self._loop.run_until_complete(_read())
 
     def _modbus_read_coils(self, address: int, slave: int, count: int=1):
@@ -397,7 +395,6 @@ class SaunaDevices:
                 if self._client is None:
                     self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
                                                     baudrate=self._ctx.getModbusSerialBaudRate(),
-                                                    # Timeout is optimized for devices.
                                                     timeout=self._ctx.getModbusSerialTimeout(),
                                                     retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
@@ -405,7 +402,7 @@ class SaunaDevices:
                 return response
             except ModbusException as e:
                 self._errorMgr.raiseModbusError(e)
-                return DummyErrorResponse()
+                return ModbusResponseError()
         return self._loop.run_until_complete(_read())
 
 
@@ -415,7 +412,6 @@ class SaunaDevices:
                 if self._client is None:
                     self._client = AsyncModbusSerialClient(port=self._ctx.getModbusSerialPort(),
                                                     baudrate=self._ctx.getModbusSerialBaudRate(),
-                                                    # Timeout is optimized for devices.
                                                     timeout=self._ctx.getModbusSerialTimeout(),
                                                     retries=self._ctx.getModbusSerialRetries())
                     await self._client.connect()
@@ -423,5 +419,5 @@ class SaunaDevices:
                 return response
             except ModbusException as e:
                 self._errorMgr.raiseModbusError(e)
-                return DummyErrorResponse()
+                return ModbusResponseError()
         return self._loop.run_until_complete(_read())

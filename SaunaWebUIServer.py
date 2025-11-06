@@ -138,8 +138,8 @@ class SaunaWebUIServer:
                 'warmup_time': self._ctx.getHeaterHealthWarmUpTimeMin(),
                 'cooldown_time': self._ctx.getHeaterHealthCooldownTimeMin(),
                 'max_safe_runtime_min': self._ctx.getHeaterMaxSafeRuntimeMin(),
-                'cycle_on_period': self._ctx.getHeaterCycleOnPeriodMin(),
-                'cycle_off_period': self._ctx.getHeaterCycleOffPeriodMin(),
+                'cycle_on_period_min': self._ctx.getHeaterCycleOnPeriodMin(),
+                'cycle_off_period_min': self._ctx.getHeaterCycleOffPeriodMin(),
                 'serial_port': self._ctx.getModbusSerialPort(),
                 'baud_rate': self._ctx.getModbusSerialBaudRate(),
                 'modbus_timeout': self._ctx.getModbusSerialTimeout(),
@@ -175,10 +175,10 @@ class SaunaWebUIServer:
                 self._ctx.setHeaterHealthCooldownTimeMin(int(data['cooldown_time']))
             if 'max_safe_runtime_min' in data:
                 self._ctx.setHeaterMaxSafeRuntimeMin(int(data['max_safe_runtime_min']))
-            if 'cycle_on_period' in data:
-                self._ctx.setHeaterCycleOnPeriodMin(int(data['cycle_on_period']))
-            if 'cycle_off_period' in data:
-                self._ctx.setHeaterCycleOffPeriodMin(int(data['cycle_off_period']))
+            if 'cycle_on_period_min' in data:
+                self._ctx.setHeaterCycleOnPeriodMin(int(data['cycle_on_period_min']))
+            if 'cycle_off_period_min' in data:
+                self._ctx.setHeaterCycleOffPeriodMin(int(data['cycle_off_period_min']))
             if 'serial_port' in data:
                 self._ctx.setModbusSerialPort(data['serial_port'])
             if 'baud_rate' in data:

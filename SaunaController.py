@@ -152,7 +152,7 @@ class SaunaController:
             self._heaterCycleTimer.stop()
             self._coolingGracePeriodTimer.stop()
         # Make sure sauna is not on longer than configured
-        elif self._ctx.isSaunaOn() and not self._ctx.getSaunaOnTimer().isCompleted():
+        elif self._ctx.isSaunaOn() and self._ctx.getSaunaOnTimer().isCompleted():
             self._ctx.turnSaunaOff()
         # If temperature started falling while the heater was off, start cooling grace period timer
         # as a door might be open for a short period of time causing temperature to drop temporarily.

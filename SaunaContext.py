@@ -29,8 +29,8 @@ class SaunaContext:
     _maxHotRoomTempF: int = 240
     _targetTempPresetMedium: int = 180
     _targetTempPresetHigh: int = 200
-    _heaterCycleOnPeriod: int = 30 * 60
-    _heaterCycleOffPeriod: int = 15 * 60
+    _heaterCycleOnPeriodMin: int = 30
+    _heaterCycleOffPeriodMin: int = 15
     # Fan Default Settings
     _fanSpeedPct: int = 100
     _numberOfFans: int = 2
@@ -114,8 +114,8 @@ class SaunaContext:
         self._configObj['heater_control']['heater_health_warmup_time_min'] = self._heaterHealthWarmUpTimeMin
         self._configObj['heater_control']['heater_health_cooldown_time_min'] = self._heaterHealthCoolDownTimeMin
         self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
-        self._configObj['heater_control']['cycle_on_period'] = self._heaterCycleOnPeriod
-        self._configObj['heater_control']['cycle_off_period'] = self._heaterCycleOffPeriod
+        self._configObj['heater_control']['cycle_on_period_min'] = self._heaterCycleOnPeriodMin
+        self._configObj['heater_control']['cycle_off_period_min'] = self._heaterCycleOffPeriodMin
         self._configObj['display'] = {}
         self._configObj['display']['display_width'] = self._displayWidth
         self._configObj['display']['display_height'] = self._displayHeight
@@ -268,16 +268,16 @@ class SaunaContext:
         self._set('heater_control', 'heater_max_safe_runtime_min', value)
 
     def getHeaterCycleOnPeriodMin(self) -> int:
-        return self._get('heater_control', 'cycle_on_period', self._heaterCycleOnPeriod)
+        return self._get('heater_control', 'cycle_on_period_min', self._heaterCycleOnPeriodMin)
 
     def setHeaterCycleOnPeriodMin(self, value: int) -> None:
-        self._set('heater_control', 'cycle_on_period', value)
+        self._set('heater_control', 'cycle_on_period_min', value)
 
     def getHeaterCycleOffPeriodMin(self) -> int:
-        return self._get('heater_control', 'cycle_off_period', self._heaterCycleOffPeriod)
+        return self._get('heater_control', 'cycle_off_period_min', self._heaterCycleOffPeriodMin)
 
     def setHeaterCycleOffPeriodMin(self, value: int) -> None:
-        self._set('heater_control', 'cycle_off_period', value)
+        self._set('heater_control', 'cycle_off_period_min', value)
 
     # ----------------------- Hot Room Control attributes --------------------------
 
