@@ -26,6 +26,21 @@ function loadSettings() {
             document.getElementById('modbus-timeout').value = data.modbus_timeout;
             document.getElementById('modbus-retries').value = data.modbus_retries;
 
+            // Modbus register addresses
+            document.getElementById('temp-sensor-addr').value = data.temp_sensor_addr;
+            document.getElementById('humidity-sensor-addr').value = data.humidity_sensor_addr;
+            document.getElementById('heater-relay-coil-addr').value = data.heater_relay_coil_addr;
+            document.getElementById('hot-room-light-coil-addr').value = data.hot_room_light_coil_addr;
+            document.getElementById('right-fan-relay-coil-addr').value = data.right_fan_relay_coil_addr;
+            document.getElementById('left-fan-relay-coil-addr').value = data.left_fan_relay_coil_addr;
+            document.getElementById('fan-module-room-temp-addr').value = data.fan_module_room_temp_addr;
+            document.getElementById('fan-status-addr').value = data.fan_status_addr;
+            document.getElementById('fan-speed-addr').value = data.fan_speed_addr;
+            document.getElementById('number-of-fans-addr').value = data.number_of_fans_addr;
+            document.getElementById('fan-fault-status-addr').value = data.fan_fault_status_addr;
+            document.getElementById('fan-module-governor-addr').value = data.fan_module_governor_addr;
+            document.getElementById('fan-module-reset-governor-value').value = data.fan_module_reset_governor_value;
+
             // Light settings
             document.getElementById('light-off-when-sauna-off').checked = data.light_off_when_sauna_off;
 
@@ -55,6 +70,19 @@ function saveSettings() {
         baud_rate: parseInt(document.getElementById('baud-rate').value),
         modbus_timeout: parseFloat(document.getElementById('modbus-timeout').value),
         modbus_retries: parseInt(document.getElementById('modbus-retries').value),
+        temp_sensor_addr: parseInt(document.getElementById('temp-sensor-addr').value),
+        humidity_sensor_addr: parseInt(document.getElementById('humidity-sensor-addr').value),
+        heater_relay_coil_addr: parseInt(document.getElementById('heater-relay-coil-addr').value),
+        hot_room_light_coil_addr: parseInt(document.getElementById('hot-room-light-coil-addr').value),
+        right_fan_relay_coil_addr: parseInt(document.getElementById('right-fan-relay-coil-addr').value),
+        left_fan_relay_coil_addr: parseInt(document.getElementById('left-fan-relay-coil-addr').value),
+        fan_module_room_temp_addr: parseInt(document.getElementById('fan-module-room-temp-addr').value),
+        fan_status_addr: parseInt(document.getElementById('fan-status-addr').value),
+        fan_speed_addr: parseInt(document.getElementById('fan-speed-addr').value),
+        number_of_fans_addr: parseInt(document.getElementById('number-of-fans-addr').value),
+        fan_fault_status_addr: parseInt(document.getElementById('fan-fault-status-addr').value),
+        fan_module_governor_addr: parseInt(document.getElementById('fan-module-governor-addr').value),
+        fan_module_reset_governor_value: parseInt(document.getElementById('fan-module-reset-governor-value').value),
         light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked,
         cpu_temp_warn: parseInt(document.getElementById('cpu-temp-warn').value),
         max_sauna_on_time_hrs: parseInt(document.getElementById('max-sauna-on-time').value),

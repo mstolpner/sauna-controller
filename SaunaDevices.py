@@ -22,28 +22,14 @@ class SaunaDevices:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     # Sensor Module Configuration
-    #TODO parametrize all addresses in settings
-    _temperatureAddress = 1
-    _humidityAddress = 0
     _lastHotRoomTemperatureC = 0
     _lastHotRoomHumidity = 0
 
     # Relay Module Configuration
-    _heaterCoilId = 0
-    _hotRoomLightCoilId = 1
-    _rightFanCoilId = 2
-    _leftFanCoilId = 3
     _lastFanRelayStatus = [False, False]
     _lastHotRoomLightOnStatus = False
 
     # Fan Module Configuration
-    _roomTemperatureAddress = 0
-    _fanStatusAddress = 1
-    _fanSpeedAddress = 3
-    _numberOfFansAddress = 6
-    _fanFaultStatusAddress = 14
-    _resetFanModuleGovernorAddress = 32
-    _resetFanModuleGovernorValue = 170
     _lastRestingRoomTemp = 0
     _rightFanId = 1
     _leftFanId = 2
@@ -77,17 +63,17 @@ class SaunaDevices:
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
         # Initialize Hot Room Light
-        self._setRelayStatus(self._hotRoomLightCoilId, self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        self._setRelayStatus(self._ctx.getHotRoomLightCoilAddr(), self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
         # Initialize Fans
         if self.getNumberOfFans() != self._ctx.getNumberOfFans():
             self.setNumberOfFans(self._ctx.getNumberOfFans())
         self.setFanSpeed(self._ctx.getFanSpeedPct())
         # Fans are off initially and get managed by the SaunaController
-        self._setFanRelayStatus(self._rightFanCoilId, False)
-        self._setFanRelayStatus(self._leftFanCoilId, False)
+        self._setFanRelayStatus(self._ctx.getRightFanRelayCoilAddr(), False)
+        self._setFanRelayStatus(self._ctx.getLeftFanRelayCoilAddr(), False)
         # These 2 functions will populate _lastFanRelayStatus[]
-        self._getFanRelayStatus(self._rightFanCoilId)
-        self._getFanRelayStatus(self._leftFanCoilId)
+        self._getFanRelayStatus(self._ctx.getRightFanRelayCoilAddr())
+        self._getFanRelayStatus(self._ctx.getLeftFanRelayCoilAddr())
         # This function will populate _lastRestingRoomTemp
         self.getRestingRoomTemp()
         # This function will populate _lastFanSpeed[]
@@ -122,7 +108,7 @@ class SaunaDevices:
     # ---------------------------------------- Sauna Sensors ---------------------------------------
 
     def getHotRoomTemperature(self, system='F') -> int:
-        response=self._modbus_read_holding_registers(self._temperatureAddress, self._ctx.getSaunaSensorsDeviceId())
+        response=self._modbus_read_holding_registers(self._ctx.getTempSensorAddr(), self._ctx.getSaunaSensorsDeviceId())
         if response.isError():
             self._errorMgr.raiseSensorModuleError('Cannot Read Temperature Sensor.')
         else:
@@ -134,7 +120,7 @@ class SaunaDevices:
             return round(self._lastHotRoomTemperatureC)
 
     def getHotRoomHumidity(self) -> int:
-        response=self._modbus_read_holding_registers(self._humidityAddress, self._ctx.getSaunaSensorsDeviceId())
+        response=self._modbus_read_holding_registers(self._ctx.getHumiditySensorAddr(), self._ctx.getSaunaSensorsDeviceId())
         if response.isError():
             self._errorMgr.raiseSensorModuleError('Cannot Read Humidity Sensor.')
         else:
@@ -143,7 +129,7 @@ class SaunaDevices:
         return round(self._lastHotRoomHumidity)
 
     def getRestingRoomTemp(self, system='F') -> int:
-        response=self._modbus_read_holding_registers(self._roomTemperatureAddress, self._ctx.getSaunaSensorsDeviceId())
+        response=self._modbus_read_holding_registers(self._ctx.getFanModuleRoomTempAddr(), self._ctx.getSaunaSensorsDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot get Resting Room Temperature.')
         else:
@@ -157,19 +143,19 @@ class SaunaDevices:
     # ---------------------------------- Sauna Heater Functions ----------------------------------
 
     def isHeaterOn(self) -> bool:
-        response = self._modbus_read_coils(self._heaterCoilId, self._ctx.getRelayModuleDeviceId())
+        response = self._modbus_read_coils(self._ctx.getHeaterRelayCoilAddr(), self._ctx.getRelayModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseRelayModuleError('Cannot get Heater Status.')
         else:
             self._errorMgr.eraseRelayModuleError()
-            self._lastHeaterOnStatus = response.bits[self._heaterCoilId]
+            self._lastHeaterOnStatus = response.bits[self._ctx.getHeaterRelayCoilAddr()]
         return self._lastHeaterOnStatus
 
     def isHeaterOff(self) -> bool:
         return not self.isHeaterOn()
 
     def setHeaterRelay(self, status: bool) -> None:
-        response = self._modbus_write_coil(self._heaterCoilId, status, self._ctx.getRelayModuleDeviceId())
+        response = self._modbus_write_coil(self._ctx.getHeaterRelayCoilAddr(), status, self._ctx.getRelayModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseRelayModuleError('Cannot Turn the Heater On or Off.')
         else:
@@ -191,16 +177,16 @@ class SaunaDevices:
         self._ctx.setHeaterOff()
 
     def getHotRoomLightStatus(self) -> bool:
-        response = self._modbus_read_coils(self._hotRoomLightCoilId, self._ctx.getRelayModuleDeviceId())
+        response = self._modbus_read_coils(self._ctx.getHotRoomLightCoilAddr(), self._ctx.getRelayModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseRelayModuleError('Cannot get Hot Room Light status.')
         else:
             self._errorMgr.eraseRelayModuleError()
-            self._lastHotRoomLightOnStatus = response.bits[self._hotRoomLightCoilId]
+            self._lastHotRoomLightOnStatus = response.bits[self._ctx.getHotRoomLightCoilAddr()]
         return self._lastHotRoomLightOnStatus
 
     def turnHotRoomLightOnOff(self, status: bool) -> None:
-        response = self._modbus_write_coil(self._hotRoomLightCoilId, status, self._ctx.getRelayModuleDeviceId())
+        response = self._modbus_write_coil(self._ctx.getHotRoomLightCoilAddr(), status, self._ctx.getRelayModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseRelayModuleError('Cannot Turn the Hot Room Light On or Off.')
         else:
@@ -238,7 +224,7 @@ class SaunaDevices:
     def _getFanStatus(self, fanId) -> bool:
         # low 4 bits correspond to 4 fans, from right to left, the most right bit corresponds to fan 1,
         # 0 means the fan stops and 1 means the fan is running
-        response = self._modbus_read_holding_registers(self._fanStatusAddress, self._ctx.getFanControlModuleDeviceId())
+        response = self._modbus_read_holding_registers(self._ctx.getFanStatusAddr(), self._ctx.getFanControlModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Get Fan Status from Fan Module.RelayModule')
         else:
@@ -257,7 +243,7 @@ class SaunaDevices:
 
     # Sets speed for all fans. 0% ... 100%. Most fans will start running at 10% or more
     def setFanSpeed(self, speedPct: int) -> None:
-        response = self._modbus_write_register(self._fanSpeedAddress, speedPct, self._ctx.getFanControlModuleDeviceId())
+        response = self._modbus_write_register(self._ctx.getFanSpeedAddr(), speedPct, self._ctx.getFanControlModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Change Fan Speed.')
         else:
@@ -269,14 +255,14 @@ class SaunaDevices:
     def getRightFanSpeedRpm(self) -> int:
         return self._getFanSpeedRpm(self._rightFanId)
 
-    def isRightFanOn(self) -> bool: 
-        return self._getFanRelayStatus(self._rightFanCoilId)
+    def isRightFanOn(self) -> bool:
+        return self._getFanRelayStatus(self._ctx.getRightFanRelayCoilAddr())
 
     def isRightFanOff(self) -> bool:
         return not self.isRightFanOn()
 
     def isLeftFanOn(self) -> bool:
-        return self._getFanRelayStatus(self._leftFanCoilId)
+        return self._getFanRelayStatus(self._ctx.getLeftFanRelayCoilAddr())
 
     def isLeftFanOff(self) -> bool:
         return not self.isLeftFanOn()
@@ -288,7 +274,7 @@ class SaunaDevices:
         self.turnLeftFanOnOff(False)
 
     def turnLeftFanOnOff(self, state: bool) -> None:
-        self._setFanRelayStatus(self._leftFanCoilId, state)
+        self._setFanRelayStatus(self._ctx.getLeftFanRelayCoilAddr(), state)
         if state and not self._leftFanPriorState:
             self._fanAccelerationTimer.start()
         self._leftFanPriorState = state
@@ -300,13 +286,13 @@ class SaunaDevices:
         self.turnRightFanOnOff(False)
 
     def turnRightFanOnOff(self, state: bool) -> None:
-        self._setFanRelayStatus(self._rightFanCoilId, state)
+        self._setFanRelayStatus(self._ctx.getRightFanRelayCoilAddr(), state)
         if state and not self._rightFanPriorState:
             self._fanAccelerationTimer.start()
         self._rightFanPriorState = state
 
     def getNumberOfFans(self) -> int:
-        response = self._modbus_read_holding_registers(self._numberOfFansAddress, self._ctx.getFanControlModuleDeviceId())
+        response = self._modbus_read_holding_registers(self._ctx.getNumberOfFansAddr(), self._ctx.getFanControlModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Get Number of Fans.')
             return self._ctx.getNumberOfFans()
@@ -315,7 +301,7 @@ class SaunaDevices:
             return response.registers[0]
 
     def setNumberOfFans(self, nFans: int) -> None:
-        response = self._modbus_write_register(self._numberOfFansAddress, nFans, self._ctx.getFanControlModuleDeviceId())
+        response = self._modbus_write_register(self._ctx.getNumberOfFansAddr(), nFans, self._ctx.getFanControlModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Set Number of Fans.')
         else:
@@ -325,7 +311,7 @@ class SaunaDevices:
         # Give fan a chance to gain speed
         if self._fanAccelerationTimer.isRunning():
             return False
-        response = self._modbus_read_holding_registers(self._fanFaultStatusAddress, self._ctx.getFanControlModuleDeviceId())
+        response = self._modbus_read_holding_registers(self._ctx.getFanFaultStatusAddr(), self._ctx.getFanControlModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Read Fan Status.')
             return True
@@ -344,8 +330,8 @@ class SaunaDevices:
         return not self._ctx.isRightFanEnabled() or not self._checkFanFaultStatus(self._rightFanId)
 
     def _resetFanModuleGovernor(self) -> None:
-        response = self._modbus_write_register(self._resetFanModuleGovernorAddress, 
-                                               self._resetFanModuleGovernorValue, 
+        response = self._modbus_write_register(self._ctx.getFanModuleGovernorAddr(),
+                                               self._ctx.getFanModuleResetGovernorValue(),
                                                self._ctx.getFanControlModuleDeviceId())
         if response.isError():
             self._errorMgr.raiseFanModuleError('Cannot Reset Fan Module.')

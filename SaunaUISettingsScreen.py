@@ -109,6 +109,22 @@ class SaunaUISettingsScreen(Screen):
         add_setting('Modbus Timeout, seconds', str(self._ctx.getModbusSerialTimeout()))
         add_setting('Modbus Retries', str(self._ctx.getModbusSerialRetries()))
 
+        # Modbus Register Addresses
+        add_section_header('Modbus Register Addresses')
+        add_setting('Temperature Sensor Address', str(self._ctx.getTempSensorAddr()))
+        add_setting('Humidity Sensor Address', str(self._ctx.getHumiditySensorAddr()))
+        add_setting('Heater Relay Coil Address', str(self._ctx.getHeaterRelayCoilAddr()))
+        add_setting('Hot Room Light Coil Address', str(self._ctx.getHotRoomLightCoilAddr()))
+        add_setting('Right Fan Relay Coil Address', str(self._ctx.getRightFanRelayCoilAddr()))
+        add_setting('Left Fan Relay Coil Address', str(self._ctx.getLeftFanRelayCoilAddr()))
+        add_setting('Fan Module Room Temp Address', str(self._ctx.getFanModuleRoomTempAddr()))
+        add_setting('Fan Status Address', str(self._ctx.getFanStatusAddr()))
+        add_setting('Fan Speed Address', str(self._ctx.getFanSpeedAddr()))
+        add_setting('Number of Fans Address', str(self._ctx.getNumberOfFansAddr()))
+        add_setting('Fan Fault Status Address', str(self._ctx.getFanFaultStatusAddr()))
+        add_setting('Fan Module Governor Address', str(self._ctx.getFanModuleGovernorAddr()))
+        add_setting('Fan Module Reset Governor Value', str(self._ctx.getFanModuleResetGovernorValue()))
+
         # Hot Room Light Settings
         add_section_header('Hot Room Light Settings')
         light_label = Label(
@@ -260,6 +276,20 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setModbusSerialBaudRate(int(self.setting_inputs['Modbus Baud Rate'].text))
         self._ctx.setModbusSerialTimeout(float(self.setting_inputs['Modbus Timeout, seconds'].text))
         self._ctx.setModbusSerialRetries(int(self.setting_inputs['Modbus Retries'].text))
+        # Save Modbus register addresses
+        self._ctx.setTempSensorAddr(int(self.setting_inputs['Temperature Sensor Address'].text))
+        self._ctx.setHumiditySensorAddr(int(self.setting_inputs['Humidity Sensor Address'].text))
+        self._ctx.setHeaterRelayCoilAddr(int(self.setting_inputs['Heater Relay Coil Address'].text))
+        self._ctx.setHotRoomLightCoilAddr(int(self.setting_inputs['Hot Room Light Coil Address'].text))
+        self._ctx.setRightFanRelayCoilAddr(int(self.setting_inputs['Right Fan Relay Coil Address'].text))
+        self._ctx.setLeftFanRelayCoilAddr(int(self.setting_inputs['Left Fan Relay Coil Address'].text))
+        self._ctx.setFanModuleRoomTempAddr(int(self.setting_inputs['Fan Module Room Temp Address'].text))
+        self._ctx.setFanStatusAddr(int(self.setting_inputs['Fan Status Address'].text))
+        self._ctx.setFanSpeedAddr(int(self.setting_inputs['Fan Speed Address'].text))
+        self._ctx.setNumberOfFansAddr(int(self.setting_inputs['Number of Fans Address'].text))
+        self._ctx.setFanFaultStatusAddr(int(self.setting_inputs['Fan Fault Status Address'].text))
+        self._ctx.setFanModuleGovernorAddr(int(self.setting_inputs['Fan Module Governor Address'].text))
+        self._ctx.setFanModuleResetGovernorValue(int(self.setting_inputs['Fan Module Reset Governor Value'].text))
         # Save display brightness
         self._ctx.setDisplayBrightness(int(self.brightness_slider.value))
         # Save system settings

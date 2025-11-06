@@ -144,6 +144,19 @@ class SaunaWebUIServer:
                 'baud_rate': self._ctx.getModbusSerialBaudRate(),
                 'modbus_timeout': self._ctx.getModbusSerialTimeout(),
                 'modbus_retries': self._ctx.getModbusSerialRetries(),
+                'temp_sensor_addr': self._ctx.getTempSensorAddr(),
+                'humidity_sensor_addr': self._ctx.getHumiditySensorAddr(),
+                'heater_relay_coil_addr': self._ctx.getHeaterRelayCoilAddr(),
+                'hot_room_light_coil_addr': self._ctx.getHotRoomLightCoilAddr(),
+                'right_fan_relay_coil_addr': self._ctx.getRightFanRelayCoilAddr(),
+                'left_fan_relay_coil_addr': self._ctx.getLeftFanRelayCoilAddr(),
+                'fan_module_room_temp_addr': self._ctx.getFanModuleRoomTempAddr(),
+                'fan_status_addr': self._ctx.getFanStatusAddr(),
+                'fan_speed_addr': self._ctx.getFanSpeedAddr(),
+                'number_of_fans_addr': self._ctx.getNumberOfFansAddr(),
+                'fan_fault_status_addr': self._ctx.getFanFaultStatusAddr(),
+                'fan_module_governor_addr': self._ctx.getFanModuleGovernorAddr(),
+                'fan_module_reset_governor_value': self._ctx.getFanModuleResetGovernorValue(),
                 'light_off_when_sauna_off': not self._ctx.getHotRoomLightAlwaysOn(),
                 'screen_width': self._ctx.getScreenWidth(),
                 'screen_height': self._ctx.getScreenHeight(),
@@ -187,6 +200,32 @@ class SaunaWebUIServer:
                 self._ctx.setModbusSerialTimeout(float(data['modbus_timeout']))
             if 'modbus_retries' in data:
                 self._ctx.setModbusSerialRetries(int(data['modbus_retries']))
+            if 'temp_sensor_addr' in data:
+                self._ctx.setTempSensorAddr(int(data['temp_sensor_addr']))
+            if 'humidity_sensor_addr' in data:
+                self._ctx.setHumiditySensorAddr(int(data['humidity_sensor_addr']))
+            if 'heater_relay_coil_addr' in data:
+                self._ctx.setHeaterRelayCoilAddr(int(data['heater_relay_coil_addr']))
+            if 'hot_room_light_coil_addr' in data:
+                self._ctx.setHotRoomLightCoilAddr(int(data['hot_room_light_coil_addr']))
+            if 'right_fan_relay_coil_addr' in data:
+                self._ctx.setRightFanRelayCoilAddr(int(data['right_fan_relay_coil_addr']))
+            if 'left_fan_relay_coil_addr' in data:
+                self._ctx.setLeftFanRelayCoilAddr(int(data['left_fan_relay_coil_addr']))
+            if 'fan_module_room_temp_addr' in data:
+                self._ctx.setFanModuleRoomTempAddr(int(data['fan_module_room_temp_addr']))
+            if 'fan_status_addr' in data:
+                self._ctx.setFanStatusAddr(int(data['fan_status_addr']))
+            if 'fan_speed_addr' in data:
+                self._ctx.setFanSpeedAddr(int(data['fan_speed_addr']))
+            if 'number_of_fans_addr' in data:
+                self._ctx.setNumberOfFansAddr(int(data['number_of_fans_addr']))
+            if 'fan_fault_status_addr' in data:
+                self._ctx.setFanFaultStatusAddr(int(data['fan_fault_status_addr']))
+            if 'fan_module_governor_addr' in data:
+                self._ctx.setFanModuleGovernorAddr(int(data['fan_module_governor_addr']))
+            if 'fan_module_reset_governor_value' in data:
+                self._ctx.setFanModuleResetGovernorValue(int(data['fan_module_reset_governor_value']))
             if 'light_off_when_sauna_off' in data:
                 self._ctx.setHotRoomLightAlwaysOn(not data['light_off_when_sauna_off'])
             if 'cpu_temp_warn' in data:

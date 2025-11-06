@@ -8,16 +8,29 @@ from Timer import Timer
 
 class SaunaContext:
     _logger: logging.Logger = logging.getLogger('sauna-controller')
-    _saunaSensorsDeviceId: int = 1
     # Modbus Serial Port Default Settings
     _modbusSerialPort = '/dev/ttyAMA0'
     _modbusSerialBaudRate: int = 9600
     _modbusSerialTimeout: float = 0.3
     _modbusSerialRetries: int = 3
-    # Modbus Default Settings
+    # Modbus Device IDs
     _saunaSensorsDeviceId: int = 1
     _relayModuleDeviceId: int = 2
     _fanControlModuleDeviceId: int = 3
+    # Modbus Register Addresses
+    _tempSensorAddr: int = 1
+    _humiditySensorAddr: int = 0
+    _heaterRelayCoilAddr: int = 0
+    _hotRoomLightCoilAddr: int = 1
+    _rightFanRelayCoilAddr: int = 2
+    _leftFanRelayCoilAddr: int = 3
+    _fanModuleRoomTempAddr: int = 0
+    _fanStatusAddr: int = 1
+    _fanSpeedAddr: int = 3
+    _numberOfFansAddr: int = 6
+    _fanFaultStatusAddr: int = 14
+    _fanModuleGovernorAddr: int = 32
+    _fanModuleResetGovernorValue: int = 170
     # Heater Default Settings
     _hotRoomTargetTempF: int = 190
     _coolingGracePeriodMin: int = 5
@@ -94,6 +107,19 @@ class SaunaContext:
         self._configObj['modbus']['serial_baud_rate'] = self._modbusSerialBaudRate
         self._configObj['modbus']['serial_timeout'] = self._modbusSerialTimeout
         self._configObj['modbus']['serial_retries'] = self._modbusSerialRetries
+        self._configObj['modbus']['temp_sensor_addr'] = self._tempSensorAddr
+        self._configObj['modbus']['humidity_sensor_addr'] = self._humiditySensorAddr
+        self._configObj['modbus']['heater_relay_coil_addr'] = self._heaterRelayCoilAddr
+        self._configObj['modbus']['hot_room_light_coil_addr'] = self._hotRoomLightCoilAddr
+        self._configObj['modbus']['right_fan_relay_coil_addr'] = self._rightFanRelayCoilAddr
+        self._configObj['modbus']['left_fan_relay_coil_addr'] = self._leftFanRelayCoilAddr
+        self._configObj['modbus']['fan_module_room_temp_addr'] = self._fanModuleRoomTempAddr
+        self._configObj['modbus']['fan_status_addr'] = self._fanStatusAddr
+        self._configObj['modbus']['fan_speed_addr'] = self._fanSpeedAddr
+        self._configObj['modbus']['number_of_fans_addr'] = self._numberOfFansAddr
+        self._configObj['modbus']['fan_fault_status_addr'] = self._fanFaultStatusAddr
+        self._configObj['modbus']['fan_module_governor_addr'] = self._fanModuleGovernorAddr
+        self._configObj['modbus']['fan_module_reset_governor_value'] = self._fanModuleResetGovernorValue
         self._configObj['hot_room_temp_control'] = {}
         self._configObj['hot_room_temp_control']['target_temp_f'] = self._hotRoomTargetTempF
         self._configObj['hot_room_temp_control']['cooling_grace_period_min'] = self._coolingGracePeriodMin
@@ -202,6 +228,84 @@ class SaunaContext:
 
     def setModbusSerialRetries(self, modbus_serial_retries: int) -> None:
         self._set('modbus', 'serial_retries', modbus_serial_retries)
+
+    def getTempSensorAddr(self) -> int:
+        return self._get('modbus', 'temp_sensor_addr', self._tempSensorAddr)
+
+    def setTempSensorAddr(self, addr: int) -> None:
+        self._set('modbus', 'temp_sensor_addr', addr)
+
+    def getHumiditySensorAddr(self) -> int:
+        return self._get('modbus', 'humidity_sensor_addr', self._humiditySensorAddr)
+
+    def setHumiditySensorAddr(self, addr: int) -> None:
+        self._set('modbus', 'humidity_sensor_addr', addr)
+
+    def getHeaterRelayCoilAddr(self) -> int:
+        return self._get('modbus', 'heater_relay_coil_addr', self._heaterRelayCoilAddr)
+
+    def setHeaterRelayCoilAddr(self, coil_addr: int) -> None:
+        self._set('modbus', 'heater_relay_coil_addr', coil_addr)
+
+    def getHotRoomLightCoilAddr(self) -> int:
+        return self._get('modbus', 'hot_room_light_coil_addr', self._hotRoomLightCoilAddr)
+
+    def setHotRoomLightCoilAddr(self, coil_addr: int) -> None:
+        self._set('modbus', 'hot_room_light_coil_addr', coil_addr)
+
+    def getRightFanRelayCoilAddr(self) -> int:
+        return self._get('modbus', 'right_fan_relay_coil_addr', self._rightFanRelayCoilAddr)
+
+    def setRightFanRelayCoilAddr(self, coil_addr: int) -> None:
+        self._set('modbus', 'right_fan_relay_coil_addr', coil_addr)
+
+    def getLeftFanRelayCoilAddr(self) -> int:
+        return self._get('modbus', 'left_fan_relay_coil_addr', self._leftFanRelayCoilAddr)
+
+    def setLeftFanRelayCoilAddr(self, coil_addr: int) -> None:
+        self._set('modbus', 'left_fan_relay_coil_addr', coil_addr)
+
+    def getFanModuleRoomTempAddr(self) -> int:
+        return self._get('modbus', 'fan_module_room_temp_addr', self._fanModuleRoomTempAddr)
+
+    def setFanModuleRoomTempAddr(self, addr: int) -> None:
+        self._set('modbus', 'fan_module_room_temp_addr', addr)
+
+    def getFanStatusAddr(self) -> int:
+        return self._get('modbus', 'fan_status_addr', self._fanStatusAddr)
+
+    def setFanStatusAddr(self, addr: int) -> None:
+        self._set('modbus', 'fan_status_addr', addr)
+
+    def getFanSpeedAddr(self) -> int:
+        return self._get('modbus', 'fan_speed_addr', self._fanSpeedAddr)
+
+    def setFanSpeedAddr(self, addr: int) -> None:
+        self._set('modbus', 'fan_speed_addr', addr)
+
+    def getNumberOfFansAddr(self) -> int:
+        return self._get('modbus', 'number_of_fans_addr', self._numberOfFansAddr)
+
+    def setNumberOfFansAddr(self, addr: int) -> None:
+        self._set('modbus', 'number_of_fans_addr', addr)
+
+    def getFanFaultStatusAddr(self) -> int:
+        return self._get('modbus', 'fan_fault_status_addr', self._fanFaultStatusAddr)
+
+    def setFanFaultStatusAddr(self, addr: int) -> None:
+        self._set('modbus', 'fan_fault_status_addr', addr)
+
+    def getFanModuleGovernorAddr(self) -> int:
+        return self._get('modbus', 'fan_module_governor_addr', self._fanModuleGovernorAddr)
+
+    def setFanModuleGovernorAddr(self, addr: int) -> None:
+        self._set('modbus', 'fan_module_governor_addr', addr)
+
+    def getFanModuleResetGovernorValue(self) -> int:
+        return self._get('modbus', 'fan_module_reset_governor_value', self._fanModuleResetGovernorValue)
+
+    def setFanModuleResetGovernorValue(self, value: int) -> None:
+        self._set('modbus', 'fan_module_reset_governor_value', value)
 
     # ----------------------- Hot Room Temp Control attributes --------------------------
 
