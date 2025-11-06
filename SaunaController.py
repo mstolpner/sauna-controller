@@ -92,14 +92,14 @@ class SaunaController:
         # Process SaunaOFF situation with a delayed fan turn off
         if self._sd.isRightFanOn() \
             and (not self._ctx.isRightFanEnabled() or (not self._ctx.isSaunaOn()
-                 and not self._ctx.isFanAfterSaunaOffTimerRunning())):
+                 and self._ctx.isFanAfterSaunaOffTimerCompleted())):
             self._sd.turnRightFanOff()
         elif self._sd.isRightFanOff() \
             and (self._ctx.isRightFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
             self._sd.turnRightFanOn()
         if self._sd.isLeftFanOn() \
             and (not self._ctx.isLeftFanEnabled() or (not self._ctx.isSaunaOn()
-                 and not self._ctx.isFanAfterSaunaOffTimerRunning())):
+                 and self._ctx.isFanAfterSaunaOffTimerCompleted())):
             self._sd.turnLeftFanOff()
         elif self._sd.isLeftFanOff() \
             and (self._ctx.isLeftFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
@@ -151,7 +151,7 @@ class SaunaController:
             # Stop all timers
             self._heaterCycleTimer.stop()
             self._coolingGracePeriodTimer.stop()
-        # Make sure sauna is not on longer than configured
+        # Make sure sauna is not on longer than configured TODO - combine as the seconf if nevet kicks in
         elif self._ctx.isSaunaOn() and self._ctx.getSaunaOnTimer().isCompleted():
             self._ctx.turnSaunaOff()
         # If temperature started falling while the heater was off, start cooling grace period timer
@@ -163,8 +163,8 @@ class SaunaController:
                 self._coolingGracePeriodTimer.start()
         # Turn Heater Off for heater cycling
         elif (self._isHeaterOn
-              # Wait for the "on" heater cycle
-              and not self._heaterCycleTimer.isRunning()):
+              # Wait while the "on" heater cycle is active
+              and self._heaterCycleTimer.isCompleted()):
             self._turnHeaterOff()
         # Turn Heater Off if temperature reached
         elif (self._isHeaterOn
@@ -222,7 +222,7 @@ class SaunaController:
             # Set up heater health timers
             self._heaterHealthWarmUpTimer.stop()
             self._heaterHealthCoolDownTimer.start()
-            self._heaterMaxSafeRuntimeTimer.start()
+            self._heaterMaxSafeRuntimeTimer.stop()
             # Set Heater Control Timer
             self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOffPeriodMin() * 60)
 

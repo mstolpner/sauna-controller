@@ -16,7 +16,7 @@ class Timer:
         return False
 
     def isRunning(self) -> bool:
-        return self._active and time.time() - self._startTime <= self._timeInterval
+        return self._active and time.time() - self._startTime < self._timeInterval
 
     def setTimeInterval(self, interval):
         self._timeInterval = interval
