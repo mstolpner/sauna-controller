@@ -3,7 +3,7 @@ import time
 import logging
 from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.exceptions import ModbusException
-from ErrorManager import ErrorManager
+from SaunaErrorMgr import SaunaErrorMgr
 from SaunaContext import SaunaContext
 from Timer import Timer
 
@@ -52,7 +52,7 @@ class SaunaDevices:
     _rightFanPriorState = False
 
 
-    def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
+    def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         # Set modbus Logging Level
         pymodbus_logger = logging.getLogger('pymodbus')
         pymodbus_logger.setLevel(logging.WARN)

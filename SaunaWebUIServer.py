@@ -4,13 +4,13 @@ import os
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from SaunaContext import SaunaContext
-from ErrorManager import ErrorManager
+from SaunaErrorMgr import SaunaErrorMgr
 
 
 class SaunaWebUIServer:
     """Web UI server for sauna controller"""
 
-    def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
+    def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         self._ctx = ctx
         self._errorMgr = errorMgr
         self._app = Flask(__name__)

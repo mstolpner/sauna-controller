@@ -7,12 +7,12 @@ import threading
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
 
 from SaunaContext import SaunaContext
-from ErrorManager import ErrorManager
+from SaunaErrorMgr import SaunaErrorMgr
 from SaunaUIMainScreen import SaunaControlApp
 
 if __name__ == '__main__':
     _ctx = SaunaContext()
-    _errorMgr = ErrorManager(_ctx)
+    _errorMgr = SaunaErrorMgr(_ctx)
 
     # Initialize Sauna Controller
     _sc = SaunaController(_ctx, _errorMgr)

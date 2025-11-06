@@ -2,7 +2,7 @@ from pymodbus.exceptions import ModbusException
 from SaunaContext import SaunaContext
 
 
-class ErrorManager:
+class SaunaErrorMgr:
     _ctx: SaunaContext
     _criticalErrorMessage = None
     _relayModuleErrorMessage = None

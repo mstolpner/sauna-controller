@@ -3,7 +3,7 @@ import threading
 import re, subprocess
 from datetime import datetime
 
-from ErrorManager import ErrorManager
+from SaunaErrorMgr import SaunaErrorMgr
 from SaunaContext import SaunaContext
 from SaunaDevices import SaunaDevices
 from Timer import Timer
@@ -31,7 +31,7 @@ class SaunaController:
     _heaterHealthLastRefPointTemp = None
 
 
-    def __init__(self, ctx: SaunaContext, errorMgr: ErrorManager):
+    def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         # Initialize dependencies/classes
         self._ctx = ctx
         self._errorMgr = errorMgr

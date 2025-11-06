@@ -14,13 +14,13 @@ from kivy.graphics import Color, Line, Rectangle
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
-from ErrorManager import ErrorManager
+from SaunaErrorMgr import SaunaErrorMgr
 from SaunaUISettingsScreen import SaunaUISettingsScreen
 from SaunaUIFanScreen import SaunaUIFanScreen
 from SaunaUIWiFiScreen import SaunaUIWiFiScreen
 from SaunaUIErrorsScreen import SaunaUIErrorsScreen
 from SaunaContext import SaunaContext
-from ErrorManager import ErrorManager
+from SaunaErrorMgr import SaunaErrorMgr
 
 # Set window size for Raspberry Pi touchscreen (portrait)
 
@@ -39,7 +39,7 @@ class StatusIcon(Button):
 
 class SaunaUIMainScreen(Screen):
 
-    def __init__(self, ctx: SaunaContext=None, errorMgr: ErrorManager=None, **kwargs):
+    def __init__(self, ctx: SaunaContext=None, errorMgr: SaunaErrorMgr=None, **kwargs):
         super().__init__(**kwargs)
 
         Window.size = (ctx.getScreenWidth(), ctx.getScreenHeight())
