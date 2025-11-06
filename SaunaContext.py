@@ -523,6 +523,9 @@ class SaunaContext:
     def getSaunaOnTimer(self) -> Timer:
         return self._saunaOnTimer
 
+    def isFanAfterSaunaOffTimerCompleted(self):
+        return self._fanAfterSaunaOffTimer.isCompleted()
+
     def isFanAfterSaunaOffTimerRunning(self):
         return self._fanAfterSaunaOffTimer.isRunning()
 

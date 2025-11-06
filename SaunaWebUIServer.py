@@ -266,7 +266,17 @@ class SaunaWebUIServer:
             if self._errorMgr._fanErrorMessage:
                 errors.append({'type': 'Fan Error', 'message': self._errorMgr._fanErrorMessage})
 
+            if self._errorMgr._systemHealthErrorMessage:
+                errors.append({'type': 'System Health Error', 'message': self._errorMgr._systemHealthErrorMessage})
+
             return jsonify({'errors': errors})
+
+        @self._app.route('/api/errors/clear', methods=['POST'])
+        def api_errors_clear():
+            """Clear all errors"""
+            if self._errorMgr:
+                self._errorMgr.clearAllErrors()
+            return jsonify({'success': True})
 
     def run(self):
         host = self._ctx.getHttpHost()

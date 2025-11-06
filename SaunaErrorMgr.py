@@ -84,5 +84,17 @@ class SaunaErrorMgr:
             self._sensorModuleErrorMessage,
             self._modbusException,
             self._heaterErrorMessage,
-            self._fanErrorMessage
+            self._fanErrorMessage,
+            self._systemHealthErrorMessage
         ])
+
+    def clearAllErrors(self) -> None:
+        """Clear all errors"""
+        self.eraseCriticalError()
+        self.eraseRelayModuleError()
+        self.eraseFanModuleError()
+        self.eraseSensorModuleError()
+        self.eraseModbusError()
+        self.eraseHeaterError()
+        self.eraseFanError()
+        self.eraseSystemHealthError()

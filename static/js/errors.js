@@ -29,6 +29,20 @@ function loadErrors() {
         .catch(error => console.error('Error loading errors:', error));
 }
 
+// Clear all errors
+function clearErrors() {
+    fetch('/api/errors/clear', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadErrors();
+        }
+    })
+    .catch(error => console.error('Error clearing errors:', error));
+}
+
 // Initialize
 loadErrors();
 setInterval(loadErrors, 5000);
