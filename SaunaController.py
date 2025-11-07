@@ -124,7 +124,7 @@ class SaunaController:
     # ------------------------ Heater Control Methods ---------------------------
 
     _heaterCycleTimer = Timer()
-#TODO review all timer logic for stop()
+
     # Heater may heat up faster than the heat exchange with the air. Use cyclic power heater on and off to avoid heater overheating.
     # When hot room air temperature starts falling, it maybe due to an open door for a short time. Use grace timer to avoid unnecessary heater on cycle.
     # Check heater health with
