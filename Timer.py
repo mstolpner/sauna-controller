@@ -18,6 +18,9 @@ class Timer:
     def isRunning(self) -> bool:
         return self._active and time.time() - self._startTime < self._timeInterval
 
+    def isCompleted(self) -> bool:
+        return self._active and time.time() - self._startTime >= self._timeInterval
+
     def setTimeInterval(self, interval):
         self._timeInterval = interval
 

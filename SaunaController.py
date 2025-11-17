@@ -141,7 +141,7 @@ class SaunaController:
         self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
 
         # Ensure the heater does not run longer than allowed max time
-        if not self._heaterMaxSafeRuntimeTimer.isRunning():
+        if self._heaterMaxSafeRuntimeTimer.isCompleted():
             self._ctx.turnSaunaOff()
             self._errorMgr.raiseCriticalError(f"Heater has been continuously on for over {self._ctx.getHeaterMaxSafeRuntimeMin()} minutes.")
 
@@ -166,9 +166,9 @@ class SaunaController:
         # Turn Heater Off if temperature reached
         elif (self._isHeaterOn
               # Hot room temp reached (target + threshold)
-              and self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() + self._ctx.getUpperHotRoomTempThresholdF()):
+              and self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getUpperHotRoomTempThresholdF()):
             self._turnHeaterOff()
-        # Turn Heater On for heater cycling or if temperature reached target
+        # Turn Heater On for heater cycling or if temperature is below target
         elif (not self._isHeaterOn and
               # Hot room temp below (target - threshold)
               self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
@@ -220,8 +220,11 @@ class SaunaController:
             self._heaterHealthWarmUpTimer.stop()
             self._heaterHealthCoolDownTimer.start()
             self._heaterMaxSafeRuntimeTimer.stop()
-            # Set Heater Control Timer
-            self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOffPeriodMin() * 60)
+            # Set Heater Control Timer only if the sauna is ON
+            if self._ctx.isSaunaOn():
+                self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOffPeriodMin() * 60)
+            else:
+                self._heaterCycleTimer.stop()
             # Stop heater cooling grace period as it's only needed when the heater is on
             self._coolingGracePeriodTimer.stop()
 
@@ -236,8 +239,11 @@ class SaunaController:
             self._heaterHealthWarmUpTimer.start()
             # Set up max heater runtime timer
             self._heaterMaxSafeRuntimeTimer.start()
-            # Set Heater Control Timer
-            self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOnPeriodMin() * 60)
+            # Set Heater Control Timer only if the sauna is ON
+            if self._ctx.isSaunaOn():
+                self._heaterCycleTimer.restart(self._ctx.getHeaterCycleOnPeriodMin() * 60)
+            else:
+                self._heaterCycleTimer.stop()
 
     # ---------------------------- System Health ---------------------------
     def _processSystemHealth(self):
