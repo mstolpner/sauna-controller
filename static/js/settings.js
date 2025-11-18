@@ -1,3 +1,8 @@
+// Get CSRF token from meta tag
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 // Load settings from server
 function loadSettings() {
     fetch('/api/settings/get')
@@ -91,7 +96,10 @@ function saveSettings() {
 
     fetch('/api/settings/update', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
         body: JSON.stringify(settings)
     })
     .then(response => response.json())

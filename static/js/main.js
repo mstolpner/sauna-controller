@@ -2,6 +2,11 @@ let tempUnit = 'F';
 let currentTempF = 75;
 let currentTargetTempF = 190;
 
+// Get CSRF token from meta tag
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 // Update clock every second
 function updateClock() {
     const now = new Date();
@@ -48,14 +53,22 @@ function updateTargetTemp(value) {
     // Send to server
     fetch('/api/temperature/set', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
         body: JSON.stringify({temp_f: currentTargetTempF})
     });
 }
 
 // Toggle sauna on/off
 function toggleSauna() {
-    fetch('/api/sauna/toggle', {method: 'POST'})
+    fetch('/api/sauna/toggle', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
         .then(response => response.json())
         .then(data => {
             updateSaunaButton(data.sauna_on);
@@ -76,7 +89,10 @@ function updateSaunaButton(isOn) {
 function setPreset(preset) {
     fetch('/api/preset/set', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
         body: JSON.stringify({preset: preset})
     })
     .then(response => response.json())

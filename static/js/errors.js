@@ -1,3 +1,8 @@
+// Get CSRF token from meta tag
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 // Load errors from server
 function loadErrors() {
     fetch('/api/errors/get')
@@ -32,7 +37,10 @@ function loadErrors() {
 // Clear all errors
 function clearErrors() {
     fetch('/api/errors/clear', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
     })
     .then(response => response.json())
     .then(data => {

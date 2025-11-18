@@ -2,8 +2,11 @@ import logging
 import socket
 import os
 from functools import wraps
+from datetime import timedelta
 
 from flask import Flask, render_template, jsonify, request, send_from_directory, session, redirect, url_for
+from flask_wtf.csrf import CSRFProtect
+from werkzeug.utils import secure_filename
 from SaunaContext import SaunaContext
 from SaunaErrorMgr import SaunaErrorMgr
 
@@ -16,7 +19,18 @@ class SaunaWebUIServer:
         self._errorMgr = errorMgr
         self._app = Flask(__name__)
         self._app.secret_key = ctx.getSecretKey()
+
+        # Session security configuration
         self._app.config['SESSION_PERMANENT'] = True
+        self._app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
+        self._app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
+        self._app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+        self._app.config['SESSION_COOKIE_SECURE'] = False  # Set to True when using HTTPS
+
+        # CSRF Protection
+        self._app.config['WTF_CSRF_TIME_LIMIT'] = None  # CSRF tokens don't expire (session-based)
+        self._csrf = CSRFProtect(self._app)
+
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self._setup_routes()
 
@@ -46,6 +60,8 @@ class SaunaWebUIServer:
             if request.method == 'POST':
                 password = request.form.get('password')
                 if password == self._ctx.getWebPassword():
+                    # Security: Regenerate session ID to prevent session fixation
+                    session.clear()
                     session['logged_in'] = True
                     session.permanent = True
                     return redirect(url_for('index'))
@@ -61,7 +77,20 @@ class SaunaWebUIServer:
 
         # Serve icon files
         @self._app.route('/icons/<path:filename>')
+        @self._login_required
         def serve_icon(filename):
+            # Security: Prevent path traversal attacks
+            # Sanitize filename to remove directory traversal attempts
+            filename = secure_filename(filename)
+
+            # Additional check: ensure no path separators remain
+            if os.path.sep in filename or (os.path.altsep and os.path.altsep in filename):
+                return "Invalid filename", 400
+
+            # Additional check: ensure filename doesn't start with dot (hidden files)
+            if filename.startswith('.'):
+                return "Invalid filename", 400
+
             icons_dir = os.path.join(self._base_dir, 'icons')
             return send_from_directory(icons_dir, filename)
 

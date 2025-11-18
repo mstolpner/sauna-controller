@@ -1,6 +1,11 @@
 let fanSpeed = 100;
 let fanRuntime = 0.5;
 
+// Get CSRF token from meta tag
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 // Load current fan settings
 function loadFanSettings() {
     fetch('/api/fan/status')
@@ -36,7 +41,10 @@ function updateFanSpeed(value) {
     // Update context immediately
     fetch('/api/fan/update', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
         body: JSON.stringify({
             fan_speed_pct: fanSpeed
         })
@@ -62,7 +70,10 @@ function saveFanSettings() {
 
     fetch('/api/fan/update', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
         body: JSON.stringify({
             left_fan_on: leftFan,
             right_fan_on: rightFan,
