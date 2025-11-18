@@ -6,6 +6,8 @@
 
 A Raspberry Pi-based sauna controller with temperature monitoring, heating control, and web interface.
 
+![img_1.png](img_2.jpeg)
+
 ---
 
 ## ⚠️ CRITICAL SAFETY WARNING
