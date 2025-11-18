@@ -3,6 +3,7 @@ from typing import Any, Optional
 from configobj import ConfigObj
 import os
 import subprocess
+import secrets
 from Timer import Timer
 
 
@@ -63,6 +64,9 @@ class SaunaContext:
     _cpuWarnTempC: int = 90
     _logLevel: int = logging.WARNING
     _maxSaunaOnTimeHrs: int = 6
+    # Authentication Settings
+    _webPassword: str = 'sauna123'
+    _secretKey: str = None  # Will be generated if not set
     # Dependencies
     _configObj = None
     _configFileName = 'sauna.ini'
@@ -154,6 +158,8 @@ class SaunaContext:
         self._configObj['system']['cpu_warn_temp_c'] = self._cpuWarnTempC
         self._configObj['system']['log_level'] = self._logLevel
         self._configObj['system']['max_sauna_on_time_hrs'] = self._maxSaunaOnTimeHrs
+        self._configObj['system']['web_password'] = self._webPassword
+        self._configObj['system']['secret_key'] = secrets.token_hex(32)
 
     def persist(self):
         self._configObj.write()
@@ -497,6 +503,17 @@ class SaunaContext:
     def setMaxSaunaOnTimeHrs(self, time: int) -> None:
         self._set('system', 'max_sauna_on_time_hrs', time)
         self._saunaOnTimer.setTimeInterval(round(self.getMaxSaunaOnTimeHrs() * 60 * 60))
+
+    def getWebPassword(self) -> str:
+        return self._get('system', 'web_password', self._webPassword)
+
+    def setWebPassword(self, password: str) -> None:
+        self._set('system', 'web_password', password)
+
+    def getSecretKey(self) -> str:
+        # Generate a new secret key if it doesn't exist
+        secret = self._get('system', 'secret_key', secrets.token_hex(32))
+        return secret
 
     # ----------------------- Not persisted attributes --------------------------
 

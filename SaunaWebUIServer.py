@@ -1,8 +1,9 @@
 import logging
 import socket
 import os
+from functools import wraps
 
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, session, redirect, url_for
 from SaunaContext import SaunaContext
 from SaunaErrorMgr import SaunaErrorMgr
 
@@ -14,6 +15,8 @@ class SaunaWebUIServer:
         self._ctx = ctx
         self._errorMgr = errorMgr
         self._app = Flask(__name__)
+        self._app.secret_key = ctx.getSecretKey()
+        self._app.config['SESSION_PERMANENT'] = True
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self._setup_routes()
 
@@ -25,8 +28,37 @@ class SaunaWebUIServer:
         except OSError:
             return False
 
+    def _login_required(self, f):
+        """Decorator to require login for routes"""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'logged_in' not in session:
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated_function
+
     def _setup_routes(self):
         """Setup all Flask routes"""
+        # Login route
+        @self._app.route('/login', methods=['GET', 'POST'])
+        def login():
+            error = None
+            if request.method == 'POST':
+                password = request.form.get('password')
+                if password == self._ctx.getWebPassword():
+                    session['logged_in'] = True
+                    session.permanent = True
+                    return redirect(url_for('index'))
+                else:
+                    error = 'Invalid password'
+            return render_template('login.html', error=error)
+
+        # Logout route
+        @self._app.route('/logout')
+        def logout():
+            session.pop('logged_in', None)
+            return redirect(url_for('login'))
+
         # Serve icon files
         @self._app.route('/icons/<path:filename>')
         def serve_icon(filename):
@@ -35,31 +67,37 @@ class SaunaWebUIServer:
 
         # Main screen
         @self._app.route('/')
+        @self._login_required
         def index():
             return render_template('index.html')
 
         # Fan configuration screen
         @self._app.route('/fan')
+        @self._login_required
         def fan():
             return render_template('fan.html')
 
         # Settings screen
         @self._app.route('/settings')
+        @self._login_required
         def settings():
             return render_template('settings.html')
 
         # WiFi screen
         @self._app.route('/wifi')
+        @self._login_required
         def wifi():
             return render_template('wifi.html')
 
         # Errors screen
         @self._app.route('/errors')
+        @self._login_required
         def errors():
             return render_template('errors.html')
 
         # API Endpoints
         @self._app.route('/api/status')
+        @self._login_required
         def api_status():
             """Get current sauna status"""
             return jsonify({
@@ -75,6 +113,7 @@ class SaunaWebUIServer:
             })
 
         @self._app.route('/api/fan/status')
+        @self._login_required
         def api_fan_status():
             """Get fan configuration"""
             return jsonify({
@@ -87,6 +126,7 @@ class SaunaWebUIServer:
             })
 
         @self._app.route('/api/fan/update', methods=['POST'])
+        @self._login_required
         def api_fan_update():
             """Update fan configuration"""
             data = request.json
@@ -101,12 +141,14 @@ class SaunaWebUIServer:
             return jsonify({'success': True})
 
         @self._app.route('/api/sauna/toggle', methods=['POST'])
+        @self._login_required
         def api_sauna_toggle():
             """Toggle sauna on/off"""
             self._ctx.turnSaunaOnOff(not self._ctx.isSaunaOn())
             return jsonify({'success': True, 'sauna_on': self._ctx.isSaunaOn()})
 
         @self._app.route('/api/temperature/set', methods=['POST'])
+        @self._login_required
         def api_temperature_set():
             """Set target temperature"""
             data = request.json
@@ -115,6 +157,7 @@ class SaunaWebUIServer:
             return jsonify({'success': True})
 
         @self._app.route('/api/preset/set', methods=['POST'])
+        @self._login_required
         def api_preset_set():
             """Set temperature preset"""
             data = request.json
@@ -126,6 +169,7 @@ class SaunaWebUIServer:
             return jsonify({'success': True, 'target_temp_f': self._ctx.getHotRoomTargetTempF()})
 
         @self._app.route('/api/settings/get')
+        @self._login_required
         def api_settings_get():
             """Get all settings"""
             return jsonify({
@@ -167,6 +211,7 @@ class SaunaWebUIServer:
             })
 
         @self._app.route('/api/settings/update', methods=['POST'])
+        @self._login_required
         def api_settings_update():
             """Update settings"""
             data = request.json
@@ -237,6 +282,7 @@ class SaunaWebUIServer:
             return jsonify({'success': True})
 
         @self._app.route('/api/errors/get')
+        @self._login_required
         def api_errors_get():
             """Get current errors"""
             if not self._errorMgr:
@@ -272,6 +318,7 @@ class SaunaWebUIServer:
             return jsonify({'errors': errors})
 
         @self._app.route('/api/errors/clear', methods=['POST'])
+        @self._login_required
         def api_errors_clear():
             """Clear all errors"""
             if self._errorMgr:
