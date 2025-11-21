@@ -321,32 +321,28 @@ class SaunaWebUIServer:
             if not self._errorMgr:
                 return jsonify({'errors': []})
 
+            # Get all errors with timestamps from the error manager
+            all_errors = self._errorMgr.getAllErrors()
+
+            # Format errors for display with human-readable type names
+            type_names = {
+                'critical': 'Critical Error',
+                'relay_module': 'Relay Module Error',
+                'fan_module': 'Fan Module Error',
+                'sensor_module': 'Sensor Module Error',
+                'modbus': 'Modbus Error',
+                'heater': 'Heater Error',
+                'fan': 'Fan Error',
+                'system_health': 'System Health Error'
+            }
+
             errors = []
-
-            # Collect all error messages
-            if self._errorMgr._criticalErrorMessage:
-                errors.append({'type': 'Critical Error', 'message': self._errorMgr._criticalErrorMessage})
-
-            if self._errorMgr._relayModuleErrorMessage:
-                errors.append({'type': 'Relay Module Error', 'message': self._errorMgr._relayModuleErrorMessage})
-
-            if self._errorMgr._fanModuleErrorMessage:
-                errors.append({'type': 'Fan Module Error', 'message': self._errorMgr._fanModuleErrorMessage})
-
-            if self._errorMgr._sensorModuleErrorMessage:
-                errors.append({'type': 'Sensor Module Error', 'message': self._errorMgr._sensorModuleErrorMessage})
-
-            if self._errorMgr._modbusException:
-                errors.append({'type': 'Modbus Error', 'message': str(self._errorMgr._modbusException)})
-
-            if self._errorMgr._heaterErrorMessage:
-                errors.append({'type': 'Heater Error', 'message': self._errorMgr._heaterErrorMessage})
-
-            if self._errorMgr._fanErrorMessage:
-                errors.append({'type': 'Fan Error', 'message': self._errorMgr._fanErrorMessage})
-
-            if self._errorMgr._systemHealthErrorMessage:
-                errors.append({'type': 'System Health Error', 'message': self._errorMgr._systemHealthErrorMessage})
+            for error in all_errors:
+                errors.append({
+                    'type': type_names.get(error['type'], error['type']),
+                    'message': error['message'],
+                    'timestamp': error['timestamp'].isoformat()
+                })
 
             return jsonify({'errors': errors})
 

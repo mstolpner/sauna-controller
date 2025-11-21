@@ -25,6 +25,15 @@ function loadErrors() {
                     messageSpan.className = 'error-message';
                     messageSpan.textContent = error.message;
 
+                    // Add timestamp if available
+                    if (error.timestamp) {
+                        const timestampSpan = document.createElement('div');
+                        timestampSpan.className = 'error-timestamp';
+                        const date = new Date(error.timestamp);
+                        timestampSpan.textContent = date.toLocaleString();
+                        errorDiv.appendChild(timestampSpan);
+                    }
+
                     errorDiv.appendChild(typeSpan);
                     errorDiv.appendChild(messageSpan);
                     errorsList.appendChild(errorDiv);

@@ -79,45 +79,23 @@ class SaunaUIErrorsScreen(Screen):
             self.errors_layout.add_widget(error_label)
             return
 
-        has_errors = False
+        # Get all errors with timestamps
+        all_errors = self.errorMgr.getAllErrors()
 
-        # Check for critical error
-        if self.errorMgr._criticalErrorMessage:
-            has_errors = True
-            self.add_error_item('CRITICAL ERROR', self.errorMgr._criticalErrorMessage)
-
-        # Check for relay module error
-        if self.errorMgr._relayModuleErrorMessage:
-            has_errors = True
-            self.add_error_item('Relay Module', self.errorMgr._relayModuleErrorMessage)
-
-        # Check for fan module error
-        if self.errorMgr._fanModuleErrorMessage:
-            has_errors = True
-            self.add_error_item('Fan Module', self.errorMgr._fanModuleErrorMessage)
-
-        # Check for sensor module error
-        if self.errorMgr._sensorModuleErrorMessage:
-            has_errors = True
-            self.add_error_item('Sensor Module', self.errorMgr._sensorModuleErrorMessage)
-
-        # Check for heater error
-        if self.errorMgr._heaterErrorMessage:
-            has_errors = True
-            self.add_error_item('Heater', self.errorMgr._heaterErrorMessage)
-
-        # Check for Modbus exception
-        if self.errorMgr._modbusException:
-            has_errors = True
-            self.add_error_item('Modbus Communication', str(self.errorMgr._modbusException))
-
-        # Check for Fan errors
-        if self.errorMgr._fanErrorMessage:
-            has_errors = True
-            self.add_error_item('Fan', str(self.errorMgr._fanErrorMessage))
+        # Map error type codes to display names
+        type_names = {
+            'critical': 'CRITICAL ERROR',
+            'relay_module': 'Relay Module',
+            'fan_module': 'Fan Module',
+            'sensor_module': 'Sensor Module',
+            'modbus': 'Modbus Communication',
+            'heater': 'Heater',
+            'fan': 'Fan',
+            'system_health': 'System Health'
+        }
 
         # If no errors, show message
-        if not has_errors:
+        if not all_errors:
             no_error_label = Label(
                 text='No active errors',
                 font_size='28sp',
@@ -126,10 +104,17 @@ class SaunaUIErrorsScreen(Screen):
                 color=(0.2, 0.8, 0.2, 1)
             )
             self.errors_layout.add_widget(no_error_label)
+        else:
+            # Display each error
+            for error in all_errors:
+                category = type_names.get(error['type'], error['type'])
+                message = error['message']
+                timestamp = error['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+                self.add_error_item(category, message, timestamp)
 
-    def add_error_item(self, category, message):
+    def add_error_item(self, category, message, timestamp):
         """Add an error item to the display"""
-        error_box = BoxLayout(orientation='vertical', size_hint_y=None, height=110, padding=5)
+        error_box = BoxLayout(orientation='vertical', size_hint_y=None, height=130, padding=5)
 
         # Category label
         category_label = Label(
@@ -158,18 +143,26 @@ class SaunaUIErrorsScreen(Screen):
         message_label.bind(size=message_label.setter('text_size'))
         error_box.add_widget(message_label)
 
+        # Timestamp label
+        timestamp_label = Label(
+            text=timestamp,
+            font_size='18sp',
+            size_hint_y=None,
+            height=30,
+            color=(0.6, 0.6, 0.6, 1),
+            italic=True,
+            halign='left',
+            valign='middle'
+        )
+        timestamp_label.bind(size=timestamp_label.setter('text_size'))
+        error_box.add_widget(timestamp_label)
+
         self.errors_layout.add_widget(error_box)
 
     def clear_errors(self, instance):
         """Clear all errors"""
         if self.errorMgr:
-            self.errorMgr.eraseCriticalError()
-            self.errorMgr.eraseRelayModuleError()
-            self.errorMgr.eraseFanModuleError()
-            self.errorMgr.eraseSensorModuleError()
-            self.errorMgr.eraseHeaterError()
-            self.errorMgr.eraseModbusError()
-            self.errorMgr.eraseFanError()
+            self.errorMgr.clearAllErrors()
             print("All errors cleared")
         self.refresh_errors()
 

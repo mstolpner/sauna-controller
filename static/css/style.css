@@ -480,4 +480,11 @@ body {
 .error-message {
     font-size: clamp(14px, 1.6vw, 18px);
     color: #ffcccc;
+    margin-bottom: 8px;
+}
+
+.error-timestamp {
+    font-size: clamp(12px, 1.4vw, 16px);
+    color: #999;
+    font-style: italic;
 }
