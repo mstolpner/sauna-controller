@@ -1,5 +1,5 @@
 from kivy.config import Config
-from SaunaOldController import SaunaController
+from SaunaController import SaunaController
 from SaunaWebUIServer import SaunaWebUIServer
 import threading
 

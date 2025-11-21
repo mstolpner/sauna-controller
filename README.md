@@ -43,7 +43,7 @@ This sauna controller interfaces with mains voltage electrical systems (120V/240
 - Automatic heating control
 - Web-based and local screen kivy-based user interface
 - Safety limits and alerts
-- Modbus RTU communication for industrial temperature controllers
+- Modbus RTU communication
 - Raspberry Pi 5 compatible
 
 ---
@@ -56,7 +56,7 @@ This sauna controller interfaces with mains voltage electrical systems (120V/240
 - Modbus RTU Temperature sensors via RS485 (https://store.comwintop.com/products/rs485-modbus-water-proof-temperature-humidity-sensor-probe or similar)
 - JPF4816 Relay for light, fans, and low power heater control
 - Contactor for Heater control
-- Sauna heating elements
+- Sauna heater
 - Power supplies and proper electrical wiring
 - You may need one or more DC-DC converters to power Raspberry Pi and Display. Note, that long power supply cables from power supplies may not work due to voltage drop and you may need to have a DC to DC converter close to the power consumer, like 24V -> 5V close to Raspberry Pi.
 - Safety cutoffs and protection devices

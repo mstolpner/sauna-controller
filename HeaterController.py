@@ -31,11 +31,11 @@ class HeaterController:
     _heaterOffCycleTimer = Timer()
 
 
-    def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
+    def __init__(self, sd: SaunaDevices, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         # Initialize dependencies/classes
         self._ctx = ctx
         self._errorMgr = errorMgr
-        self._sd = SaunaDevices(self._ctx, self._errorMgr)
+        self._sd = sd
         # Initialize timers
         self._coolingGracePeriodTimer = Timer(self._ctx.getCoolingGracePeriodMin() * 60)
         self._heaterHealthCoolDownTimer = Timer(self._ctx.getHeaterHealthCooldownTimeMin() * 60)

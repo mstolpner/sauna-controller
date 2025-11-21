@@ -25,7 +25,7 @@ class SaunaController:
         self._ctx = ctx
         self._errorMgr = errorMgr
         self._sd = SaunaDevices(self._ctx, self._errorMgr)
-        self._hc = HeaterController(self._ctx, self._errorMgr)
+        self._hc = HeaterController(self._sd, self._ctx, self._errorMgr)
         # Ensure safe exit
         atexit.register(self._onExit)
 
