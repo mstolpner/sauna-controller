@@ -74,6 +74,7 @@ function loadSettings() {
             document.getElementById('display-brightness').value = data.display_brightness;
 
             // System settings
+            document.getElementById('cpu-temp-current').textContent = data.cpu_temp ? data.cpu_temp.toFixed(1) : '--';
             document.getElementById('cpu-temp-warn').value = data.cpu_temp_warn;
             document.getElementById('max-sauna-on-time').value = data.max_sauna_on_time_hrs;
             document.getElementById('log-level').value = data.log_level;

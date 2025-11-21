@@ -8,6 +8,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.slider import Slider
 from kivy.uix.spinner import Spinner
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
+from kivy.clock import Clock
 from SaunaContext import SaunaContext
 import logging
 
@@ -184,6 +185,31 @@ class SaunaUISettingsScreen(Screen):
 
         # System Settings
         current_section = add_section_header(system_layout, 'System Settings')
+
+        # CPU Temperature - Read only
+        cpu_temp_label = Label(
+            text='Current CPU Temperature, °C',
+            font_size='20sp',
+            size_hint_x=0.6,
+            size_hint_y=None,
+            height=50,
+            halign='left',
+            valign='middle'
+        )
+        cpu_temp_label.bind(size=cpu_temp_label.setter('text_size'))
+        current_section.add_widget(cpu_temp_label)
+
+        self.cpu_temp_value = Label(
+            text=f'{self._ctx.getCpuTemp():.1f}',
+            font_size='28sp',
+            size_hint_x=0.4,
+            size_hint_y=None,
+            height=50,
+            color=(0.85, 1, 0.4, 0.8),
+            bold=True
+        )
+        current_section.add_widget(self.cpu_temp_value)
+
         add_setting('CPU Temperature Warning Threshold, °C', str(self._ctx.getCpuWarnTempC()))
         add_setting('Max Sauna On Time, hours', str(self._ctx.getMaxSaunaOnTimeHrs()))
 
@@ -264,6 +290,9 @@ class SaunaUISettingsScreen(Screen):
 
         self.add_widget(layout)
 
+        # Schedule CPU temperature updates
+        Clock.schedule_interval(self.update_cpu_temp, 2)
+
     def toggle_light_checkbox(self, instance):
         """Toggle light checkbox state"""
         self.light_checkbox.active = not self.light_checkbox.active
@@ -277,6 +306,10 @@ class SaunaUISettingsScreen(Screen):
     def update_brightness_label(self, instance, value):
         """Update brightness value label when slider changes"""
         self.brightness_value_label.text = str(int(value))
+
+    def update_cpu_temp(self, dt):
+        """Update CPU temperature display"""
+        self.cpu_temp_value.text = f'{self._ctx.getCpuTemp():.1f}'
 
     def save_settings(self, instance):
         # Save temperature settings

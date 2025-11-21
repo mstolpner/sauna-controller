@@ -235,6 +235,7 @@ class SaunaWebUIServer:
                 'screen_height': self._ctx.getScreenHeight(),
                 'screen_rotation': self._ctx.getScreenRotation(),
                 'display_brightness': self._ctx.getDisplayBrightness(),
+                'cpu_temp': self._ctx.getCpuTemp(),
                 'cpu_temp_warn': self._ctx.getCpuWarnTempC(),
                 'log_level': self._ctx.getLogLevel(),
                 'max_sauna_on_time_hrs': self._ctx.getMaxSaunaOnTimeHrs()

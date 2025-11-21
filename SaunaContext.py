@@ -84,8 +84,6 @@ class SaunaContext:
     _fanAfterSaunaOffTimer: Timer = None
     _saunaOnTimer: Timer = None
 
-    # TODO Split settings screen.
-    # TODO Add errors to fan settings.
     def __init__(self):
         iniFileExists = os.path.exists(self._configFileName)
         self._configObj = ConfigObj(self._configFileName)

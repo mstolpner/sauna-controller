@@ -429,6 +429,12 @@ body {
     height: 30px;
 }
 
+.readonly-value {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: bold;
+    color: #d9ff66;
+}
+
 .setting-checkbox {
     width: 40px;
     height: 40px;
