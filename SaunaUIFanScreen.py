@@ -242,7 +242,7 @@ class SaunaUIFanScreen(Screen):
     def on_ok(self, instance):
         self._ctx.setRightFanEnabled(self.right_fan_btn.active)
         self._ctx.setLeftFanEnabled(self.left_fan_btn.active)
-        self._ctx.setFanSpeedPct(self.speed_slider.value)
-        self._ctx.setFanRunningTimeAfterSaunaOffHrs(self.runtime_slider.value)
+        self._ctx.setFanSpeedPct(int(self.speed_slider.value))
+        self._ctx.setFanRunningTimeAfterSaunaOffHrs(int(self.runtime_slider.value))
         self._ctx.persist()
         self.manager.current = 'main'
