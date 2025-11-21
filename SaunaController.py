@@ -29,6 +29,9 @@ class SaunaController:
     _heaterHealthWarmUpTimer = None
     _heaterMaxSafeRuntimeTimer = None
     _heaterHealthLastRefPointTemp = None
+    # Heater timers
+    _heaterOnCycleTimer = Timer()
+    _heaterOffCycleTimer = Timer()
 
 
     def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
@@ -74,8 +77,6 @@ class SaunaController:
     def _processFanControl(self):
         # Check fan health only when fan(s) are supposed to be running
         if self._sd.isLeftFanOn() or self._sd.isRightFanOn():
-#        if (((self._ctx.isRightFanEnabled() or self._ctx.isLeftFanEnabled()) and self._ctx._isSaunaOn) or
-#                self._ctx.isFanAfterSaunaOffTimerRunning()):
             leftFanOk = self._sd.isLeftFanOk()
             rightFanOk = self._sd.isRightFanOk()
             errMsg = ''
@@ -104,11 +105,6 @@ class SaunaController:
         elif self._sd.isLeftFanOff() \
             and (self._ctx.isLeftFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
             self._sd.turnLeftFanOn()
-
-#        self._sd.turnRightFanOnOff(self._ctx.isRightFanEnabled() and (self._ctx._isSaunaOn() or
-#                                                                      self._ctx.isFanAfterSaunaOffTimerRunning()))
-#        self._sd.turnLeftFanOnOff(self._ctx.isLeftFanEnabled() and (self._ctx._isSaunaOn() or
-#                                                                    self._ctx.isFanAfterSaunaOffTimerRunning()))
         self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
         self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
         self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
@@ -123,9 +119,6 @@ class SaunaController:
 
     # ------------------------ Heater Control Methods ---------------------------
 
-    _heaterOnCycleTimer = Timer()
-    _heaterOffCycleTimer = Timer()
-
     # Heater may heat up faster than the heat exchange with the air. Use cyclic power heater on and off to avoid heater overheating.
     # When hot room air temperature starts falling, it maybe due to an open door for a short time. Use grace timer to avoid unnecessary heater on cycle.
     # Check heater health with
@@ -135,13 +128,18 @@ class SaunaController:
     #   4) heater only runs for max period of time,
     #   5) sauna is on only for certain max period of time.
     def _processHeaterControl(self) -> None:
-        # Detect temp change, self._ctx.getHotRoomTempF() has the prior iteration temp
+
+        # Detect temp change, self._ctx.getHotRoomTempF() still has the prior iteration temp at this point
         tempFalling = self._ctx.getHotRoomTempF() > self._ctx.getHotRoomTempF()
         tempRising = self._ctx.getHotRoomTempF() < self._ctx.getHotRoomTempF()
+        tempAboveTarget = self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+        tempBelowTarget = self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+
         # Detect heater staus change
         heaterTurnedOff = self._isHeaterOn and not self._sd.isHeaterOn()
         heaterTurnedOn = not self._isHeaterOn and self._sd.isHeaterOn()
         self._isHeaterOn = self._sd.isHeaterOn()
+
         # Update current temp and humidity in the context for display etc.
         self._ctx.setHotRoomTempF(self._sd.getHotRoomTemperature('F'))
         self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
@@ -161,7 +159,6 @@ class SaunaController:
         # as a door might be open for a short period of time causing temperature to drop temporarily.
         elif (not self._isHeaterOn
               and tempFalling
-#              and not self._heaterOffCycleTimer.isRunning()
               and not self._coolingGracePeriodTimer.isRunning()):
                 self._coolingGracePeriodTimer.start()
         # Turn Heater Off for heater cycling if On cycle is finished
@@ -170,14 +167,10 @@ class SaunaController:
               and not self._heaterOnCycleTimer.isRunning()):
             self._turnHeaterOff()
         # Turn Heater Off if temperature reached
-        elif (self._isHeaterOn
-              # Hot room temp reached (target + threshold)
-              and self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getUpperHotRoomTempThresholdF()):
+        elif self._isHeaterOn and tempAboveTarget:
             self._turnHeaterOff()
         # Turn Heater On for heater cycling or if temperature is below target
-        elif (not self._isHeaterOn and
-              # Hot room temp below (target - threshold)
-              self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+        elif (not self._isHeaterOn and tempBelowTarget
               # Allow for cooling grace period as a door might be open for a short period causing temperature to drop temporarily
               and not self._coolingGracePeriodTimer.isRunning()
               # Wait for the "off" heater cycle
@@ -188,17 +181,16 @@ class SaunaController:
 
         # Ensure contactor and heater work properly - temperature is rising as expected
         if self._isHeaterOn and not self._heaterHealthWarmUpTimer.isRunning():
-            if self._ctx.getHotRoomTempF() <= self._heaterHealthLastRefPointTemp:
+            if not tempRising:
                 self._errorMgr.raiseHeaterError('Hot room temperature is not rising.')
             else:
                 # All good, restart the cycle
                 self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
             self._heaterHealthWarmUpTimer.start()
+
         # Ensure contactor works properly - temperature is falling as expected
-        if (not self._isHeaterOn
-            and self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
-            and not self._heaterHealthCoolDownTimer.isRunning()):
-            if self._ctx.getHotRoomTempF() >= self._heaterHealthLastRefPointTemp:
+        if not self._isHeaterOn and tempAboveTarget and not self._heaterHealthCoolDownTimer.isRunning():
+            if not tempFalling:
                 self._errorMgr.raiseHeaterError('Hot room temperature is not falling.')
             else:
                 # All good, restart the cycle
@@ -243,6 +235,7 @@ class SaunaController:
         self._heaterOffCycleTimer.stop()
 
     # ---------------------------- System Health ---------------------------
+
     def _processSystemHealth(self):
         err, msg = subprocess.getstatusoutput('vcgencmd measure_temp')
         if not err:
