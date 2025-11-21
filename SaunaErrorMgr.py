@@ -1,7 +1,7 @@
 from pymodbus.exceptions import ModbusException
 from SaunaContext import SaunaContext
 
-
+#TODO add timestamp to error messages. Do not erase errors completely, add log into the UI, log only unique errors
 class SaunaErrorMgr:
     _ctx: SaunaContext
     _criticalErrorMessage = None

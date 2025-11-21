@@ -129,25 +129,27 @@ class SaunaController:
     #   5) sauna is on only for certain max period of time.
     def _processHeaterControl(self) -> None:
 
-        # Detect temp change, self._ctx.getHotRoomTempF() still has the prior iteration temp at this point
-        tempFalling = self._ctx.getHotRoomTempF() > self._ctx.getHotRoomTempF()
-        tempRising = self._ctx.getHotRoomTempF() < self._ctx.getHotRoomTempF()
-        tempAboveTarget = self._ctx.getHotRoomTempF() >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
-        tempBelowTarget = self._ctx.getHotRoomTempF() <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+        # Detect temp change, self._ctx.getHotRoomTempF() still has the prior iteration temp at this point.
+        # Get the current hot room temp first to avoid racing conditions
+        currentHotRoomTemp = self._sd.getHotRoomTemperature('F')
+        tempFalling = self._ctx.getHotRoomTempF() > currentHotRoomTemp
+        tempRising = self._ctx.getHotRoomTempF() < currentHotRoomTemp
+        tempAboveTarget = currentHotRoomTemp >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+        tempBelowTarget = currentHotRoomTemp <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+
+        # Update current temp and humidity in the context for display etc.
+        self._ctx.setHotRoomTempF(currentHotRoomTemp)
+        self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
 
         # Detect heater staus change
         heaterTurnedOff = self._isHeaterOn and not self._sd.isHeaterOn()
         heaterTurnedOn = not self._isHeaterOn and self._sd.isHeaterOn()
         self._isHeaterOn = self._sd.isHeaterOn()
 
-        # Update current temp and humidity in the context for display etc.
-        self._ctx.setHotRoomTempF(self._sd.getHotRoomTemperature('F'))
-        self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
-
         # Ensure the heater does not run longer than allowed max time
-        if self._heaterMaxSafeRuntimeTimer.isCompleted():
-            self._ctx.turnSaunaOff()
-            self._errorMgr.raiseCriticalError(f"Heater has been continuously on for over {self._ctx.getHeaterMaxSafeRuntimeMin()} minutes.")
+#        if not self._heaterMaxSafeRuntimeTimer.isRunning():
+#            self._ctx.turnSaunaOff()
+#            self._errorMgr.raiseCriticalError(f"Heater has been continuously on for over {self._ctx.getHeaterMaxSafeRuntimeMin()} minutes.")
 
         # If sauna is off, ensure the heater is off.
         if self._ctx.isSaunaOff():
@@ -180,22 +182,18 @@ class SaunaController:
             self._turnHeaterOn()
 
         # Ensure contactor and heater work properly - temperature is rising as expected
-        if self._isHeaterOn and not self._heaterHealthWarmUpTimer.isRunning():
-            if not tempRising:
-                self._errorMgr.raiseHeaterError('Hot room temperature is not rising.')
-            else:
-                # All good, restart the cycle
-                self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
+        if self._isHeaterOn and not self._heaterHealthWarmUpTimer.isRunning() and not tempRising:
+            self._errorMgr.raiseHeaterError('Hot room temperature is not rising.')
+        if self._isHeaterOn and tempRising:
             self._heaterHealthWarmUpTimer.start()
+            self._errorMgr.eraseHeaterError()
 
         # Ensure contactor works properly - temperature is falling as expected
-        if not self._isHeaterOn and tempAboveTarget and not self._heaterHealthCoolDownTimer.isRunning():
-            if not tempFalling:
-                self._errorMgr.raiseHeaterError('Hot room temperature is not falling.')
-            else:
-                # All good, restart the cycle
-                self._heaterHealthLastRefPointTemp = self._ctx.getHotRoomTempF()
+        if not self._isHeaterOn and not self._heaterHealthCoolDownTimer.isRunning() and not tempFalling:
+            self._errorMgr.raiseHeaterError('Hot room temperature is not falling.')
+        if not self._isHeaterOn and tempFalling:
             self._heaterHealthCoolDownTimer.start()
+            self._errorMgr.eraseHeaterError()
 
     def _turnHeaterOff(self):
         if self._isHeaterOn:

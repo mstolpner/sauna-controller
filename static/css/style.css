@@ -33,7 +33,7 @@ body {
 .status-icons-left,
 .status-icons-right {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
 }
 
