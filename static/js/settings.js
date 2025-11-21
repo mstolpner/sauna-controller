@@ -3,6 +3,27 @@ function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
 
+// Switch between tabs
+function switchTab(tabName) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        content.classList.remove('active');
+    });
+
+    // Remove active class from all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Show the selected tab content
+    document.getElementById(tabName + '-tab').classList.add('active');
+
+    // Add active class to the clicked button
+    event.target.classList.add('active');
+}
+
 // Load settings from server
 function loadSettings() {
     fetch('/api/settings/get')
@@ -49,6 +70,9 @@ function loadSettings() {
             // Light settings
             document.getElementById('light-off-when-sauna-off').checked = data.light_off_when_sauna_off;
 
+            // Display settings
+            document.getElementById('display-brightness').value = data.display_brightness;
+
             // System settings
             document.getElementById('cpu-temp-warn').value = data.cpu_temp_warn;
             document.getElementById('max-sauna-on-time').value = data.max_sauna_on_time_hrs;
@@ -89,6 +113,7 @@ function saveSettings() {
         fan_module_governor_addr: parseInt(document.getElementById('fan-module-governor-addr').value),
         fan_module_reset_governor_value: parseInt(document.getElementById('fan-module-reset-governor-value').value),
         light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked,
+        display_brightness: parseInt(document.getElementById('display-brightness').value),
         cpu_temp_warn: parseInt(document.getElementById('cpu-temp-warn').value),
         max_sauna_on_time_hrs: parseInt(document.getElementById('max-sauna-on-time').value),
         log_level: parseInt(document.getElementById('log-level').value)

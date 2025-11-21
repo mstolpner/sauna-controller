@@ -9,14 +9,17 @@ from SaunaDevices import SaunaDevices
 from Timer import Timer
 
 
-class HeaterController:
+class SaunaController:
 
-    _ctx : SaunaContext = None
-    _errorMgr : SaunaErrorMgr = None
-    _sd : SaunaDevices = None
+    _ctx = None
+    _errorMgr = None
+    _sd = None
 
     # Heater state
     _isHeaterOn = False
+
+    # Is the app in the exiting process
+    _isOnExit = False
 
     # Cooling grace timer. See comments in the method below.
     _coolingGracePeriodTimer = None
@@ -43,6 +46,78 @@ class HeaterController:
         self._heaterMaxSafeRuntimeTimer = Timer(self._ctx.getHeaterMaxSafeRuntimeMin() * 60)
         # Initialize member variables
         self._heaterHealthLastRefPointTemp = self._sd.getHotRoomTemperature('F')
+        # Ensure safe exit
+        atexit.register(self._onExit)
+
+    def _onExit(self):
+        self._isOnExit = True
+        self._ctx.turnSaunaOff()
+
+    # ----------------------------------- Sauna Controller Run Methods ------------------------------------
+
+    def run(self):
+        # Start sauna control loop in background thread
+        saunaControllerThread = threading.Thread(target=self._run, args=(), daemon=True)
+        saunaControllerThread.start()
+
+    def _run(self):
+        while True:
+            if self._isOnExit:
+                self._sd.turnHeaterOff()
+                self._sd.turnLeftFanOff()
+                self._sd.turnRightFanOff()
+            else:
+                self._processHeaterControl()
+                self._processFanControl()
+                self._processHotRoomLight()
+                self._processSystemHealth()
+
+    # ----------------------- Fan Control Methods --------------------------
+
+    def _processFanControl(self):
+        # Check fan health only when fan(s) are supposed to be running
+        if self._sd.isLeftFanOn() or self._sd.isRightFanOn():
+            leftFanOk = self._sd.isLeftFanOk()
+            rightFanOk = self._sd.isRightFanOk()
+            errMsg = ''
+            if not leftFanOk:
+                errMsg += " Left fan does not work properly."
+            if not rightFanOk:
+                errMsg += " Right fan does not work properly."
+            if rightFanOk and leftFanOk:
+                self._errorMgr.eraseFanError()
+            else:
+                self._errorMgr.raiseFanError(errMsg)
+        else:
+            self._errorMgr.eraseFanError()
+        # Process SaunaOFF situation with a delayed fan turn off
+        if self._sd.isRightFanOn() \
+            and (not self._ctx.isRightFanEnabled() or (not self._ctx.isSaunaOn()
+                 and not self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnRightFanOff()
+        elif self._sd.isRightFanOff() \
+            and (self._ctx.isRightFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnRightFanOn()
+        if self._sd.isLeftFanOn() \
+            and (not self._ctx.isLeftFanEnabled() or (not self._ctx.isSaunaOn()
+                 and not self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnLeftFanOff()
+        elif self._sd.isLeftFanOff() \
+            and (self._ctx.isLeftFanEnabled() and (self._ctx.isSaunaOn() or self._ctx.isFanAfterSaunaOffTimerRunning())):
+            self._sd.turnLeftFanOn()
+        self._sd.setFanSpeed((self._ctx.getFanSpeedPct()))
+        self._ctx.setLeftFanRpm(self._sd.getLeftFanSpeedRpm())
+        self._ctx.setRightFanRpm(self._sd.getRightFanSpeedRpm())
+
+    # ----------------------- Room Light Control Methods ---------------------
+
+    def _processHotRoomLight(self):
+        # Turn hot room light on/off
+        self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+
+
+    # ------------------------ Heater Control Methods ---------------------------
 
     # Heater may heat up faster than the heat exchange with the air. Use cyclic power heater on and off to avoid heater overheating.
     # When hot room air temperature starts falling, it maybe due to an open door for a short time. Use grace timer to avoid unnecessary heater on cycle.
@@ -52,14 +127,14 @@ class HeaterController:
     #   3) proper current flows through the heater when the heater is on if a current sensor is present, - TODO
     #   4) heater only runs for max period of time,
     #   5) sauna is on only for certain max period of time.
-    def processHeaterControl(self) -> None:
+    def _processHeaterControl(self) -> None:
 
         # Detect temp change, self._ctx.getHotRoomTempF() still has the prior iteration temp at this point.
         # Get the current hot room temp first to avoid racing conditions
         currentHotRoomTemp = self._sd.getHotRoomTemperature('F')
         tempFalling = self._ctx.getHotRoomTempF() > currentHotRoomTemp
         tempRising = self._ctx.getHotRoomTempF() < currentHotRoomTemp
-        tempAboveTarget = currentHotRoomTemp >= self._ctx.getHotRoomTargetTempF() - self._ctx.getUpperHotRoomTempThresholdF()
+        tempAboveTarget = currentHotRoomTemp >= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
         tempBelowTarget = currentHotRoomTemp <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
 
         # Update current temp and humidity in the context for display etc.
@@ -156,3 +231,18 @@ class HeaterController:
         # Set Heater Cycle Timers
         self._heaterOnCycleTimer.restart(self._ctx.getHeaterCycleOnPeriodMin() * 60)
         self._heaterOffCycleTimer.stop()
+
+    # ---------------------------- System Health ---------------------------
+
+    def _processSystemHealth(self):
+        err, msg = subprocess.getstatusoutput('vcgencmd measure_temp')
+        if not err:
+            m = re.search(r'-?\d\.?\d*', msg)
+            try:
+                self._ctx.setCpuTemp(float(m.group()))
+                if self._ctx.getCpuTemp() > self._ctx.getCpuWarnTempC():
+                    self._errorMgr.raiseSystemHealthError(f"CPU Temperature is {self._ctx.getCpuTemp()}°C")
+                else:
+                    self._errorMgr.eraseSystemHealthError()
+            except ValueError:  # catch only error needed
+                pass

@@ -234,6 +234,7 @@ class SaunaWebUIServer:
                 'screen_width': self._ctx.getScreenWidth(),
                 'screen_height': self._ctx.getScreenHeight(),
                 'screen_rotation': self._ctx.getScreenRotation(),
+                'display_brightness': self._ctx.getDisplayBrightness(),
                 'cpu_temp_warn': self._ctx.getCpuWarnTempC(),
                 'log_level': self._ctx.getLogLevel(),
                 'max_sauna_on_time_hrs': self._ctx.getMaxSaunaOnTimeHrs()
@@ -302,6 +303,8 @@ class SaunaWebUIServer:
                 self._ctx.setFanModuleResetGovernorValue(int(data['fan_module_reset_governor_value']))
             if 'light_off_when_sauna_off' in data:
                 self._ctx.setHotRoomLightAlwaysOn(not data['light_off_when_sauna_off'])
+            if 'display_brightness' in data:
+                self._ctx.setDisplayBrightness(int(data['display_brightness']))
             if 'cpu_temp_warn' in data:
                 self._ctx.setCpuWarnTempC(int(data['cpu_temp_warn']))
             if 'log_level' in data:

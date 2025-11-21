@@ -7,6 +7,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.slider import Slider
 from kivy.uix.spinner import Spinner
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from SaunaContext import SaunaContext
 import logging
 
@@ -24,20 +25,26 @@ class SaunaUISettingsScreen(Screen):
         layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
 
         # Header
-        header = BoxLayout(size_hint_y=0.1)
+        header = BoxLayout(size_hint_y=0.08)
         header.add_widget(Label(text='Settings', font_size='30sp', bold=True))
         layout.add_widget(header)
 
-        # Settings list with input fields
-        scroll_view = ScrollView(size_hint=(1, 0.9))
-        settings_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, padding=10)
-        settings_layout.bind(minimum_height=settings_layout.setter('height'))
+        # Create tabbed panel
+        tab_panel = TabbedPanel(do_default_tab=False, size_hint_y=0.84)
+        tab_panel.tab_height = 50
 
         self.setting_inputs = {}
+
+        # ==================== USER TAB ====================
+        user_tab = TabbedPanelItem(text='User')
+        user_scroll = ScrollView()
+        user_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, padding=10)
+        user_layout.bind(minimum_height=user_layout.setter('height'))
+
         current_section = None
 
         # Helper function to add section header
-        def add_section_header(title):
+        def add_section_header(parent_layout, title):
             nonlocal current_section
             header_label = Label(
                 text=title,
@@ -50,12 +57,13 @@ class SaunaUISettingsScreen(Screen):
                 valign='middle'
             )
             header_label.bind(size=header_label.setter('text_size'))
-            settings_layout.add_widget(header_label)
+            parent_layout.add_widget(header_label)
 
             # Create a new GridLayout for this section's settings
             current_section = GridLayout(cols=2, spacing=10, size_hint_y=None)
             current_section.bind(minimum_height=current_section.setter('height'))
-            settings_layout.add_widget(current_section)
+            parent_layout.add_widget(current_section)
+            return current_section
 
         # Helper function to add setting
         def add_setting(setting_name, default_value):
@@ -83,7 +91,7 @@ class SaunaUISettingsScreen(Screen):
             current_section.add_widget(input_field)
 
         # Temperature Settings
-        add_section_header('Temperature Settings')
+        current_section = add_section_header(user_layout, 'Temperature Settings')
         add_setting('Max Hot Room Temperature, °F', str(self._ctx.getHotRoomMaxTempF()))
         add_setting('Preset Medium Hot Room Temperature, °F', str(self._ctx.getTargetTempPresetMedium()))
         add_setting('Preset High Hot Room Temperature, °F', str(self._ctx.getTargetTempPresetHigh()))
@@ -92,41 +100,18 @@ class SaunaUISettingsScreen(Screen):
         add_setting('Hot Room Cooling Grace Period, minutes', str(self._ctx.getCoolingGracePeriodMin()))
 
         # Heater Health Check Settings
-        add_section_header('Heater Health Check Settings')
+        current_section = add_section_header(user_layout, 'Heater Health Check Settings')
         add_setting('Heater Health Check Warmup Time, minutes', str(self._ctx.getHeaterHealthWarmUpTimeMin()))
         add_setting('Heater Health Check Cooldown Time, minutes', str(self._ctx.getHeaterHealthCooldownTimeMin()))
         add_setting('Heater Max Safe Runtime, minutes', str(self._ctx.getHeaterMaxSafeRuntimeMin()))
 
         # Heater Cycle Control Settings
-        add_section_header('Heater Cycle Control Settings')
+        current_section = add_section_header(user_layout, 'Heater Cycle Control Settings')
         add_setting('Heater Cycle On Period, minutes', str(self._ctx.getHeaterCycleOnPeriodMin()))
         add_setting('Heater Cycle Off Period, minutes', str(self._ctx.getHeaterCycleOffPeriodMin()))
 
-        # Modbus Communication Settings
-        add_section_header('Modbus Communication Settings')
-        add_setting('Modbus Serial Port', self._ctx.getModbusSerialPort())
-        add_setting('Modbus Baud Rate', str(self._ctx.getModbusSerialBaudRate()))
-        add_setting('Modbus Timeout, seconds', str(self._ctx.getModbusSerialTimeout()))
-        add_setting('Modbus Retries', str(self._ctx.getModbusSerialRetries()))
-
-        # Modbus Register Addresses
-        add_section_header('Modbus Register Addresses')
-        add_setting('Temperature Sensor Address', str(self._ctx.getTempSensorAddr()))
-        add_setting('Humidity Sensor Address', str(self._ctx.getHumiditySensorAddr()))
-        add_setting('Heater Relay Coil Address', str(self._ctx.getHeaterRelayCoilAddr()))
-        add_setting('Hot Room Light Coil Address', str(self._ctx.getHotRoomLightCoilAddr()))
-        add_setting('Right Fan Relay Coil Address', str(self._ctx.getRightFanRelayCoilAddr()))
-        add_setting('Left Fan Relay Coil Address', str(self._ctx.getLeftFanRelayCoilAddr()))
-        add_setting('Fan Module Room Temp Address', str(self._ctx.getFanModuleRoomTempAddr()))
-        add_setting('Fan Status Address', str(self._ctx.getFanStatusAddr()))
-        add_setting('Fan Speed Address', str(self._ctx.getFanSpeedAddr()))
-        add_setting('Number of Fans Address', str(self._ctx.getNumberOfFansAddr()))
-        add_setting('Fan Fault Status Address', str(self._ctx.getFanFaultStatusAddr()))
-        add_setting('Fan Module Governor Address', str(self._ctx.getFanModuleGovernorAddr()))
-        add_setting('Fan Module Reset Governor Value', str(self._ctx.getFanModuleResetGovernorValue()))
-
         # Hot Room Light Settings
-        add_section_header('Hot Room Light Settings')
+        current_section = add_section_header(user_layout, 'Hot Room Light Settings')
         light_label = Label(
             text='Turn Hot Room Light Off When Sauna is Off',
             font_size='20sp',
@@ -156,7 +141,7 @@ class SaunaUISettingsScreen(Screen):
         current_section.add_widget(self.light_checkbox)
 
         # Display Settings
-        add_section_header('Display Settings')
+        current_section = add_section_header(user_layout, 'Display Settings')
         brightness_label = Label(
             text='Display Brightness',
             font_size='20sp',
@@ -187,8 +172,18 @@ class SaunaUISettingsScreen(Screen):
         brightness_container.add_widget(self.brightness_value_label)
         current_section.add_widget(brightness_container)
 
+        user_scroll.add_widget(user_layout)
+        user_tab.add_widget(user_scroll)
+        tab_panel.add_widget(user_tab)
+
+        # ==================== SYSTEM TAB ====================
+        system_tab = TabbedPanelItem(text='System')
+        system_scroll = ScrollView()
+        system_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, padding=10)
+        system_layout.bind(minimum_height=system_layout.setter('height'))
+
         # System Settings
-        add_section_header('System Settings')
+        current_section = add_section_header(system_layout, 'System Settings')
         add_setting('CPU Temperature Warning Threshold, °C', str(self._ctx.getCpuWarnTempC()))
         add_setting('Max Sauna On Time, hours', str(self._ctx.getMaxSaunaOnTimeHrs()))
 
@@ -226,8 +221,34 @@ class SaunaUISettingsScreen(Screen):
         )
         current_section.add_widget(self.log_level_spinner)
 
-        scroll_view.add_widget(settings_layout)
-        layout.add_widget(scroll_view)
+        # Modbus Communication Settings
+        current_section = add_section_header(system_layout, 'Modbus Communication Settings')
+        add_setting('Modbus Serial Port', self._ctx.getModbusSerialPort())
+        add_setting('Modbus Baud Rate', str(self._ctx.getModbusSerialBaudRate()))
+        add_setting('Modbus Timeout, seconds', str(self._ctx.getModbusSerialTimeout()))
+        add_setting('Modbus Retries', str(self._ctx.getModbusSerialRetries()))
+
+        # Modbus Register Addresses
+        current_section = add_section_header(system_layout, 'Modbus Register Addresses')
+        add_setting('Temperature Sensor Address', str(self._ctx.getTempSensorAddr()))
+        add_setting('Humidity Sensor Address', str(self._ctx.getHumiditySensorAddr()))
+        add_setting('Heater Relay Coil Address', str(self._ctx.getHeaterRelayCoilAddr()))
+        add_setting('Hot Room Light Coil Address', str(self._ctx.getHotRoomLightCoilAddr()))
+        add_setting('Right Fan Relay Coil Address', str(self._ctx.getRightFanRelayCoilAddr()))
+        add_setting('Left Fan Relay Coil Address', str(self._ctx.getLeftFanRelayCoilAddr()))
+        add_setting('Fan Module Room Temp Address', str(self._ctx.getFanModuleRoomTempAddr()))
+        add_setting('Fan Status Address', str(self._ctx.getFanStatusAddr()))
+        add_setting('Fan Speed Address', str(self._ctx.getFanSpeedAddr()))
+        add_setting('Number of Fans Address', str(self._ctx.getNumberOfFansAddr()))
+        add_setting('Fan Fault Status Address', str(self._ctx.getFanFaultStatusAddr()))
+        add_setting('Fan Module Governor Address', str(self._ctx.getFanModuleGovernorAddr()))
+        add_setting('Fan Module Reset Governor Value', str(self._ctx.getFanModuleResetGovernorValue()))
+
+        system_scroll.add_widget(system_layout)
+        system_tab.add_widget(system_scroll)
+        tab_panel.add_widget(system_tab)
+
+        layout.add_widget(tab_panel)
 
         # Save button
         save_btn = Button(
