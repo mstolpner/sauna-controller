@@ -154,24 +154,17 @@ class SaunaUISettingsScreen(Screen):
         brightness_label.bind(size=brightness_label.setter('text_size'))
         current_section.add_widget(brightness_label)
 
-        # Brightness slider with value label
-        brightness_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, spacing=10)
+        # Brightness slider
         self.brightness_slider = Slider(
             min=0,
             max=255,
             value=self._ctx.getDisplayBrightness(),
             step=1,
-            size_hint_x=0.7
+            size_hint_x=0.4,
+            size_hint_y=None,
+            height=50
         )
-        self.brightness_value_label = Label(
-            text=str(int(self.brightness_slider.value)),
-            font_size='20sp',
-            size_hint_x=0.3
-        )
-        self.brightness_slider.bind(value=self.update_brightness_label)
-        brightness_container.add_widget(self.brightness_slider)
-        brightness_container.add_widget(self.brightness_value_label)
-        current_section.add_widget(brightness_container)
+        current_section.add_widget(self.brightness_slider)
 
         user_scroll.add_widget(user_layout)
         user_tab.add_widget(user_scroll)
@@ -302,10 +295,6 @@ class SaunaUISettingsScreen(Screen):
         else:
             self.light_checkbox.background_normal = 'icons/checkbox-unchecked.png'
             self.light_checkbox.background_down = 'icons/checkbox-unchecked.png'
-
-    def update_brightness_label(self, instance, value):
-        """Update brightness value label when slider changes"""
-        self.brightness_value_label.text = str(int(value))
 
     def update_cpu_temp(self, dt):
         """Update CPU temperature display"""
