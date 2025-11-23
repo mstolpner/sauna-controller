@@ -146,6 +146,7 @@ class SaunaUISettingsScreen(Screen):
         brightness_label = Label(
             text='Display Brightness',
             font_size='20sp',
+            size_hint_x=0.6,
             size_hint_y=None,
             height=50,
             halign='left',
@@ -164,6 +165,7 @@ class SaunaUISettingsScreen(Screen):
             size_hint_y=None,
             height=50
         )
+        self.brightness_slider.bind(value=self.update_brightness_live)
         current_section.add_widget(self.brightness_slider)
 
         user_scroll.add_widget(user_layout)
@@ -295,6 +297,10 @@ class SaunaUISettingsScreen(Screen):
         else:
             self.light_checkbox.background_normal = 'icons/checkbox-unchecked.png'
             self.light_checkbox.background_down = 'icons/checkbox-unchecked.png'
+
+    def update_brightness_live(self, instance, value):
+        """Update display brightness in real-time as slider moves"""
+        self._ctx.setDisplayBrightness(int(value))
 
     def update_cpu_temp(self, dt):
         """Update CPU temperature display"""

@@ -6,7 +6,7 @@
 
 A Raspberry Pi-based sauna controller with temperature monitoring, heating control, and web interface.
 
-![img_1.png](img_2.jpeg)
+![img_1.png](resources/img_2.jpeg)
 
 ---
 
@@ -62,7 +62,7 @@ This sauna controller interfaces with mains voltage electrical systems (120V/240
 - Safety cutoffs and protection devices
 
 ## Hardware Diagram
-![img_1.png](img_1.png)
+![img_1.png](resources/img_1.png)
 
 ---
 
