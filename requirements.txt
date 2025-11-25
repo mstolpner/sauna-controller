@@ -1,0 +1,14 @@
+# Web Framework
+Flask>=3.1.0
+Flask-WTF>=1.2.0
+Flask-Limiter>=4.0.0
+
+# Configuration Management
+configobj>=5.0.8
+
+# Hardware Communication (Modbus)
+pymodbus>=3.11.0
+
+# GUI Framework
+Kivy>=2.3.0
+Kivy-Garden>=0.1.5
