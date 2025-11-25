@@ -6,6 +6,9 @@ from datetime import timedelta
 
 from flask import Flask, render_template, jsonify, request, send_from_directory, session, redirect, url_for
 from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_limiter.errors import RateLimitExceeded
 from werkzeug.utils import secure_filename
 from core.SaunaContext import SaunaContext
 from core.SaunaErrorMgr import SaunaErrorMgr
@@ -31,6 +34,14 @@ class SaunaWebUIServer:
         self._app.config['WTF_CSRF_TIME_LIMIT'] = None  # CSRF tokens don't expire (session-based)
         self._csrf = CSRFProtect(self._app)
 
+        # Rate Limiting
+        self._limiter = Limiter(
+            get_remote_address,
+            app=self._app,
+            default_limits=["200 per day", "50 per hour"],
+            storage_uri="memory://"
+        )
+
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self._setup_routes()
 
@@ -53,20 +64,24 @@ class SaunaWebUIServer:
 
     def _setup_routes(self):
         """Setup all Flask routes"""
-        # Login route
+        # Login route with rate limiting: 5 attempts per 15 minutes
         @self._app.route('/login', methods=['GET', 'POST'])
+        @self._limiter.limit("5 per 15 minutes", methods=['POST'])
         def login():
             error = None
             if request.method == 'POST':
                 password = request.form.get('password')
+                client_ip = get_remote_address()
                 if password == self._ctx.getWebPassword():
                     # Security: Regenerate session ID to prevent session fixation
                     session.clear()
                     session['logged_in'] = True
                     session.permanent = True
+                    logging.info(f'Successful login from {client_ip}')
                     return redirect(url_for('index'))
                 else:
                     error = 'Invalid password'
+                    logging.warning(f'Failed login attempt from {client_ip}')
             return render_template('login.html', error=error)
 
         # Logout route
@@ -353,6 +368,15 @@ class SaunaWebUIServer:
             if self._errorMgr:
                 self._errorMgr.clearAllErrors()
             return jsonify({'success': True})
+
+        # Error handler for rate limit exceeded
+        @self._app.errorhandler(RateLimitExceeded)
+        def handle_rate_limit_exceeded(e):
+            """Handle rate limit exceeded errors"""
+            if request.path == '/login':
+                return render_template('login.html',
+                    error='Too many login attempts. Please try again in 15 minutes.'), 429
+            return jsonify({'error': 'Rate limit exceeded. Please try again later.'}), 429
 
     def run(self):
         host = self._ctx.getHttpHost()

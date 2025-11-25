@@ -1,7 +1,5 @@
 import time
 
-from mypy.dmypy.client import is_running
-
 
 class Timer:
 
