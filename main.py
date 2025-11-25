@@ -8,7 +8,7 @@ Config.set('kivy', 'keyboard_mode', 'systemanddock')
 
 from core.SaunaContext import SaunaContext
 from core.SaunaErrorMgr import SaunaErrorMgr
-from SaunaUIMainScreen import SaunaControlApp
+from ui.SaunaUIMainScreen import SaunaControlApp
 
 if __name__ == '__main__':
     _ctx = SaunaContext()

@@ -14,10 +14,10 @@ from kivy.graphics import Color, Line, Rectangle
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
-from SaunaUISettingsScreen import SaunaUISettingsScreen
-from SaunaUIFanScreen import SaunaUIFanScreen
-from SaunaUIWiFiScreen import SaunaUIWiFiScreen
-from SaunaUIErrorsScreen import SaunaUIErrorsScreen
+from ui.SaunaUISettingsScreen import SaunaUISettingsScreen
+from ui.SaunaUIFanScreen import SaunaUIFanScreen
+from ui.SaunaUIWiFiScreen import SaunaUIWiFiScreen
+from ui.SaunaUIErrorsScreen import SaunaUIErrorsScreen
 from core.SaunaContext import SaunaContext
 from core.SaunaErrorMgr import SaunaErrorMgr
 
