@@ -1,13 +1,11 @@
 import atexit
 import threading
 import re, subprocess
-from datetime import datetime
 
-from HeaterController import HeaterController
-from SaunaErrorMgr import SaunaErrorMgr
-from SaunaContext import SaunaContext
-from SaunaDevices import SaunaDevices
-from Timer import Timer
+from core.HeaterController import HeaterController
+from core.SaunaErrorMgr import SaunaErrorMgr
+from core.SaunaContext import SaunaContext
+from hardware.SaunaDevices import SaunaDevices
 
 
 class SaunaController:

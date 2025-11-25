@@ -5,7 +5,7 @@ from kivy.uix.label import Label
 from kivy.uix.slider import Slider
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.clock import Clock
-from SaunaContext import SaunaContext
+from core.SaunaContext import SaunaContext
 
 class SaunaUIFanScreen(Screen):
 

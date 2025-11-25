@@ -7,8 +7,8 @@ from datetime import timedelta
 from flask import Flask, render_template, jsonify, request, send_from_directory, session, redirect, url_for
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
-from SaunaContext import SaunaContext
-from SaunaErrorMgr import SaunaErrorMgr
+from core.SaunaContext import SaunaContext
+from core.SaunaErrorMgr import SaunaErrorMgr
 
 
 class SaunaWebUIServer:

@@ -1,5 +1,5 @@
 from pymodbus.exceptions import ModbusException
-from SaunaContext import SaunaContext
+from core.SaunaContext import SaunaContext
 from datetime import datetime
 
 

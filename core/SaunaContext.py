@@ -1,10 +1,10 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 from configobj import ConfigObj
 import os
 import subprocess
 import secrets
-from Timer import Timer
+from util.Timer import Timer
 
 
 class SaunaContext:

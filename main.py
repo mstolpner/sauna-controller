@@ -1,13 +1,13 @@
 from kivy.config import Config
-from SaunaController import SaunaController
+from core.SaunaController import SaunaController
 from SaunaWebUIServer import SaunaWebUIServer
 import threading
 
 # Enable virtual keyboard - must be before other kivy imports
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
 
-from SaunaContext import SaunaContext
-from SaunaErrorMgr import SaunaErrorMgr
+from core.SaunaContext import SaunaContext
+from core.SaunaErrorMgr import SaunaErrorMgr
 from SaunaUIMainScreen import SaunaControlApp
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ from kivy.uix.slider import Slider
 from kivy.uix.spinner import Spinner
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.clock import Clock
-from SaunaContext import SaunaContext
+from core.SaunaContext import SaunaContext
 import logging
 
 

@@ -14,13 +14,12 @@ from kivy.graphics import Color, Line, Rectangle
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
-from SaunaErrorMgr import SaunaErrorMgr
 from SaunaUISettingsScreen import SaunaUISettingsScreen
 from SaunaUIFanScreen import SaunaUIFanScreen
 from SaunaUIWiFiScreen import SaunaUIWiFiScreen
 from SaunaUIErrorsScreen import SaunaUIErrorsScreen
-from SaunaContext import SaunaContext
-from SaunaErrorMgr import SaunaErrorMgr
+from core.SaunaContext import SaunaContext
+from core.SaunaErrorMgr import SaunaErrorMgr
 
 # Set window size for Raspberry Pi touchscreen (portrait)
 
