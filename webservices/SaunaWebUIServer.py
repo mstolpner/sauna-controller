@@ -20,7 +20,16 @@ class SaunaWebUIServer:
     def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         self._ctx = ctx
         self._errorMgr = errorMgr
-        self._app = Flask(__name__)
+
+        # Get project root directory (parent of webservices directory)
+        self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+        # Initialize Flask with explicit template and static folders
+        self._app = Flask(
+            __name__,
+            template_folder=os.path.join(self._base_dir, 'templates'),
+            static_folder=os.path.join(self._base_dir, 'static')
+        )
         self._app.secret_key = ctx.getSecretKey()
 
         # Session security configuration
@@ -42,7 +51,6 @@ class SaunaWebUIServer:
             storage_uri="memory://"
         )
 
-        self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self._setup_routes()
 
     def _is_wifi_connected(self):

@@ -96,6 +96,8 @@ class SaunaContext:
         # Initialize timers
         self._fanAfterSaunaOffTimer = Timer(round(self.getFanRunningTimeAfterSaunaOffHrs() * 60 * 60))
         self._saunaOnTimer = Timer(round(self.getMaxSaunaOnTimeHrs() * 60 * 60))
+        # Set initial brightness
+        self.setDisplayBrightness(self.getDisplayBrightness())
 
     def getLogger(self) -> logging.Logger:
         return self._logger

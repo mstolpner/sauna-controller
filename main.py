@@ -1,6 +1,6 @@
 from kivy.config import Config
 from core.SaunaController import SaunaController
-from SaunaWebUIServer import SaunaWebUIServer
+from webservices.SaunaWebUIServer import SaunaWebUIServer
 import threading
 
 # Enable virtual keyboard - must be before other kivy imports
