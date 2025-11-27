@@ -80,6 +80,7 @@ class SaunaUIMainScreen(Screen):
         self.status_bar.add_widget(Label())  # Spacer
 
         self.light_icon = StatusIcon('icons/light_off.png')
+        self.light_icon.bind(on_press=self.toggle_light_always_on)
         self.status_bar.add_widget(self.light_icon)
 
         self.heater_icon = StatusIcon('icons/heater_off.png')
@@ -450,7 +451,10 @@ class SaunaUIMainScreen(Screen):
             print("Turning sauna OFF")
         else:
             print(f"Setting temperature to {temp}°C")
-    
+
+    def toggle_light_always_on(self, instance):
+        self.ctx.setHotRoomLightAlwaysOn(not self.ctx.getHotRoomLightAlwaysOn())
+
     def open_fan_screen(self, instance):
         self.manager.current = 'fan'
 
