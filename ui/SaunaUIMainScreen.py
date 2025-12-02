@@ -59,7 +59,16 @@ class SaunaUIMainScreen(Screen):
         self.errorMgr = errorMgr
         self.active_preset = None
         self.preset_buttons = []
-        
+
+        # Screen timeout variables
+        self.last_activity_time = Clock.get_time()
+        self.screen_timeout_seconds = 30 * 60  # 30 minutes
+        self.screen_is_off = False
+        self.saved_brightness = ctx.getDisplayBrightness()
+
+        # Bind window touch event to detect any touch
+        Window.bind(on_touch_down=self.on_window_touch)
+
         layout = BoxLayout(orientation='vertical', padding=10, spacing=5)
 
         # Top status bar
@@ -308,6 +317,8 @@ class SaunaUIMainScreen(Screen):
         Clock.schedule_interval(self.update_sensors, 1)
         # Update clock every second
         Clock.schedule_interval(self.update_clock, 1)
+        # Check for screen timeout every second
+        Clock.schedule_interval(self.check_screen_timeout, 1)
         # Initialize heater button state
         self.update_sauna_button()
         # Initialize light icon state
@@ -366,6 +377,10 @@ class SaunaUIMainScreen(Screen):
         # Update slider if value differs (to reflect external changes)
         if hasattr(self, 'temp_slider') and self.temp_slider.value != target_temp:
             self.temp_slider.value = target_temp
+
+        # Wake screen if sauna turns on while screen is off
+        if self.ctx.isSaunaOn() and self.screen_is_off:
+            self.turn_screen_on()
 
         self.update_sauna_button()
 
@@ -466,6 +481,44 @@ class SaunaUIMainScreen(Screen):
 
     def open_errors_screen(self, instance):
         self.manager.current = 'errors'
+
+    def on_window_touch(self, window, touch):
+        """Handle any touch on the window"""
+        if self.screen_is_off:
+            # Screen is off, wake it up
+            self.turn_screen_on()
+            # Return to main screen
+            if self.manager and self.manager.current != 'main':
+                self.manager.current = 'main'
+            # Consume the touch event (don't process further)
+            return True
+        else:
+            # Screen is on, reset inactivity timer
+            self.last_activity_time = Clock.get_time()
+            # Let the touch event propagate normally
+            return False
+
+    def check_screen_timeout(self, dt):
+        """Check if screen should be turned off due to inactivity"""
+        # Only turn off screen if sauna is off
+        if not self.ctx.isSaunaOn() and not self.screen_is_off:
+            inactive_time = Clock.get_time() - self.last_activity_time
+            if inactive_time >= self.screen_timeout_seconds:
+                self.turn_screen_off()
+
+    def turn_screen_off(self):
+        """Turn off the screen by setting brightness to 0"""
+        if not self.screen_is_off:
+            self.saved_brightness = self.ctx.getDisplayBrightness()
+            self.ctx.setDisplayBrightness(0)
+            self.screen_is_off = True
+
+    def turn_screen_on(self):
+        """Turn on the screen by restoring brightness"""
+        if self.screen_is_off:
+            self.ctx.setDisplayBrightness(self.saved_brightness)
+            self.screen_is_off = False
+            self.last_activity_time = Clock.get_time()
 
     def _update_bg(self, instance, value):
         """Update background rectangle size and position"""
