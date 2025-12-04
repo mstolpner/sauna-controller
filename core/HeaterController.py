@@ -57,8 +57,8 @@ class HeaterController:
         currentHotRoomTemp = self._sd.getHotRoomTemperature('F')
         tempFalling = self._ctx.getHotRoomTempF() > currentHotRoomTemp
         tempRising = self._ctx.getHotRoomTempF() < currentHotRoomTemp
-        tempAboveTarget = currentHotRoomTemp >= self._ctx.getHotRoomTargetTempF() - self._ctx.getUpperHotRoomTempThresholdF()
-        tempBelowTarget = currentHotRoomTemp <= self._ctx.getHotRoomTargetTempF() - self._ctx.getLowerHotRoomTempThresholdF()
+        heatingTargetReached = currentHotRoomTemp >= self._ctx.getHotRoomTargetTempF() - self._ctx.getWarmUpHysteresisF()
+        coolingTargetReached = currentHotRoomTemp <= self._ctx.getHotRoomTargetTempF() - self._ctx.getCoolDownHysteresisF()
 
         # Update current temp and humidity in the context for display etc.
         self._ctx.setHotRoomTempF(currentHotRoomTemp)
@@ -85,17 +85,18 @@ class HeaterController:
         elif (not self._isHeaterOn
               and tempFalling
               and not self._coolingGracePeriodTimer.isRunning()):
-                self._coolingGracePeriodTimer.start()
+                # Restart to accept any changes in configuration
+                self._coolingGracePeriodTimer.restart(self._ctx.getCoolingGracePeriodMin() * 60)
+        # Turn Heater Off if temperature reached
+        elif self._isHeaterOn and heatingTargetReached:
+            self._turnHeaterOff()
         # Turn Heater Off for heater cycling if On cycle is finished
         elif (self._isHeaterOn
               # Wait for the "on" heater cycle
               and not self._heaterOnCycleTimer.isRunning()):
             self._turnHeaterOff()
-        # Turn Heater Off if temperature reached
-        elif self._isHeaterOn and tempAboveTarget:
-            self._turnHeaterOff()
         # Turn Heater On for heater cycling or if temperature is below target
-        elif (not self._isHeaterOn and tempBelowTarget
+        elif (not self._isHeaterOn and coolingTargetReached
               # Allow for cooling grace period as a door might be open for a short period causing temperature to drop temporarily
               and not self._coolingGracePeriodTimer.isRunning()
               # Wait for the "off" heater cycle
@@ -128,7 +129,7 @@ class HeaterController:
         self._heaterHealthWarmUpTimer.stop()
         self._heaterHealthCoolDownTimer.start()
         self._heaterMaxSafeRuntimeTimer.stop()
-        # Set Heater On Cycle Timer only if the sauna is ON
+        # Set Heater Off Cycle Timer only if the sauna is ON
         if self._ctx.isSaunaOn():
             self._heaterOffCycleTimer.restart(self._ctx.getHeaterCycleOffPeriodMin() * 60)
         else:

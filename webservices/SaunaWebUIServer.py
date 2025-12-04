@@ -47,7 +47,7 @@ class SaunaWebUIServer:
         self._limiter = Limiter(
             get_remote_address,
             app=self._app,
-            default_limits=["200 per day", "50 per hour"],
+            default_limits=["5000 per day", "1000 per hour"],
             storage_uri="memory://"
         )
 
@@ -228,8 +228,8 @@ class SaunaWebUIServer:
                 'max_temp_f': self._ctx.getHotRoomMaxTempF(),
                 'preset_medium': self._ctx.getTargetTempPresetMedium(),
                 'preset_high': self._ctx.getTargetTempPresetHigh(),
-                'lower_threshold_f': self._ctx.getLowerHotRoomTempThresholdF(),
-                'upper_threshold_f': self._ctx.getUpperHotRoomTempThresholdF(),
+                'lower_threshold_f': self._ctx.getWarmUpHysteresisF(),
+                'upper_threshold_f': self._ctx.getCoolDownHysteresisF(),
                 'cooling_grace_period': self._ctx.getCoolingGracePeriodMin(),
                 'warmup_time': self._ctx.getHeaterHealthWarmUpTimeMin(),
                 'cooldown_time': self._ctx.getHeaterHealthCooldownTimeMin(),
@@ -276,9 +276,9 @@ class SaunaWebUIServer:
             if 'preset_high' in data:
                 self._ctx.setTargetTempPresetHigh(int(data['preset_high']))
             if 'lower_threshold_f' in data:
-                self._ctx.setLowerHotRoomTempThresholdF(int(data['lower_threshold_f']))
+                self._ctx.setWarmUpHysteresisF(int(data['lower_threshold_f']))
             if 'upper_threshold_f' in data:
-                self._ctx.setUpperHotRoomTempThresholdF(int(data['upper_threshold_f']))
+                self._ctx.setCoolDownHysteresisF(int(data['upper_threshold_f']))
             if 'cooling_grace_period' in data:
                 self._ctx.setCoolingGracePeriodMin(int(data['cooling_grace_period']))
             if 'warmup_time' in data:

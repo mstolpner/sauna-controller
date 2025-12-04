@@ -96,8 +96,8 @@ class SaunaUISettingsScreen(Screen):
         add_setting('Max Hot Room Temperature, °F', str(self._ctx.getHotRoomMaxTempF()))
         add_setting('Preset Medium Hot Room Temperature, °F', str(self._ctx.getTargetTempPresetMedium()))
         add_setting('Preset High Hot Room Temperature, °F', str(self._ctx.getTargetTempPresetHigh()))
-        add_setting('Heater On Lower Temperature Threshold, °F', str(self._ctx.getLowerHotRoomTempThresholdF()))
-        add_setting('Heater Off Upper Temperature Threshold, °F', str(self._ctx.getUpperHotRoomTempThresholdF()))
+        add_setting('Warm Up Hysteresis Below Target, °F', str(self._ctx.getWarmUpHysteresisF()))
+        add_setting('Cool Down Hysteresis Below Target, °F', str(self._ctx.getCoolDownHysteresisF()))
         add_setting('Hot Room Cooling Grace Period, minutes', str(self._ctx.getCoolingGracePeriodMin()))
 
         # Heater Health Check Settings
@@ -311,8 +311,8 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setHotRoomMaxTempF(int(self.setting_inputs['Max Hot Room Temperature, °F'].text))
         self._ctx.setTargetTempPresetMedium(int(self.setting_inputs['Preset Medium Hot Room Temperature, °F'].text))
         self._ctx.setTargetTempPresetHigh(int(self.setting_inputs['Preset High Hot Room Temperature, °F'].text))
-        self._ctx.setLowerHotRoomTempThresholdF(int(self.setting_inputs['Heater On Lower Temperature Threshold, °F'].text))
-        self._ctx.setUpperHotRoomTempThresholdF(int(self.setting_inputs['Heater Off Upper Temperature Threshold, °F'].text))
+        self._ctx.setWarmUpHysteresisF(int(self.setting_inputs['Warm Up Hysteresis Below Target, °F'].text))
+        self._ctx.setCoolDownHysteresisF(int(self.setting_inputs['Cool Down Hysteresis Below Target, °F'].text))
         self._ctx.setCoolingGracePeriodMin(int(self.setting_inputs['Hot Room Cooling Grace Period, minutes'].text))
         self._ctx.setHeaterHealthWarmupTimeMin(int(self.setting_inputs['Heater Health Check Warmup Time, minutes'].text))
         self._ctx.setHeaterHealthCooldownTimeMin(int(self.setting_inputs['Heater Health Check Cooldown Time, minutes'].text))

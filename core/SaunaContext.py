@@ -34,9 +34,9 @@ class SaunaContext:
     _fanModuleResetGovernorValue: int = 170
     # Heater Default Settings
     _hotRoomTargetTempF: int = 190
-    _coolingGracePeriodMin: int = 5
-    _lowerHotRoomTempThreshold: int = 5
-    _upperHotRoomTempThreshold: int = 0
+    _coolingGracePeriodMin: int = 3
+    _warmUpHysteresisBelowTarget_f: int = 5
+    _coolDownHysteresisBelowTarget: int = 5
     _heaterHealthWarmUpTimeMin: int = 10
     _heaterHealthCoolDownTimeMin: int = 20
     _heaterMaxSafeRuntimeMin: int = 240
@@ -127,8 +127,8 @@ class SaunaContext:
         self._configObj['hot_room_temp_control'] = {}
         self._configObj['hot_room_temp_control']['target_temp_f'] = self._hotRoomTargetTempF
         self._configObj['hot_room_temp_control']['cooling_grace_period_min'] = self._coolingGracePeriodMin
-        self._configObj['hot_room_temp_control']['lower_hot_room_temp_threshold_f'] = self._lowerHotRoomTempThreshold
-        self._configObj['hot_room_temp_control']['upper_hot_room_temp_threshold_f'] = self._upperHotRoomTempThreshold
+        self._configObj['hot_room_temp_control']['warm_up_hysteresis_below_target_f'] = self._warmUpHysteresisBelowTarget_f
+        self._configObj['hot_room_temp_control']['cool_down_hysteresis_below_target_f'] = self._coolDownHysteresisBelowTarget
         self._configObj['hot_room_temp_control']['max_temp_f'] = self._maxHotRoomTempF
         self._configObj['hot_room_temp_control']['target_temp_preset_medium'] = self._targetTempPresetMedium
         self._configObj['hot_room_temp_control']['target_temp_preset_high'] = self._targetTempPresetHigh
@@ -327,17 +327,17 @@ class SaunaContext:
     def setCoolingGracePeriodMin(self, coolingGracePeriodMin: int) -> None:
         self._set('hot_room_temp_control', 'cooling_grace_period_min', coolingGracePeriodMin)
 
-    def getLowerHotRoomTempThresholdF(self) -> int:
-        return self._get('hot_room_temp_control', 'lower_hot_room_temp_threshold_f', self._lowerHotRoomTempThreshold)
+    def getWarmUpHysteresisF(self) -> int:
+        return self._get('hot_room_temp_control', 'warm_up_hysteresis_below_target_f', self._warmUpHysteresisBelowTarget_f)
 
-    def setLowerHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
-        self._set('hot_room_temp_control', 'lower_hot_room_temp_threshold_f', thresholdTempF)
+    def setWarmUpHysteresisF(self, thresholdTempF: int) -> None:
+        self._set('hot_room_temp_control', 'warm_up_hysteresis_below_target_f', thresholdTempF)
 
-    def getUpperHotRoomTempThresholdF(self) -> int:
-        return self._get('hot_room_temp_control', 'upper_hot_room_temp_threshold_f', self._upperHotRoomTempThreshold)
+    def getCoolDownHysteresisF(self) -> int:
+        return self._get('hot_room_temp_control', 'cool_down_hysteresis_below_target_f', self._coolDownHysteresisBelowTarget)
 
-    def setUpperHotRoomTempThresholdF(self, thresholdTempF: int) -> None:
-        self._set('hot_room_temp_control', 'upper_hot_room_temp_threshold_f', thresholdTempF)
+    def setCoolDownHysteresisF(self, thresholdTempF: int) -> None:
+        self._set('hot_room_temp_control', 'cool_down_hysteresis_below_target_f', thresholdTempF)
 
     def getHotRoomMaxTempF(self) -> int:
         return self._get('hot_room_temp_control', 'max_temp_f', self._maxHotRoomTempF)
