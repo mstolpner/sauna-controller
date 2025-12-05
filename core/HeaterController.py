@@ -6,7 +6,7 @@ from hardware.SaunaDevices import SaunaDevices
 from util.Timer import Timer
 
 #TODO add high temp config: enabled, threshold temp, on/off time
-#TODO update light icon - it will turn light on/off instead of touching option. Normal process will override the button on sauna on/off event
+#TODO update auto light off into auto light on/off
 class HeaterController:
 
     _ctx : SaunaContext = None

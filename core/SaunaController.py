@@ -91,8 +91,9 @@ class SaunaController:
 
     def _processHotRoomLight(self):
         # Turn hot room light on/off
-        self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
-        self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        #self._sd.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        #self._ctx.setHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        self._sd.turnHotRoomLightOnOff(self._ctx.isHotRoomLightOn())
 
     # ---------------------------- System Health ---------------------------
 

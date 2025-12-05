@@ -534,8 +534,26 @@ class SaunaContext:
         if  self._isSaunaOn:
             self._fanAfterSaunaOffTimer.stop()
             self._saunaOnTimer.start()
+            self.setHotRoomLightOn()
         else:
             self._fanAfterSaunaOffTimer.start()
+            if not self.getHotRoomLightAlwaysOn():
+                self.setHotRoomLightOff()
+
+    def isHotRoomLightOn(self) -> bool:
+        return self._hotRoomLightOn
+
+    def isHotRoomLightOff(self) -> bool:
+        return not self._hotRoomLightOn
+
+    def setHotRoomLightOn(self):
+        self.setHotRoomLightOnOff(True)
+
+    def setHotRoomLightOff(self):
+        self.setHotRoomLightOnOff(False)
+
+    def setHotRoomLightOnOff(self, state: bool):
+        self._hotRoomLightOn = state
 
     def getSaunaOnTimer(self) -> Timer:
         return self._saunaOnTimer
@@ -563,12 +581,6 @@ class SaunaContext:
 
     def setHotRoomHumidity(self, humidity: float) -> None:
         self._hotRoomHumidity = humidity
-
-    def isHotRoomLightOn(self) -> bool:
-        return self._hotRoomLightOn
-
-    def setHotRoomLightOnOff(self, value: bool) -> None:
-        self._hotRoomLightOn = value
 
     def getLeftFanRpm(self) -> int:
         return self._leftFanRpm
