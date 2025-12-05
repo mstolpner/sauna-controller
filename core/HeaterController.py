@@ -5,7 +5,6 @@ from core.SaunaContext import SaunaContext
 from hardware.SaunaDevices import SaunaDevices
 from util.Timer import Timer
 
-#TODO add high temp config: enabled, threshold temp, on/off time
 class HeaterController:
 
     _ctx : SaunaContext = None
