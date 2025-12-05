@@ -44,7 +44,11 @@ class SaunaContext:
     _targetTempPresetMedium: int = 180
     _targetTempPresetHigh: int = 200
     _heaterCycleOnPeriodMin: int = 30
-    _heaterCycleOffPeriodMin: int = 15
+    _heaterCycleOffPeriodMin: int = 5
+    _heaterHighTempMode: bool = False
+    _heaterHighTempThresholdF: int = 170
+    _heaterHighTempCycleOnPeriodMin: int = 10
+    _heaterHighTempCycleOffPeriodMin: int = 5
     # Fan Default Settings
     _fanSpeedPct: int = 100
     _numberOfFans: int = 2
@@ -146,6 +150,10 @@ class SaunaContext:
         self._configObj['heater_control']['heater_max_safe_runtime_min'] = self._heaterMaxSafeRuntimeMin
         self._configObj['heater_control']['cycle_on_period_min'] = self._heaterCycleOnPeriodMin
         self._configObj['heater_control']['cycle_off_period_min'] = self._heaterCycleOffPeriodMin
+        self._configObj['heater_control']['high_temp_mode'] = self._heaterHighTempMode
+        self._configObj['heater_control']['high_temp_threshold_f'] = self._heaterHighTempThresholdF
+        self._configObj['heater_control']['high_temp_cycle_on_period_min'] = self._heaterHighTempCycleOnPeriodMin
+        self._configObj['heater_control']['high_temp_cycle_off_period_min'] = self._heaterHighTempCycleOffPeriodMin
         self._configObj['display'] = {}
         self._configObj['display']['display_width'] = self._displayWidth
         self._configObj['display']['display_height'] = self._displayHeight
@@ -378,16 +386,46 @@ class SaunaContext:
         self._set('heater_control', 'heater_max_safe_runtime_min', value)
 
     def getHeaterCycleOnPeriodMin(self) -> int:
-        return self._get('heater_control', 'cycle_on_period_min', self._heaterCycleOnPeriodMin)
+        if not self.getHeaterHighTempMode() or self.getHotRoomTempF() < self.getHeaterHighTempThresholdF():
+            return self._get('heater_control', 'cycle_on_period_min', self._heaterCycleOnPeriodMin)
+        else:
+            return self._get('heater_control', 'high_temp_cycle_on_period_min', self._heaterCycleOnPeriodMin)
 
     def setHeaterCycleOnPeriodMin(self, value: int) -> None:
         self._set('heater_control', 'cycle_on_period_min', value)
 
     def getHeaterCycleOffPeriodMin(self) -> int:
-        return self._get('heater_control', 'cycle_off_period_min', self._heaterCycleOffPeriodMin)
+        if not self.getHeaterHighTempMode() or self.getHotRoomTempF() < self.getHeaterHighTempThresholdF():
+            return self._get('heater_control', 'cycle_off_period_min', self._heaterCycleOffPeriodMin)
+        else:
+            return self._get('heater_control', 'high_temp_cycle_off_period_min', self._heaterCycleOffPeriodMin)
 
     def setHeaterCycleOffPeriodMin(self, value: int) -> None:
         self._set('heater_control', 'cycle_off_period_min', value)
+
+    def getHeaterHighTempMode(self) -> bool:
+        return self._get('heater_control', 'high_temp_mode', self._heaterHighTempMode)
+
+    def setHeaterHighTempMode(self, value: bool) -> None:
+        self._set('heater_control', 'high_temp_mode', value)
+
+    def getHeaterHighTempThresholdF(self) -> int:
+        return self._get('heater_control', 'high_temp_threshold_f', self._heaterHighTempThresholdF)
+
+    def setHeaterHighTempThresholdF(self, value: int) -> None:
+        self._set('heater_control', 'high_temp_threshold_f', value)
+
+    def getHeaterHighTempCycleOnPeriodMin(self) -> int:
+        return self._get('heater_control', 'high_temp_cycle_on_period_min', self._heaterHighTempCycleOnPeriodMin)
+
+    def setHeaterHighTempCycleOnPeriodMin(self, value: int) -> None:
+        self._set('heater_control', 'high_temp_cycle_on_period_min', value)
+
+    def getHeaterHighTempCycleOffPeriodMin(self) -> int:
+        return self._get('heater_control', 'high_temp_cycle_off_period_min', self._heaterHighTempCycleOffPeriodMin)
+
+    def setHeaterHighTempCycleOffPeriodMin(self, value: int) -> None:
+        self._set('heater_control', 'high_temp_cycle_off_period_min', value)
 
     # ----------------------- Hot Room Control attributes --------------------------
 
@@ -534,10 +572,11 @@ class SaunaContext:
         if  self._isSaunaOn:
             self._fanAfterSaunaOffTimer.stop()
             self._saunaOnTimer.start()
-            self.setHotRoomLightOn()
+            if self.getHotRoomLightAutoOnOff():
+                self.setHotRoomLightOn()
         else:
             self._fanAfterSaunaOffTimer.start()
-            if not self.getHotRoomLightAutoOnOff():
+            if self.getHotRoomLightAutoOnOff():
                 self.setHotRoomLightOff()
 
     def isHotRoomLightOn(self) -> bool:

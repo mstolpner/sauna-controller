@@ -45,6 +45,10 @@ function loadSettings() {
             // Heater cycle control settings
             document.getElementById('cycle-on-period').value = data.cycle_on_period_min;
             document.getElementById('cycle-off-period').value = data.cycle_off_period_min;
+            document.getElementById('high-temp-mode').checked = data.high_temp_mode;
+            document.getElementById('high-temp-threshold').value = data.high_temp_threshold_f;
+            document.getElementById('high-temp-cycle-on-period').value = data.high_temp_cycle_on_period_min;
+            document.getElementById('high-temp-cycle-off-period').value = data.high_temp_cycle_off_period_min;
 
             // Modbus settings
             document.getElementById('serial-port').value = data.serial_port;
@@ -96,6 +100,10 @@ function saveSettings() {
         max_safe_runtime_min: parseInt(document.getElementById('max-safe-runtime').value),
         cycle_on_period_min: parseInt(document.getElementById('cycle-on-period').value),
         cycle_off_period_min: parseInt(document.getElementById('cycle-off-period').value),
+        high_temp_mode: document.getElementById('high-temp-mode').checked,
+        high_temp_threshold_f: parseInt(document.getElementById('high-temp-threshold').value),
+        high_temp_cycle_on_period_min: parseInt(document.getElementById('high-temp-cycle-on-period').value),
+        high_temp_cycle_off_period_min: parseInt(document.getElementById('high-temp-cycle-off-period').value),
         serial_port: document.getElementById('serial-port').value,
         baud_rate: parseInt(document.getElementById('baud-rate').value),
         modbus_timeout: parseFloat(document.getElementById('modbus-timeout').value),

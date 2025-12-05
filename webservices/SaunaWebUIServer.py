@@ -243,6 +243,10 @@ class SaunaWebUIServer:
                 'max_safe_runtime_min': self._ctx.getHeaterMaxSafeRuntimeMin(),
                 'cycle_on_period_min': self._ctx.getHeaterCycleOnPeriodMin(),
                 'cycle_off_period_min': self._ctx.getHeaterCycleOffPeriodMin(),
+                'high_temp_mode': self._ctx.getHeaterHighTempMode(),
+                'high_temp_threshold_f': self._ctx.getHeaterHighTempThresholdF(),
+                'high_temp_cycle_on_period_min': self._ctx.getHeaterHighTempCycleOnPeriodMin(),
+                'high_temp_cycle_off_period_min': self._ctx.getHeaterHighTempCycleOffPeriodMin(),
                 'serial_port': self._ctx.getModbusSerialPort(),
                 'baud_rate': self._ctx.getModbusSerialBaudRate(),
                 'modbus_timeout': self._ctx.getModbusSerialTimeout(),
@@ -298,6 +302,14 @@ class SaunaWebUIServer:
                 self._ctx.setHeaterCycleOnPeriodMin(int(data['cycle_on_period_min']))
             if 'cycle_off_period_min' in data:
                 self._ctx.setHeaterCycleOffPeriodMin(int(data['cycle_off_period_min']))
+            if 'high_temp_mode' in data:
+                self._ctx.setHeaterHighTempMode(data['high_temp_mode'])
+            if 'high_temp_threshold_f' in data:
+                self._ctx.setHeaterHighTempThresholdF(int(data['high_temp_threshold_f']))
+            if 'high_temp_cycle_on_period_min' in data:
+                self._ctx.setHeaterHighTempCycleOnPeriodMin(int(data['high_temp_cycle_on_period_min']))
+            if 'high_temp_cycle_off_period_min' in data:
+                self._ctx.setHeaterHighTempCycleOffPeriodMin(int(data['high_temp_cycle_off_period_min']))
             if 'serial_port' in data:
                 self._ctx.setModbusSerialPort(data['serial_port'])
             if 'baud_rate' in data:

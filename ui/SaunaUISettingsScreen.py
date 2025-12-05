@@ -111,6 +111,36 @@ class SaunaUISettingsScreen(Screen):
         add_setting('Heater Cycle On Period, minutes', str(self._ctx.getHeaterCycleOnPeriodMin()))
         add_setting('Heater Cycle Off Period, minutes', str(self._ctx.getHeaterCycleOffPeriodMin()))
 
+        # High Temp Mode checkbox
+        high_temp_mode_label = Label(
+            text='High Temp Mode',
+            font_size='20sp',
+            size_hint_y=None,
+            height=50,
+            halign='left',
+            valign='middle'
+        )
+        high_temp_mode_label.bind(size=high_temp_mode_label.setter('text_size'))
+        current_section.add_widget(high_temp_mode_label)
+
+        self.high_temp_mode_checkbox = Button(
+            size_hint=(None, None),
+            size=(45, 45),
+            background_normal='icons/checkbox-unchecked.png',
+            background_down='icons/checkbox-unchecked.png',
+            border=(0, 0, 0, 0)
+        )
+        self.high_temp_mode_checkbox.active = self._ctx.getHeaterHighTempMode()
+        if self.high_temp_mode_checkbox.active:
+            self.high_temp_mode_checkbox.background_normal = 'icons/checkbox-checked.png'
+            self.high_temp_mode_checkbox.background_down = 'icons/checkbox-checked.png'
+        self.high_temp_mode_checkbox.bind(on_press=self.toggle_high_temp_mode_checkbox)
+        current_section.add_widget(self.high_temp_mode_checkbox)
+
+        add_setting('High Temp Threshold, °F', str(self._ctx.getHeaterHighTempThresholdF()))
+        add_setting('High Temp Cycle On Period, minutes', str(self._ctx.getHeaterHighTempCycleOnPeriodMin()))
+        add_setting('High Temp Cycle Off Period, minutes', str(self._ctx.getHeaterHighTempCycleOffPeriodMin()))
+
         # Hot Room Light Settings
         current_section = add_section_header(user_layout, 'Hot Room Light Settings')
         light_label = Label(
@@ -298,6 +328,16 @@ class SaunaUISettingsScreen(Screen):
             self.light_checkbox.background_normal = 'icons/checkbox-unchecked.png'
             self.light_checkbox.background_down = 'icons/checkbox-unchecked.png'
 
+    def toggle_high_temp_mode_checkbox(self, instance):
+        """Toggle high temp mode checkbox state"""
+        self.high_temp_mode_checkbox.active = not self.high_temp_mode_checkbox.active
+        if self.high_temp_mode_checkbox.active:
+            self.high_temp_mode_checkbox.background_normal = 'icons/checkbox-checked.png'
+            self.high_temp_mode_checkbox.background_down = 'icons/checkbox-checked.png'
+        else:
+            self.high_temp_mode_checkbox.background_normal = 'icons/checkbox-unchecked.png'
+            self.high_temp_mode_checkbox.background_down = 'icons/checkbox-unchecked.png'
+
     def update_brightness_live(self, instance, value):
         """Update display brightness in real-time as slider moves"""
         self._ctx.setDisplayBrightness(int(value))
@@ -319,6 +359,10 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime, minutes'].text))
         self._ctx.setHeaterCycleOnPeriodMin(int(self.setting_inputs['Heater Cycle On Period, minutes'].text))
         self._ctx.setHeaterCycleOffPeriodMin(int(self.setting_inputs['Heater Cycle Off Period, minutes'].text))
+        self._ctx.setHeaterHighTempMode(self.high_temp_mode_checkbox.active)
+        self._ctx.setHeaterHighTempThresholdF(int(self.setting_inputs['High Temp Threshold, °F'].text))
+        self._ctx.setHeaterHighTempCycleOnPeriodMin(int(self.setting_inputs['High Temp Cycle On Period, minutes'].text))
+        self._ctx.setHeaterHighTempCycleOffPeriodMin(int(self.setting_inputs['High Temp Cycle Off Period, minutes'].text))
         self._ctx.setHotRoomLightAutoOnOff(self.light_checkbox.active)
         self._ctx.setModbusSerialPort(self.setting_inputs['Modbus Serial Port'].text)
         self._ctx.setModbusSerialBaudRate(int(self.setting_inputs['Modbus Baud Rate'].text))
