@@ -68,7 +68,7 @@ function loadSettings() {
             document.getElementById('fan-module-reset-governor-value').value = data.fan_module_reset_governor_value;
 
             // Light settings
-            document.getElementById('light-off-when-sauna-off').checked = data.light_off_when_sauna_off;
+            document.getElementById('light-auto-on-off').checked = data.light_auto_on_off;
 
             // Display settings
             document.getElementById('display-brightness').value = data.display_brightness;
@@ -113,7 +113,7 @@ function saveSettings() {
         fan_fault_status_addr: parseInt(document.getElementById('fan-fault-status-addr').value),
         fan_module_governor_addr: parseInt(document.getElementById('fan-module-governor-addr').value),
         fan_module_reset_governor_value: parseInt(document.getElementById('fan-module-reset-governor-value').value),
-        light_off_when_sauna_off: document.getElementById('light-off-when-sauna-off').checked,
+        light_auto_on_off: document.getElementById('light-auto-on-off').checked,
         display_brightness: parseInt(document.getElementById('display-brightness').value),
         cpu_temp_warn: parseInt(document.getElementById('cpu-temp-warn').value),
         max_sauna_on_time_hrs: parseInt(document.getElementById('max-sauna-on-time').value),

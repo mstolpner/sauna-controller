@@ -63,7 +63,7 @@ class SaunaDevices:
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
         # Initialize Hot Room Light
-        self._setRelayStatus(self._ctx.getHotRoomLightCoilAddr(), self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        self._setRelayStatus(self._ctx.getHotRoomLightCoilAddr(), self._ctx.getHotRoomLightAutoOnOff() or self._ctx.isSaunaOn())
         # Initialize Fans
         if self.getNumberOfFans() != self._ctx.getNumberOfFans():
             self.setNumberOfFans(self._ctx.getNumberOfFans())
@@ -89,7 +89,7 @@ class SaunaDevices:
         # Initialize Heater
         self.turnHeaterOff()
         # Initialize hot room light
-        self.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAlwaysOn() or self._ctx.isSaunaOn())
+        self.turnHotRoomLightOnOff(self._ctx.getHotRoomLightAutoOnOff() or self._ctx.isSaunaOn())
         # Initialize fan timer to prevent false errors during fan acceleration
         self._fanAccelerationTimer = Timer(10)
         # Release resources on exit

@@ -253,7 +253,7 @@ class SaunaWebUIServer:
                 'fan_fault_status_addr': self._ctx.getFanFaultStatusAddr(),
                 'fan_module_governor_addr': self._ctx.getFanModuleGovernorAddr(),
                 'fan_module_reset_governor_value': self._ctx.getFanModuleResetGovernorValue(),
-                'light_off_when_sauna_off': not self._ctx.getHotRoomLightAlwaysOn(),
+                'light_auto_on_off': self._ctx.getHotRoomLightAutoOnOff(),
                 'screen_width': self._ctx.getScreenWidth(),
                 'screen_height': self._ctx.getScreenHeight(),
                 'screen_rotation': self._ctx.getScreenRotation(),
@@ -325,8 +325,8 @@ class SaunaWebUIServer:
                 self._ctx.setFanModuleGovernorAddr(int(data['fan_module_governor_addr']))
             if 'fan_module_reset_governor_value' in data:
                 self._ctx.setFanModuleResetGovernorValue(int(data['fan_module_reset_governor_value']))
-            if 'light_off_when_sauna_off' in data:
-                self._ctx.setHotRoomLightAlwaysOn(not data['light_off_when_sauna_off'])
+            if 'light_auto_on_off' in data:
+                self._ctx.setHotRoomLightAutoOnOff(data['light_auto_on_off'])
             if 'display_brightness' in data:
                 self._ctx.setDisplayBrightness(int(data['display_brightness']))
             if 'cpu_temp_warn' in data:

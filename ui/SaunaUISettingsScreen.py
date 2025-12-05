@@ -114,7 +114,7 @@ class SaunaUISettingsScreen(Screen):
         # Hot Room Light Settings
         current_section = add_section_header(user_layout, 'Hot Room Light Settings')
         light_label = Label(
-            text='Turn Hot Room Light Off When Sauna is Off',
+            text='Automatically Control Light (On/Off with Sauna)',
             font_size='20sp',
             size_hint_y=None,
             height=50,
@@ -132,8 +132,8 @@ class SaunaUISettingsScreen(Screen):
             background_down='icons/checkbox-unchecked.png',
             border=(0, 0, 0, 0)
         )
-        # Set initial state based on config (inverted: label asks about turning OFF, config is about always ON)
-        self.light_checkbox.active = not self._ctx.getHotRoomLightAlwaysOn()
+        # Set initial state based on config
+        self.light_checkbox.active = self._ctx.getHotRoomLightAutoOnOff()
         if self.light_checkbox.active:
             self.light_checkbox.background_normal = 'icons/checkbox-checked.png'
             self.light_checkbox.background_down = 'icons/checkbox-checked.png'
@@ -319,13 +319,11 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setHeaterMaxSafeRuntimeMin(int(self.setting_inputs['Heater Max Safe Runtime, minutes'].text))
         self._ctx.setHeaterCycleOnPeriodMin(int(self.setting_inputs['Heater Cycle On Period, minutes'].text))
         self._ctx.setHeaterCycleOffPeriodMin(int(self.setting_inputs['Heater Cycle Off Period, minutes'].text))
-        # Save light setting from checkbox (inverted logic: label asks about turning OFF, config is about always ON)
-        self._ctx.setHotRoomLightAlwaysOn(not self.light_checkbox.active)
+        self._ctx.setHotRoomLightAutoOnOff(self.light_checkbox.active)
         self._ctx.setModbusSerialPort(self.setting_inputs['Modbus Serial Port'].text)
         self._ctx.setModbusSerialBaudRate(int(self.setting_inputs['Modbus Baud Rate'].text))
         self._ctx.setModbusSerialTimeout(float(self.setting_inputs['Modbus Timeout, seconds'].text))
         self._ctx.setModbusSerialRetries(int(self.setting_inputs['Modbus Retries'].text))
-        # Save Modbus register addresses
         self._ctx.setTempSensorAddr(int(self.setting_inputs['Temperature Sensor Address'].text))
         self._ctx.setHumiditySensorAddr(int(self.setting_inputs['Humidity Sensor Address'].text))
         self._ctx.setHeaterRelayCoilAddr(int(self.setting_inputs['Heater Relay Coil Address'].text))
@@ -339,9 +337,7 @@ class SaunaUISettingsScreen(Screen):
         self._ctx.setFanFaultStatusAddr(int(self.setting_inputs['Fan Fault Status Address'].text))
         self._ctx.setFanModuleGovernorAddr(int(self.setting_inputs['Fan Module Governor Address'].text))
         self._ctx.setFanModuleResetGovernorValue(int(self.setting_inputs['Fan Module Reset Governor Value'].text))
-        # Save display brightness
         self._ctx.setDisplayBrightness(int(self.brightness_slider.value))
-        # Save system settings
         self._ctx.setCpuWarnTempC(int(self.setting_inputs['CPU Temperature Warning Threshold, °C'].text))
         self._ctx.setMaxSaunaOnTimeHrs(int(self.setting_inputs['Max Sauna On Time, hours'].text))
         # Save log level

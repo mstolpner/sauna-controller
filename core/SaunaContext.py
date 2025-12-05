@@ -50,7 +50,7 @@ class SaunaContext:
     _numberOfFans: int = 2
     _fanRunningTimeAfterSaunaOffHrs: float = 4.0
     # Hot Room Light Default Settings
-    _hotRoomLightAlwaysOn: bool = False
+    _hotRoomLightAutoOnOff: bool = False
     _hotRoomLightOn: bool = False
     # Appearance Default Settings
     _displayWidth: int = 800
@@ -139,7 +139,7 @@ class SaunaContext:
         self._configObj['fan_control']['right_fan_enabled_min'] = self._rightFanOnStatus
         self._configObj['fan_control']['running_time_after_sauna_off_hrs'] = self._fanRunningTimeAfterSaunaOffHrs
         self._configObj['hot_room_control'] = {}
-        self._configObj['hot_room_control']['hot_room_light_always_on'] = self._hotRoomLightAlwaysOn
+        self._configObj['hot_room_control']['hot_room_light_auto_on_off'] = self._hotRoomLightAutoOnOff
         self._configObj['heater_control'] = {}
         self._configObj['heater_control']['heater_health_warmup_time_min'] = self._heaterHealthWarmUpTimeMin
         self._configObj['heater_control']['heater_health_cooldown_time_min'] = self._heaterHealthCoolDownTimeMin
@@ -391,11 +391,11 @@ class SaunaContext:
 
     # ----------------------- Hot Room Control attributes --------------------------
 
-    def getHotRoomLightAlwaysOn(self) -> bool:
-        return self._get('hot_room_control', 'hot_room_light_always_on', self._hotRoomLightAlwaysOn)
+    def getHotRoomLightAutoOnOff(self) -> bool:
+        return self._get('hot_room_control', 'hot_room_light_auto_on_off', self._hotRoomLightAutoOnOff)
 
-    def setHotRoomLightAlwaysOn(self, value: bool) -> None:
-        self._set('hot_room_control', 'hot_room_light_always_on', value)
+    def setHotRoomLightAutoOnOff(self, value: bool) -> None:
+        self._set('hot_room_control', 'hot_room_light_auto_on_off', value)
 
     # ----------------------- Fan Control attributes --------------------------
 
@@ -537,7 +537,7 @@ class SaunaContext:
             self.setHotRoomLightOn()
         else:
             self._fanAfterSaunaOffTimer.start()
-            if not self.getHotRoomLightAlwaysOn():
+            if not self.getHotRoomLightAutoOnOff():
                 self.setHotRoomLightOff()
 
     def isHotRoomLightOn(self) -> bool:
