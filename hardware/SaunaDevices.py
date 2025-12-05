@@ -18,9 +18,6 @@ class SaunaDevices:
     # Sauna Context Manager
     _ctx = None
 
-    # Configure logging for asyncio
-    logging.getLogger('asyncio').setLevel(logging.WARNING)
-
     # Sensor Module Configuration
     _lastHotRoomTemperatureC = 0
     _lastHotRoomHumidity = 0
@@ -55,10 +52,12 @@ class SaunaDevices:
     def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         # Set modbus Logging Level
         pymodbus_logger = logging.getLogger('pymodbus')
-        pymodbus_logger.setLevel(logging.WARN)
+        pymodbus_logger.setLevel(ctx.getLogLevel())
         # Dependencies
         self._ctx = ctx
         self._errorMgr = errorMgr
+        # Configure logging for asyncio
+        logging.getLogger('asyncio').setLevel(ctx.getLogLevel())
         # Create persistent event loop for async operations
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)

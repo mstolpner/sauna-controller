@@ -75,6 +75,20 @@ function toggleSauna() {
         });
 }
 
+// Toggle light on/off
+function toggleLight() {
+    fetch('/api/light/toggle', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Light toggled:', data.light_on);
+        });
+}
+
 // Update sauna button image
 function updateSaunaButton(isOn) {
     const saunaImg = document.getElementById('sauna-img');

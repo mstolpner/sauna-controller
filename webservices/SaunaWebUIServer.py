@@ -199,6 +199,13 @@ class SaunaWebUIServer:
             self._ctx.turnSaunaOnOff(not self._ctx.isSaunaOn())
             return jsonify({'success': True, 'sauna_on': self._ctx.isSaunaOn()})
 
+        @self._app.route('/api/light/toggle', methods=['POST'])
+        @self._login_required
+        def api_light_toggle():
+            """Toggle hot room light on/off"""
+            self._ctx.setHotRoomLightOnOff(not self._ctx.isHotRoomLightOn())
+            return jsonify({'success': True, 'light_on': self._ctx.isHotRoomLightOn()})
+
         @self._app.route('/api/temperature/set', methods=['POST'])
         @self._login_required
         def api_temperature_set():

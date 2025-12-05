@@ -6,7 +6,6 @@ from hardware.SaunaDevices import SaunaDevices
 from util.Timer import Timer
 
 #TODO add high temp config: enabled, threshold temp, on/off time
-#TODO update auto light off into auto light on/off
 class HeaterController:
 
     _ctx : SaunaContext = None
