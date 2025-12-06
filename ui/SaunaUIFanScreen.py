@@ -151,7 +151,7 @@ class SaunaUIFanScreen(Screen):
         # Fan Running Time After Sauna Off Control
         runtime_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 10, 60, 0])
         runtime_label = Label(
-            text='Time to keep fan running after sauna is off, hrs',
+            text='Keep fan running after sauna is off, hrs',
             font_size='24sp',
             bold=True,
             size_hint_y=0.3
