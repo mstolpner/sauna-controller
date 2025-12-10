@@ -16,25 +16,15 @@
 
         <!-- Fan Controls -->
         <div class="fan-controls">
-            <div class="fan-row">
-                <label class="checkbox-container">
-                    <input type="checkbox" id="left-fan" onchange="updateFanStatus()">
-                    <span class="checkmark"></span>
-                    <span class="checkbox-label">Left Fan</span>
-                </label>
-                <label class="checkbox-container">
-                    <input type="checkbox" id="right-fan" onchange="updateFanStatus()">
-                    <span class="checkmark"></span>
-                    <span class="checkbox-label">Right Fan</span>
-                </label>
+            <div class="fan-icons-row">
+                <img id="left-fan-icon" src="/icons/fan_grey.png" alt="Left Fan" class="fan-icon" onclick="toggleLeftFan()">
+                <img id="right-fan-icon" src="/icons/fan_grey.png" alt="Right Fan" class="fan-icon" onclick="toggleRightFan()">
             </div>
             <div class="fan-rpm-display">
                 <div class="rpm-item">
-                    <span class="rpm-label">Left Fan:</span>
                     <span id="left-fan-rpm" class="rpm-value">0 RPM</span>
                 </div>
                 <div class="rpm-item">
-                    <span class="rpm-label">Right Fan:</span>
                     <span id="right-fan-rpm" class="rpm-value">0 RPM</span>
                 </div>
             </div>

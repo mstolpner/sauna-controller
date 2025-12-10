@@ -1,9 +1,24 @@
 let fanSpeed = 100;
 let fanRuntime = 0.5;
+let leftFanEnabled = false;
+let rightFanEnabled = false;
+let leftFanHealthy = true;
+let rightFanHealthy = true;
 
 // Get CSRF token from meta tag
 function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+// Get appropriate fan icon based on state
+function getFanIcon(enabled, healthy) {
+    if (!healthy) {
+        return '/icons/fan_red.png';
+    } else if (enabled) {
+        return '/icons/fan_green.png';
+    } else {
+        return '/icons/fan_grey.png';
+    }
 }
 
 // Load current fan settings
@@ -11,9 +26,15 @@ function loadFanSettings() {
     fetch('/api/fan/status')
         .then(response => response.json())
         .then(data => {
-            // Set checkboxes
-            document.getElementById('left-fan').checked = data.left_fan_on;
-            document.getElementById('right-fan').checked = data.right_fan_on;
+            // Set fan states
+            leftFanEnabled = data.left_fan_on;
+            rightFanEnabled = data.right_fan_on;
+            leftFanHealthy = data.left_fan_healthy;
+            rightFanHealthy = data.right_fan_healthy;
+
+            // Update fan icons
+            document.getElementById('left-fan-icon').src = getFanIcon(leftFanEnabled, leftFanHealthy);
+            document.getElementById('right-fan-icon').src = getFanIcon(rightFanEnabled, rightFanHealthy);
 
             // Set fan speed
             fanSpeed = data.fan_speed_pct;
@@ -58,16 +79,12 @@ function updateFanRuntime(value) {
     document.getElementById('fan-runtime-value').textContent = `${fanRuntime.toFixed(2)} hrs`;
 }
 
-// Update fan status when checkboxes change
-function updateFanStatus() {
-    // This is called on checkbox change, but we'll save on OK button
-}
+// Toggle left fan
+function toggleLeftFan() {
+    leftFanEnabled = !leftFanEnabled;
+    document.getElementById('left-fan-icon').src = getFanIcon(leftFanEnabled, leftFanHealthy);
 
-// Save fan settings and return to main screen
-function saveFanSettings() {
-    const leftFan = document.getElementById('left-fan').checked;
-    const rightFan = document.getElementById('right-fan').checked;
-
+    // Update on server
     fetch('/api/fan/update', {
         method: 'POST',
         headers: {
@@ -75,8 +92,42 @@ function saveFanSettings() {
             'X-CSRFToken': getCSRFToken()
         },
         body: JSON.stringify({
-            left_fan_on: leftFan,
-            right_fan_on: rightFan,
+            left_fan_on: leftFanEnabled
+        })
+    })
+    .catch(error => console.error('Error updating left fan:', error));
+}
+
+// Toggle right fan
+function toggleRightFan() {
+    rightFanEnabled = !rightFanEnabled;
+    document.getElementById('right-fan-icon').src = getFanIcon(rightFanEnabled, rightFanHealthy);
+
+    // Update on server
+    fetch('/api/fan/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            right_fan_on: rightFanEnabled
+        })
+    })
+    .catch(error => console.error('Error updating right fan:', error));
+}
+
+// Save fan settings and return to main screen
+function saveFanSettings() {
+    fetch('/api/fan/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            left_fan_on: leftFanEnabled,
+            right_fan_on: rightFanEnabled,
             fan_speed_pct: fanSpeed,
             running_time_after_sauna_off_hrs: fanRuntime
         })
@@ -90,13 +141,24 @@ function saveFanSettings() {
     .catch(error => console.error('Error saving fan settings:', error));
 }
 
-// Update RPM displays periodically
+// Update RPM displays and fan icons periodically
 function updateRpmDisplays() {
     fetch('/api/fan/status')
         .then(response => response.json())
         .then(data => {
+            // Update RPM values
             document.getElementById('left-fan-rpm').textContent = `${data.left_fan_rpm} RPM`;
             document.getElementById('right-fan-rpm').textContent = `${data.right_fan_rpm} RPM`;
+
+            // Update fan states
+            leftFanEnabled = data.left_fan_on;
+            rightFanEnabled = data.right_fan_on;
+            leftFanHealthy = data.left_fan_healthy;
+            rightFanHealthy = data.right_fan_healthy;
+
+            // Update fan icons
+            document.getElementById('left-fan-icon').src = getFanIcon(leftFanEnabled, leftFanHealthy);
+            document.getElementById('right-fan-icon').src = getFanIcon(rightFanEnabled, rightFanHealthy);
         })
         .catch(error => console.error('Error updating RPM:', error));
 }

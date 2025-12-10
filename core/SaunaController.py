@@ -55,14 +55,14 @@ class SaunaController:
     def _processFanControl(self):
         # Check fan health only when fan(s) are supposed to be running
         if self._sd.isLeftFanOn() or self._sd.isRightFanOn():
-            leftFanOk = self._sd.isLeftFanOk()
-            rightFanOk = self._sd.isRightFanOk()
+            self._ctx.setLeftFanHealthy(self._sd.isLeftFanOk())
+            self._ctx.setRightFanHealthy(self._sd.isRightFanOk())
             errMsg = ''
-            if not leftFanOk:
+            if not self._ctx.isLeftFanHealthy():
                 errMsg += " Left fan does not work properly."
-            if not rightFanOk:
+            if not self._ctx.isRightFanHealthy():
                 errMsg += " Right fan does not work properly."
-            if rightFanOk and leftFanOk:
+            if self._ctx.isRightFanHealthy() and self._ctx.isLeftFanHealthy():
                 self._errorMgr.eraseFanError()
             else:
                 self._errorMgr.raiseFanError(errMsg)

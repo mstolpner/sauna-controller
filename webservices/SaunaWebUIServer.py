@@ -171,6 +171,8 @@ class SaunaWebUIServer:
             return jsonify({
                 'left_fan_on': self._ctx.isLeftFanEnabled(),
                 'right_fan_on': self._ctx.isRightFanEnabled(),
+                'left_fan_healthy': self._ctx.isLeftFanHealthy(),
+                'right_fan_healthy': self._ctx.isRightFanHealthy(),
                 'fan_speed_pct': self._ctx.getFanSpeedPct(),
                 'left_fan_rpm': self._ctx.getLeftFanRpm(),
                 'right_fan_rpm': self._ctx.getRightFanRpm(),

@@ -22,103 +22,65 @@ class SaunaUIFanScreen(Screen):
         header.add_widget(Label(text='Fan Configuration', font_size='30sp', bold=True))
         layout.add_widget(header)
 
-        # Fan controls - top third of screen
-        fan_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.23, padding=[0, 10, 0, 0])
+        # Fan controls - top section of screen
+        fan_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.25, padding=[0, 0, 0, 0])
 
         # Make label clickable
         class ClickableLabel(ButtonBehavior, Label):
             pass
 
         # Both fans in one horizontal row
-        fans_box = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=45)
-        fans_box.add_widget(Label(size_hint_x=0.15))  # Left spacer - 15% from left
+        fans_box = BoxLayout(orientation='horizontal', spacing=120, size_hint_y=None, height=120)
+        fans_box.add_widget(Label(size_hint_x=0.25))  # Left spacer
 
-        # Left Fan
-        self.left_fan_btn = Button(
+        self.left_fan_icon = Button(
             size_hint=(None, None),
-            size=(45, 45),
-            background_normal='icons/checkbox-unchecked.png',
-            background_down='icons/checkbox-unchecked.png',
+            size=(120, 120),
+            background_normal=self._get_fan_icon(self._ctx.isLeftFanEnabled(), self._ctx.isLeftFanHealthy()),
+            background_down=self._get_fan_icon(self._ctx.isLeftFanEnabled(), self._ctx.isLeftFanHealthy()),
             border=(0, 0, 0, 0)
         )
+        self.left_fan_icon.bind(on_press=self.toggle_left_fan)
+        fans_box.add_widget(self.left_fan_icon)
 
-        # Load initial state from context
-        self.left_fan_btn.active = self._ctx.isLeftFanEnabled()
-        if self.left_fan_btn.active:
-            self.left_fan_btn.background_normal = 'icons/checkbox-checked.png'
-            self.left_fan_btn.background_down = 'icons/checkbox-checked.png'
-        self.left_fan_btn.bind(on_press=self.toggle_left_fan)
-        fans_box.add_widget(self.left_fan_btn)
-
-        left_label = ClickableLabel(text='Left Fan', font_size='30sp', bold=True, halign='left', size_hint_x=0.4)
-        left_label.text_size = (left_label.width, None)
-        left_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
-        left_label.bind(on_press=self.toggle_left_fan)
-        fans_box.add_widget(left_label)
-
-        # Right Fan
-        self.right_fan_btn = Button(
+        self.right_fan_icon = Button(
             size_hint=(None, None),
-            size=(45, 45),
-            background_normal='icons/checkbox-unchecked.png',
-            background_down='icons/checkbox-unchecked.png',
+            size=(120, 120),
+            background_normal=self._get_fan_icon(self._ctx.isRightFanEnabled(), self._ctx.isRightFanHealthy()),
+            background_down=self._get_fan_icon(self._ctx.isRightFanEnabled(), self._ctx.isRightFanHealthy()),
             border=(0, 0, 0, 0)
         )
+        self.right_fan_icon.bind(on_press=self.toggle_right_fan)
+        fans_box.add_widget(self.right_fan_icon)
 
-        # Load initial state from context
-        self.right_fan_btn.active = self._ctx.isRightFanEnabled()
-        if self.right_fan_btn.active:
-            self.right_fan_btn.background_normal = 'icons/checkbox-checked.png'
-            self.right_fan_btn.background_down = 'icons/checkbox-checked.png'
-        self.right_fan_btn.bind(on_press=self.toggle_right_fan)
-        fans_box.add_widget(self.right_fan_btn)
-
-        right_label = ClickableLabel(text='Right Fan', font_size='30sp', bold=True, halign='left', size_hint_x=0.4)
-        right_label.text_size = (right_label.width, None)
-        right_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
-        right_label.bind(on_press=self.toggle_right_fan)
-        fans_box.add_widget(right_label)
+        fans_box.add_widget(Label(size_hint_x=0.25))  # Right spacer
 
         fan_layout.add_widget(fans_box)
 
-        # RPM Display
-        rpm_box = BoxLayout(orientation='horizontal', spacing=5, size_hint_y=None, height=35, padding=[0, 0, 0, 0])
-        # Add spacer to match checkbox row (15% + checkbox width 45px + spacing 20px = align with checkbox text)
-        left_spacer = BoxLayout(size_hint_x=0.15)
-        left_spacer.add_widget(Label(size_hint_x=None, width=65))  # 45px checkbox + 20px spacing
-        rpm_box.add_widget(left_spacer)
+        # RPM Display - centered under fan icons
+        rpm_box = BoxLayout(orientation='horizontal', spacing=120, size_hint_y=None, height=35)
+        rpm_box.add_widget(Label(size_hint_x=0.25))  # Left spacer
 
         # Left Fan RPM
-        left_rpm_label = Label(text='Left Fan:', font_size='24sp', bold=True, halign='left',
-                              size_hint_x=None, width=120, color=(0.5, 0.8, 1.0, 1))
-        left_rpm_label.text_size = (left_rpm_label.width, None)
-        left_rpm_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
-        rpm_box.add_widget(left_rpm_label)
-
-        self.left_rpm_value = Label(text='0 RPM', font_size='24sp', bold=True, halign='left',
+        self.left_rpm_value = Label(text='0 RPM', font_size='24sp', bold=True, halign='center',
                                     size_hint_x=None, width=120, color=(0.85, 1.0, 0.4, 1))
-        self.left_rpm_value.text_size = (self.left_rpm_value.width, None)
-        self.left_rpm_value.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
         rpm_box.add_widget(self.left_rpm_value)
 
         # Right Fan RPM
-        right_rpm_label = Label(text='Right Fan:', font_size='24sp', bold=True, halign='left',
-                               size_hint_x=None, width=130, color=(0.5, 0.8, 1.0, 1))
-        right_rpm_label.text_size = (right_rpm_label.width, None)
-        right_rpm_label.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
-        rpm_box.add_widget(right_rpm_label)
-
-        self.right_rpm_value = Label(text='0 RPM', font_size='24sp', bold=True, halign='left',
+        self.right_rpm_value = Label(text='0 RPM', font_size='24sp', bold=True, halign='center',
                                      size_hint_x=None, width=120, color=(0.85, 1.0, 0.4, 1))
-        self.right_rpm_value.text_size = (self.right_rpm_value.width, None)
-        self.right_rpm_value.bind(size=lambda instance, value: setattr(instance, 'text_size', (instance.width, None)))
         rpm_box.add_widget(self.right_rpm_value)
+
+        rpm_box.add_widget(Label(size_hint_x=0.25))  # Right spacer
 
         fan_layout.add_widget(rpm_box)
         layout.add_widget(fan_layout)
 
+        # Add spacer between fans and sliders
+        layout.add_widget(Label(size_hint_y=0.10))
+
         # Fan Speed Control
-        speed_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 10, 60, 0])
+        speed_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 0, 60, 0])
         speed_label = Label(
             text='Fan Speed',
             font_size='30sp',
@@ -149,7 +111,7 @@ class SaunaUIFanScreen(Screen):
         layout.add_widget(speed_layout)
 
         # Fan Running Time After Sauna Off Control
-        runtime_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 10, 60, 0])
+        runtime_layout = BoxLayout(orientation='vertical', spacing=20, size_hint_y=0.18, padding=[60, 0, 60, 0])
         runtime_label = Label(
             text='Keep fan running after sauna is off, hrs',
             font_size='24sp',
@@ -180,7 +142,7 @@ class SaunaUIFanScreen(Screen):
         layout.add_widget(runtime_layout)
 
         # Spacer to push OK button up from bottom
-        layout.add_widget(Label(size_hint_y=0.20))
+        layout.add_widget(Label(size_hint_y=0.08))
 
         # OK button
         ok_btn = Button(
@@ -202,23 +164,27 @@ class SaunaUIFanScreen(Screen):
         # Schedule RPM display updates every 2 seconds
         Clock.schedule_interval(self.update_rpm_displays, 1)
 
-    def toggle_left_fan(self, instance):
-        self.left_fan_btn.active = not self.left_fan_btn.active
-        if self.left_fan_btn.active:
-            self.left_fan_btn.background_normal = 'icons/checkbox-checked.png'
-            self.left_fan_btn.background_down = 'icons/checkbox-checked.png'
+    def _get_fan_icon(self, enabled, healthy):
+        if not healthy:
+            return 'icons/fan_red.png'
+        elif enabled:
+            return 'icons/fan_green.png'
         else:
-            self.left_fan_btn.background_normal = 'icons/checkbox-unchecked.png'
-            self.left_fan_btn.background_down = 'icons/checkbox-unchecked.png'
+            return 'icons/fan_grey.png'
+
+    def toggle_left_fan(self, instance):
+        new_state = not self._ctx.isLeftFanEnabled()
+        self._ctx.setLeftFanEnabled(new_state)
+        icon = self._get_fan_icon(new_state, self._ctx.isLeftFanHealthy())
+        self.left_fan_icon.background_normal = icon
+        self.left_fan_icon.background_down = icon
 
     def toggle_right_fan(self, instance):
-        self.right_fan_btn.active = not self.right_fan_btn.active
-        if self.right_fan_btn.active:
-            self.right_fan_btn.background_normal = 'icons/checkbox-checked.png'
-            self.right_fan_btn.background_down = 'icons/checkbox-checked.png'
-        else:
-            self.right_fan_btn.background_normal = 'icons/checkbox-unchecked.png'
-            self.right_fan_btn.background_down = 'icons/checkbox-unchecked.png'
+        new_state = not self._ctx.isRightFanEnabled()
+        self._ctx.setRightFanEnabled(new_state)
+        icon = self._get_fan_icon(new_state, self._ctx.isRightFanHealthy())
+        self.right_fan_icon.background_normal = icon
+        self.right_fan_icon.background_down = icon
 
     # Handle fan speed slider change. Update SaunaContext right away.
     def on_speed_change(self, instance, value):
@@ -231,7 +197,7 @@ class SaunaUIFanScreen(Screen):
         runtime_hrs = value
         self.runtime_value_label.text = f'{runtime_hrs:.2f} hrs'
 
-    # Update RPM displays from context
+    # Update RPM displays and fan icons from context
     def update_rpm_displays(self, dt):
         if self._ctx:
             left_rpm = self._ctx.getLeftFanRpm()
@@ -239,9 +205,15 @@ class SaunaUIFanScreen(Screen):
             self.left_rpm_value.text = f'{left_rpm} RPM'
             self.right_rpm_value.text = f'{right_rpm} RPM'
 
+            left_icon = self._get_fan_icon(self._ctx.isLeftFanEnabled(), self._ctx.isLeftFanHealthy())
+            self.left_fan_icon.background_normal = left_icon
+            self.left_fan_icon.background_down = left_icon
+
+            right_icon = self._get_fan_icon(self._ctx.isRightFanEnabled(), self._ctx.isRightFanHealthy())
+            self.right_fan_icon.background_normal = right_icon
+            self.right_fan_icon.background_down = right_icon
+
     def on_ok(self, instance):
-        self._ctx.setRightFanEnabled(self.right_fan_btn.active)
-        self._ctx.setLeftFanEnabled(self.left_fan_btn.active)
         self._ctx.setFanSpeedPct(int(self.speed_slider.value))
         self._ctx.setFanRunningTimeAfterSaunaOffHrs(int(self.runtime_slider.value))
         self._ctx.persist()

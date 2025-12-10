@@ -12,7 +12,7 @@ from kivy.clock import Clock
 from core.SaunaContext import SaunaContext
 import logging
 
-
+#TODO min brightness on the slider
 class SaunaUISettingsScreen(Screen):
     """Settings configuration screen"""
 

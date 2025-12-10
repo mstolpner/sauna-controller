@@ -83,6 +83,8 @@ class SaunaContext:
     _rightFanRpm = 0
     _leftFanOnStatus = False
     _rightFanOnStatus = True
+    _leftFanHealthy = True
+    _rightFanHealthy = True
     _cpuTempC = 0
     # Timers
     _fanAfterSaunaOffTimer: Timer = None
@@ -632,6 +634,18 @@ class SaunaContext:
 
     def setRightFanRpm(self, rpm: int) -> None:
         self._rightFanRpm = rpm
+
+    def isLeftFanHealthy(self) -> bool:
+        return self._leftFanHealthy
+
+    def setLeftFanHealthy(self, healthy: bool) -> None:
+        self._leftFanHealthy = healthy
+
+    def isRightFanHealthy(self) -> bool:
+        return self._rightFanHealthy
+
+    def setRightFanHealthy(self, healthy: bool) -> None:
+        self._rightFanHealthy = healthy
 
     def getCpuTemp(self) -> float:
         return self._cpuTempC
