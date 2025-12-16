@@ -7,7 +7,8 @@ from core.SaunaErrorMgr import SaunaErrorMgr
 from core.SaunaContext import SaunaContext
 from hardware.SaunaDevices import SaunaDevices
 
-
+#TODO wifi if not connected for over 5 min
+#TODO brightness
 class SaunaController:
 
     _ctx : SaunaContext = None

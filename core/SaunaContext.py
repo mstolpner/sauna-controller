@@ -506,7 +506,9 @@ class SaunaContext:
         return self._get('display', 'display_brightness', self._displayBrightness)
 
     def setDisplayBrightness(self, brightness: int) -> None:
-        self._set('display', 'display_brightness', brightness)
+        # Do not save screensaver mode
+        if brightness != 0:
+            self._set('display', 'display_brightness', brightness)
         subprocess.getstatusoutput(f'echo {brightness} > {self.getDisplayDeviceBrightnessPath()}')
 
 
