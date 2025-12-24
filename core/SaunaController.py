@@ -1,14 +1,14 @@
 import atexit
 import threading
 import re, subprocess
+import time
 
 from core.HeaterController import HeaterController
 from core.SaunaErrorMgr import SaunaErrorMgr
 from core.SaunaContext import SaunaContext
 from hardware.SaunaDevices import SaunaDevices
 
-#TODO wifi if not connected for over 5 min
-#TODO brightness
+
 class SaunaController:
 
     _ctx : SaunaContext = None
@@ -18,6 +18,10 @@ class SaunaController:
 
     # Is the app in the exiting process
     _isOnExit = False
+
+    # WiFi reconnection tracking
+    _wifiDisconnectedTime = None
+    _wifiReconnectThreshold = 300  # 5 minutes in seconds
 
     def __init__(self, ctx: SaunaContext, errorMgr: SaunaErrorMgr):
         # Initialize dependencies/classes
@@ -50,6 +54,7 @@ class SaunaController:
                 self._processFanControl()
                 self._processHotRoomLight()
                 self._processSystemHealth()
+                self._processWiFiHealth()
 
     # ----------------------- Fan Control Methods --------------------------
 
@@ -110,3 +115,39 @@ class SaunaController:
                     self._errorMgr.eraseSystemHealthError()
             except ValueError:  # catch only error needed
                 pass
+
+    # ---------------------------- WiFi Health -----------------------------
+
+    def _isWiFiConnected(self):
+        """Check if WiFi is connected using nmcli"""
+        try:
+            result = subprocess.run(
+                ['nmcli', '-t', '-f', 'STATE', 'general'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return result.returncode == 0 and 'connected' in result.stdout.lower()
+        except Exception:
+            return False
+
+    def _reconnectWiFi(self):
+        """Attempt to reconnect to WiFi using nmcli"""
+        try:
+            subprocess.run(['nmcli', 'networking', 'off'], timeout=5)
+            time.sleep(2)
+            subprocess.run(['nmcli', 'networking', 'on'], timeout=5)
+        except Exception:
+            pass
+
+    def _processWiFiHealth(self):
+        """Monitor WiFi connection and reconnect if disconnected for over 5 minutes"""
+        if self._isWiFiConnected():
+            self._wifiDisconnectedTime = None
+        else:
+            currentTime = time.time()
+            if self._wifiDisconnectedTime is None:
+                self._wifiDisconnectedTime = currentTime
+            elif currentTime - self._wifiDisconnectedTime >= self._wifiReconnectThreshold:
+                self._reconnectWiFi()
+                self._wifiDisconnectedTime = currentTime

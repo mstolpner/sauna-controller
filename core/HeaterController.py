@@ -58,6 +58,10 @@ class HeaterController:
         heatingTargetReached = currentHotRoomTemp >= self._ctx.getHotRoomTargetTempF() - self._ctx.getWarmUpHysteresisF()
         coolingTargetReached = currentHotRoomTemp <= self._ctx.getHotRoomTargetTempF() - self._ctx.getCoolDownHysteresisF()
 
+        # Prevent racing condition. Give priority to the heating cycle
+        if heatingTargetReached and coolingTargetReached:
+            coolingTargetReached = False
+
         # Update current temp and humidity in the context for display etc.
         self._ctx.setHotRoomTempF(currentHotRoomTemp)
         self._ctx.setHotRoomHumidity(self._sd.getHotRoomHumidity())
